@@ -1,0 +1,27 @@
+ToDo List
+- Read in flow-rate accurately
+- Calculate volume based on flow-rate
+- Code the concept of a "drinking session"
+	- What was the break in time from the last time the flow meter was activated?
+- Code the concept of number of beers
+	- In a night
+		- Requires clock / timer
+- Code button presses to switch display modes
+- Display out to LCD
+- Reset function for lifetime start over
+
+
+
+Features
+--------
+- Display on LCD
+	- Output 
+		time to beer completion
+			most recent <--> flow-rate <--> timer
+			best
+		number of beers drank (# red solo cups saved)
+			total
+			tonight
+	  to LCD
+	  
+	Solo Cup Saver
