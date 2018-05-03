@@ -5,6 +5,15 @@
   @purpose: Store and calculate flow meter data for a beer bong.
 */
 
+/*
+  Useful resources:
+    http://playground.arduino.cc/Code/Time
+    https://playground.arduino.cc/Code/Stopwatch
+    https://www.arduino.cc/reference/en/language/functions/external-interrupts/attachinterrupt/
+    https://www.arduino.cc/en/Reference/StyleGuide
+    https://www.bc-robotics.com/tutorials/using-a-flow-sensor-with-arduino/
+*/
+
 
 //***************
 // Globals
@@ -21,7 +30,9 @@ int pulsesPerCup;
 int currCount;
 int prevCount;
 int lifetimeBeerCount;
+float lifetimeVolume;
 int fastestTime;
+float multiplier;
 double flowRate;
 volatile int count;
 
@@ -30,11 +41,22 @@ String strBeerTiming = "Time: ";
 String strBeerTimingUnit = " ms!";
 String strPrevCount = "Prev: ";
 String strCurrCount = "Curr: ";
+String strFastestTime = "Fastest time: ";
 String strLifetimeCount = "Total beers: ";
+String strLifetimeVolume = "Total volume: ";
+String strLifetimeVolumeUnit = " ml";
+String strTonight = " tonight";
 
 // Timing
 unsigned long endTime;
 unsigned long startTime;
+int lastBeerDay;
+int lastBeerHour;
+int currentBeerDay;
+int currentBeerHour;
+unsigned long secondsInADay = 86400;
+unsigned long lastBeerCompletionInstant;
+unsigned long currentBeerCompletionInstant;
 
 // States
 boolean booDirtyPrint;
@@ -77,6 +99,7 @@ void initGlobals() {
   flowPin = 2;
   bitsPerSecond = 9600;   // initialize serial communication at 9600 bits per second:
   pulsesPerCup = 89;
+  multiplier=2.647;
 
   currCount=0;
   prevCount=-1;
@@ -116,8 +139,16 @@ void resetTiming() {
   endTime=0;
 }
 
-unsigned long getBeerTime() {
+unsigned long getBeerCompletionDuration() {
   return endTime-startTime;
+}
+
+void setBeerCompletionDateTime() {
+  currentBeerCompletionInstant=now();
+}
+
+boolean isNewDay() {
+  return (lastBeerCompletionInstant < (currentBeerCompletionInstant-secondsInADay))
 }
 
 //***************
@@ -125,6 +156,17 @@ unsigned long getBeerTime() {
 //***************
 void recordBeerEnd() {
   lifetimeBeerCount++;
+  lifetimeVolume+=count*multiplier;
+  setBeerCompletionDateTime();
+  if (isNewDay()) {
+    resetTonightCounts();
+  }
+}
+
+void resetTonightCounts() {
+  totalBeersTonight=0;
+  totalVolumeTonight=0;
+  fastestBeerTonight=0;
 }
 
 void resetBeerSession() {
@@ -144,6 +186,7 @@ boolean shouldPrintBeerTime() {
 }
 
 void printStatusReport() {
-  Serial.println(strBeerTiming + getBeerTime() + strBeerTimingUnit);
+  Serial.println(strBeerTiming + getBeerCompletionDuration() + strBeerTimingUnit);
   Serial.println(strLifetimeCount + lifetimeBeerCount);
+  Serial.println(strLifetimeVolume + lifetimeVolume + strLifetimeVolumeUnit);
 }
