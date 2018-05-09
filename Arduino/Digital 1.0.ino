@@ -162,27 +162,50 @@ void DisplayChange() {
 //***************
 // Timing
 //***************
+/*
+  Called the first time the hall effect sensor has been triggered since the last beer session completed.
+*/
+
 void beerStart() {
   startTime=millis();
 }
 
+/*
+  Called every time the hall effect sensor fires. Represents another ~2.65 ml have been drank.
+*/
 void beerPulse() {
   endTime=millis();
 }
 
+/*
+  Reset the start and end time for a beer that will be drank and judged.
+*/
 void resetTiming() {
   startTime=0;
   endTime=0;
 }
 
+/*
+  Get the time it took to complete the most recent beer.
+ 
+  @return How long it took to complete the last beer.
+*/
 unsigned long getBeerCompletionDuration() {
   return endTime-startTime;
 }
 
+/*
+  Denote the completion of a new beer at the current instant.
+*/
 void setBeerCompletionDateTime() {
   //currentBeerCompletionInstant=now(); @TODO: Now isn't working/validating
 }
 
+/*
+  Determines whether or not the completion of the last beer represents a new day.
+  
+  @return Is the first beer of new day
+*/
 boolean isNewDay() {
   return (lastBeerCompletionInstant < (currentBeerCompletionInstant-SECONDS_IN_DAY));
 }
@@ -201,12 +224,19 @@ void recordBeerEnd() {
   }
 }
 
+/*
+  Call if more than 12 hours have passed since the last time a beer was drank. 
+  This function will reset all of the relevant variables scoring beer statistics for a given night.
+*/
 void resetTonightCounts() {
   totalBeersTonight=0;
   totalVolumeTonight=0;
   fastestBeerTonightTime=0;
 }
 
+/*
+  Resets all of the variables tied to a beer session.
+*/
 void resetBeerSession() {
   count=0;
   currCount=0;
@@ -219,10 +249,17 @@ void resetBeerSession() {
 //***************
 // Printing
 //***************
+
+/*
+  Determines whether or not to print out the beer completion data. 
+*/
 boolean shouldPrintBeerTime() {
   return ((currCount>0) && (booDirtyPrint) && (currCount==prevCount));
 }
 
+/*
+  Print out status of the device given the last beer that was completed.
+*/
 void printStatusReport() {
   Serial.println(STR_BEER_TIMING + getBeerCompletionDuration() + STR_BEER_TIMING_UNIT);
   Serial.println(STR_LIFETIME_COUNT + lifetimeBeerCount);
@@ -232,18 +269,38 @@ void printStatusReport() {
 //***************
 // Storage
 //***************
+/*
+  Get integer value held in permanent storage from EEPROM data.
+  
+  @param address integer value denoting where to read from
+  @return the integer value stored in the desired address.
+*/
 int getIntegerData(int address) {
   int value;
   EEPROM.get(address, value);
   return value;
 }
 
+/*
+  Get float value held in permanent storage from EEPROM data.
+  
+  @param address integer value denoting where to read from
+  @return the float value stored in the desired address.
+*/
 float getFloatData(int address) {
   float value;
   EEPROM.get(address,value);
   return value;
 }
- 
+
+/*
+  Store integer value into permanent storage at EEPROM.
+  NOTE: There are a limited number of times this can be called, 
+    try to store to addresses as few times as possible.
+  
+  @param address integer value denoting where to store the data to
+  @param value integer value you desire to store into EEPROM.
+*/
 void storeData(int address, int value) {
   EEPROM.put(address,value);
   Serial.print(value);
@@ -251,6 +308,14 @@ void storeData(int address, int value) {
   Serial.println(address);
 }
 
+/*
+  Store float value into permanent storage at EEPROM.
+  NOTE: There are a limited number of times this can be called, 
+    try to store to addresses as few times as possible.
+  
+  @param address integer value denoting where to store the data to
+  @param value float value you desire to store into EEPROM.
+*/
 void storeFloatData(int address, float value) {
   EEPROM.put(address,value);
   Serial.print(value);
@@ -283,7 +348,10 @@ void storeLifetimeVolume() {
   storeFloatData(ADDR_LIFETIME_VOLUME,lifetimeVolume);
 }
 
-
+/*
+  Only call this when resetting the device to factory settings!
+  Permanently erases all persistent data stored on the arduino or board.
+*/
 void clearEEPROM() {
   for (int i = 0 ; i < EEPROM.length() ; i++) {
     if(EEPROM.read(i) != 0) {                   //skip already "empty" addresses
