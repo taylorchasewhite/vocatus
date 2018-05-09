@@ -24,6 +24,9 @@
   Use for comments, determination of proper conventions in PQAing this code, in this order of correctness:
     1. Ed Parrish's C++ Style Guide - http://www.edparrish.net/common/cppdoc.html
     2. C++ Style Guide - https://google.github.io/styleguide/cppguide.html
+  
+  Exceptions to PQA resources linked:
+    Use tabs, not spaces. Use the arduino web IDE to determine what the tab keystroke translates to.
     
   --------------------------
 */
@@ -44,28 +47,40 @@ int pulsesPerCup;
 // Counts
 int currCount;
 int prevCount;
+
 int lifetimeBeerCount;
+int totalBeersTonight;
+
 float lifetimeVolume;
+float totalVolumeTonight;
+
 int fastestBeerTime;
+int fastestBeerTonightTime;
 float multiplier;
+
 double flowRate;
 volatile int count;
 
 // Display strings
-const String strBeerTiming = "Time: ";
-const String strBeerTimingUnit = " ms!";
-const String strPrevCount = "Prev: ";
-const String strCurrCount = "Curr: ";
-const String strFastestTime = "Fastest time: ";
-const String strLifetimeCount = "Total beers: ";
-const String strLifetimeVolume = "Total volume: ";
-const String strLifetimeVolumeUnit = " ml";
-const String strTonight = " tonight";
+const String STR_BEER_TIMING          = "Time: ";
+const String STR_BEER_TIMING_UNIT     = " ms!";
+const String STR_PREV_COUNT           = "Prev: ";
+const String STR_CURR_COUNT           = "Curr: ";
+const String STR_FASTEST_TIME         = "Fastest time: ";
+const String STR_LIFETIME_COUNT       = "Total beers: ";
+const String STR_LIFETIME_VOLUME      = "Total volume: ";
+const String STR_LIFETIME_VOLUME_UNIT = " ml";
+const String STR_TONIGHT              = " tonight";
 
 // Addresses
-const int addressFastestBeer = 0;
-const int addressBeerCount = 1*sizeof(int);
-const int addressLifetimeVolume = 2*sizeof(int);
+const int ADDR_FASTEST_BEER           = 0;
+const int ADDR_BEER_COUNT             = 1*sizeof(int);
+const int ADDR_LIFETIME_VOLUME        = 2*sizeof(int);
+
+const int ADDR_TONIGHT_FASTEST_BEER   = 10*sizeof(int);
+const int ADDR_TONIGHT_BEER_COUNT     = 11*sizeof(int);
+const int ADDR_TONIGHT_VOLUME         = 12*sizeof(int);
+
 
 // Timing
 unsigned long endTime;
@@ -75,7 +90,7 @@ int lastBeerHour;
 int currentBeerDay;
 int currentBeerHour;
 
-const unsigned long secondsInADay = 86400;
+const unsigned long SECONDS_IN_DAY = 86400;
 unsigned long lastBeerCompletionInstant;
 unsigned long currentBeerCompletionInstant;
 
@@ -107,8 +122,8 @@ void loop() {
     resetBeerSession();
   } 
   else if (prevCount!=currCount) {
-    //Serial.println(strPrevCount + prevCount);
-    //Serial.println(strCurrCount + currCount);
+    //Serial.println(STR_PREV_COUNT + prevCount);
+    //Serial.println(STR_CURR_COUNT + currCount);
   }
 }
 
@@ -165,11 +180,11 @@ unsigned long getBeerCompletionDuration() {
 }
 
 void setBeerCompletionDateTime() {
-  currentBeerCompletionInstant=now();
+  //currentBeerCompletionInstant=now(); @TODO: Now isn't working/validating
 }
 
 boolean isNewDay() {
-  return (lastBeerCompletionInstant < (currentBeerCompletionInstant-secondsInADay))
+  return (lastBeerCompletionInstant < (currentBeerCompletionInstant-SECONDS_IN_DAY));
 }
 
 //***************
@@ -178,7 +193,9 @@ boolean isNewDay() {
 void recordBeerEnd() {
   lifetimeBeerCount++;
   lifetimeVolume+=count*multiplier;
+  
   setBeerCompletionDateTime();
+  
   if (isNewDay()) {
     resetTonightCounts();
   }
@@ -187,7 +204,7 @@ void recordBeerEnd() {
 void resetTonightCounts() {
   totalBeersTonight=0;
   totalVolumeTonight=0;
-  fastestBeerTonight=0;
+  fastestBeerTonightTime=0;
 }
 
 void resetBeerSession() {
@@ -207,31 +224,23 @@ boolean shouldPrintBeerTime() {
 }
 
 void printStatusReport() {
-  Serial.println(strBeerTiming + getBeerCompletionDuration() + strBeerTimingUnit);
-  Serial.println(strLifetimeCount + lifetimeBeerCount);
-  Serial.println(strLifetimeVolume + lifetimeVolume + strLifetimeVolumeUnit);
+  Serial.println(STR_BEER_TIMING + getBeerCompletionDuration() + STR_BEER_TIMING_UNIT);
+  Serial.println(STR_LIFETIME_COUNT + lifetimeBeerCount);
+  Serial.println(STR_LIFETIME_VOLUME + lifetimeVolume + STR_LIFETIME_VOLUME_UNIT);
 }
 
 //***************
 // Storage
 //***************
-void printTemp()
-{
-  for (int i = 0 ; i < EEPROM.length() ; i++) {
-    byte value = EEPROM.read(i);                //read EEPROM data at address i
-    if(value != 0)                              //skip "empty" addresses
-    {
-      float temp = value*conv_coeff;            //convert ADC values to temperature
-      temp = (temp - 0.5)*100;                  //take care of the offset
- 
-      Serial.println(temp);
-    }
-  }
-}
-
 int getIntegerData(int address) {
   int value;
   EEPROM.get(address, value);
+  return value;
+}
+
+float getFloatData(int address) {
+  float value;
+  EEPROM.get(address,value);
   return value;
 }
  
@@ -242,39 +251,45 @@ void storeData(int address, int value) {
   Serial.println(address);
 }
 
+void storeFloatData(int address, float value) {
+  EEPROM.put(address,value);
+  Serial.print(value);
+  Serial.print(" stored at address ");
+  Serial.println(address);
+}
+
 int getFastestBeer() {
-  return getIntegerData(addressFastestBeer);
+  return getIntegerData(ADDR_FASTEST_BEER);
 }
 
 void storeFastestBeer() {
-  storeData(addressFastestBeer,fastestBeerTime);
+  storeData(ADDR_FASTEST_BEER,fastestBeerTime);
 }
 
 int getLifetimeBeerCount() {
-  getIntegerData(addressBeerCount);
+  getIntegerData(ADDR_BEER_COUNT);
 }
 
 void storeLifetimeBeerCount() {
-  storeData(addressBeerCount,lifetimeBeerCount);
+  storeData(ADDR_BEER_COUNT,lifetimeBeerCount);
 
 }
 
-int getLifetimeVolume() {
-  return getIntegerData(addressLifetimeVolume);
+float getLifetimeVolume() {
+  return getFloatData(ADDR_LIFETIME_VOLUME);
 }
 
 void storeLifetimeVolume() {
-  storeData(addressLifetimeVolume,lifetimeVolume);
+  storeFloatData(ADDR_LIFETIME_VOLUME,lifetimeVolume);
 }
 
 
 void clearEEPROM() {
   for (int i = 0 ; i < EEPROM.length() ; i++) {
-    if(EEPROM.read(i) != 0)                     //skip already "empty" addresses
-    {
+    if(EEPROM.read(i) != 0) {                   //skip already "empty" addresses
+    
       EEPROM.write(i, 0);                       //write 0 to address i
     }
   }
   Serial.println("EEPROM erased");
-  address = 0;                                  //reset address counter
 }
