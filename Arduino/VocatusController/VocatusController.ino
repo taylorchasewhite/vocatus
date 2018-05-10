@@ -149,11 +149,11 @@ void initGlobals() {
   currCount=0;
   prevCount=-1;
   booDirtyPrint=false;
-  
-  sendToStatusBoard = false; //set to true to have output sent via serial message to a statusboard (e.g. processing)
-  debugModeOn = true;
+    
+  statusBoardEnabled = true; //set to true to have output sent via serial message to a statusboard (e.g. processing)
+  debugModeOn = false;
   startingUp = false;
-  
+
   readFromStorage();
 }
 
@@ -164,7 +164,6 @@ void initializeDisplay() {
     printStatusReport(true);
     startingUp=true;
   }
-}
 
 //***************
 // Interrupts
@@ -311,6 +310,8 @@ void printStatusReport(bool storage) {
     debugPrintln(STR_LIFETIME_COUNT + lifetimeBeerCount);
     debugPrintln(STR_LIFETIME_VOLUME + lifetimeVolume + STR_LIFETIME_VOLUME_UNIT);
   }
+  if(statusBoardEnabled) { sendToStatusBoard(); }
+}
 
 //***************
 // Storage
@@ -469,4 +470,12 @@ String buildComString(int lifeCountVar,float lifeRecordVar,int curCountVar,float
   toSend += ";";
   
   return (toSend);
+}
+
+ */
+void sendToStatusBoard()
+{
+  String comString = buildComString(lifetimeTotalBeerCount,lifetimeFastestBeerTime,tonightTotalBeerCount,tonightFastestBeerTime,0,false,0); //TODO modify this new string builder based on TCW's variables
+
+  Serial.println(comString);  
 }
