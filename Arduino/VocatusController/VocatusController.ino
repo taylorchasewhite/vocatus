@@ -98,7 +98,7 @@ unsigned long currentBeerCompletionInstant;
 boolean booDirtyPrint;
 
 //Flags
-boolean sendToStatusBoard; 
+boolean statusBoardEnabled; 
 boolean debugModeOn; 
 
 //***************
@@ -144,8 +144,8 @@ void initGlobals() {
   prevCount=-1;
   booDirtyPrint=false;
   
-  sendToStatusBoard = false; //set to true to have output sent via serial message to a statusboard (e.g. processing)
-  debugModeOn = true;
+  statusBoardEnabled = true; //set to true to have output sent via serial message to a statusboard (e.g. processing)
+  debugModeOn = false;
 }
 
 //***************
@@ -270,6 +270,8 @@ void printStatusReport() {
   debugPrintln(STR_BEER_TIMING + getBeerCompletionDuration() + STR_BEER_TIMING_UNIT);
   debugPrintln(STR_LIFETIME_COUNT + lifetimeTotalBeerCount);
   debugPrintln(STR_LIFETIME_VOLUME + lifetimeTotalVolume + STR_LIFETIME_VOLUME_UNIT);
+
+  if(statusBoardEnabled) { sendToStatusBoard(); }
 }
 
 //***************
@@ -375,7 +377,7 @@ void clearEEPROM() {
  * Only print to the serial monitor if debug mode is turned on and if not using a status board
  */
 boolean shouldPrint() {
-  return(debugModeOn && !sendToStatusBoard); 
+  return(debugModeOn && !statusBoardEnabled); 
 }
 
 /*
@@ -420,3 +422,14 @@ String buildComString(int lifeCountVar,float lifeRecordVar,int curCountVar,float
   
   return (toSend);
 }
+
+/*
+ * Send info to the status board
+ */
+void sendToStatusBoard()
+{
+  String comString = buildComString(lifetimeTotalBeerCount,lifetimeFastestBeerTime,tonightTotalBeerCount,tonightFastestBeerTime,0,false,0); //TODO modify this new string builder based on TCW's variables
+
+  Serial.println(comString);  
+}
+
