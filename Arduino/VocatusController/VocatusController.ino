@@ -43,20 +43,19 @@ int flowPin;
 int rebootPin;
 int resetPin;
 int pulsesPerCup;
-bool startingUp;
 
 // Counts
 int currCount;
 int prevCount;
 
-int lifetimeBeerCount;
-int totalBeersTonight;
+int lifetimeTotalBeerCount;
+int tonightTotalBeerCount;
 
-float lifetimeVolume;
-float totalVolumeTonight;
+float lifetimeTotalVolume;
+float tonightTotalVolume;
 
-int fastestBeerTime;
-int fastestBeerTonightTime;
+int lifetimeFastestBeerTime;
+int tonightFastestBeerTime;
 float multiplier;
 
 double flowRate;
@@ -97,11 +96,12 @@ unsigned long lastBeerCompletionInstant;
 unsigned long currentBeerCompletionInstant;
 
 // States
-boolean booDirtyPrint;
+bool firstDropOfBeer;
 
 //Flags
-boolean statusBoardEnabled; 
-boolean debugModeOn; 
+bool statusBoardEnabled; 
+bool debugModeOn; 
+bool startingUp;
 
 //***************
 // Core
@@ -148,7 +148,7 @@ void initGlobals() {
   
   currCount=0;
   prevCount=-1;
-  booDirtyPrint=false;
+  firstDropOfBeer=false;
     
   statusBoardEnabled = true; //set to true to have output sent via serial message to a statusboard (e.g. processing)
   debugModeOn = false;
@@ -164,6 +164,7 @@ void initializeDisplay() {
     printStatusReport(true);
     startingUp=true;
   }
+}
 
 //***************
 // Interrupts
@@ -171,7 +172,7 @@ void initializeDisplay() {
 void Flow() {
   if (count==0) {
       beerStart();
-      booDirtyPrint=true;
+      firstDropOfBeer=true;
   }
   count++;
   beerPulse();
@@ -220,7 +221,7 @@ int getBeerCompletionDuration() {
 void setBeerCompletionDuration(int startTime, int endTime) {
   lastBeerDuration = endTime-startTime;
   if ((lastBeerDuration < getFastestBeerTime()) || (getFastestBeerTime()<=0)) {
-    fastestBeerTime = lastBeerDuration;
+    lifetimeFastestBeerTime = lastBeerDuration;
     storeFastestBeerTime();
   }
 }
@@ -245,10 +246,10 @@ boolean isNewDay() {
 // Statistics & State Change
 //***************
 void recordBeerEnd() {
-  lifetimeBeerCount++;
+  lifetimeTotalBeerCount++;
   storeLifetimeBeerCount(); // @TODO: Abstract these two calls to a function
   
-  lifetimeVolume+=count*multiplier;
+  lifetimeTotalVolume+=count*multiplier;
   storeLifetimeVolume();
   
   setBeerCompletionDuration(startTime,endTime);
@@ -265,9 +266,9 @@ void recordBeerEnd() {
   This function will reset all of the relevant variables scoring beer statistics for a given night.
 */
 void resetTonightCounts() {
-  totalBeersTonight=0;
-  totalVolumeTonight=0;
-  fastestBeerTonightTime=0;
+  tonightTotalBeerCount=0;
+  tonightTotalVolume=0;
+  tonightFastestBeerTime=0;
 }
 
 /*
@@ -278,7 +279,7 @@ void resetBeerSession() {
   currCount=0;
   prevCount=0;
   resetTiming();
-  booDirtyPrint=true; // print it out
+  firstDropOfBeer=true; // print it out
 }
 
 
@@ -290,7 +291,7 @@ void resetBeerSession() {
   Determines whether or not to print out the beer completion data. 
 */
 boolean shouldPrintBeerTime() {
-  return ((currCount>0) && (booDirtyPrint) && (currCount==prevCount));
+  return ((currCount>0) && (firstDropOfBeer) && (currCount==prevCount));
 }
 
 /*
@@ -307,10 +308,11 @@ void printStatusReport(bool storage) {
   }
   else {
     debugPrintln(STR_BEER_TIMING + getBeerCompletionDuration() + STR_BEER_TIMING_UNIT);
-    debugPrintln(STR_LIFETIME_COUNT + lifetimeBeerCount);
-    debugPrintln(STR_LIFETIME_VOLUME + lifetimeVolume + STR_LIFETIME_VOLUME_UNIT);
+    debugPrintln(STR_LIFETIME_COUNT + lifetimeTotalBeerCount);
+    debugPrintln(STR_LIFETIME_VOLUME + lifetimeTotalVolume + STR_LIFETIME_VOLUME_UNIT);
   }
-  if(statusBoardEnabled) { sendToStatusBoard(); }
+  
+  sendToStatusBoard();
 }
 
 //***************
@@ -379,7 +381,7 @@ int getFastestBeerTime() {
 }
 
 void storeFastestBeerTime() {
-  storeFloatData(ADDR_FASTEST_BEER,fastestBeerTime);
+  storeFloatData(ADDR_FASTEST_BEER,lifetimeFastestBeerTime);
 }
 
 float getLifetimeBeerCount() {
@@ -387,7 +389,7 @@ float getLifetimeBeerCount() {
 }
 
 void storeLifetimeBeerCount() {
-  storeFloatData(ADDR_BEER_COUNT,lifetimeBeerCount);
+  storeFloatData(ADDR_BEER_COUNT,lifetimeTotalBeerCount);
 
 }
 
@@ -396,13 +398,13 @@ float getLifetimeVolume() {
 }
 
 void storeLifetimeVolume() {
-  storeFloatData(ADDR_LIFETIME_VOLUME,lifetimeVolume);
+  storeFloatData(ADDR_LIFETIME_VOLUME,lifetimeTotalVolume);
 }
 
 void readFromStorage() {
-  fastestBeerTime = getFastestBeerTime();
-  lifetimeVolume=getLifetimeVolume();
-  lifetimeBeerCount = getLifetimeBeerCount();
+  lifetimeFastestBeerTime = getFastestBeerTime();
+  lifetimeTotalVolume=getLifetimeVolume();
+  lifetimeTotalBeerCount = getLifetimeBeerCount();
 }
 
 /*
@@ -477,8 +479,10 @@ String buildComString(int lifeCountVar,float lifeRecordVar,int curCountVar,float
  */
 void sendToStatusBoard()
 {
-  String comString = buildComString(lifetimeTotalBeerCount,lifetimeFastestBeerTime,tonightTotalBeerCount,tonightFastestBeerTime,0,false,0); //TODO modify this new string builder based on TCW's variables
-
-  Serial.println(comString);  
+  if(statusBoardEnabled) { 
+    String comString = buildComString(lifetimeTotalBeerCount,lifetimeFastestBeerTime,tonightTotalBeerCount,tonightFastestBeerTime,0,false,0); 
+    //TODO modify this new string builder based on TCW's variables
+    Serial.println(comString);  
+  }
 }
 
