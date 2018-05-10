@@ -48,14 +48,14 @@ int pulsesPerCup;
 int currCount;
 int prevCount;
 
-int lifetimeBeerCount;
-int totalBeersTonight;
+int lifetimeTotalBeerCount;
+int tonightTotalBeerCount;
 
-float lifetimeVolume;
-float totalVolumeTonight;
+float lifetimeTotalVolume;
+float tonightTotalVolume;
 
-int fastestBeerTime;
-int fastestBeerTonightTime;
+int lifetimeFastestBeerTime;
+int tonightFastestBeerTime;
 float multiplier;
 
 double flowRate;
@@ -214,8 +214,8 @@ boolean isNewDay() {
 // Statistics & State Change
 //***************
 void recordBeerEnd() {
-  lifetimeBeerCount++;
-  lifetimeVolume+=count*multiplier;
+  lifetimeTotalBeerCount++;
+  lifetimeTotalVolume+=count*multiplier;
   
   setBeerCompletionDateTime();
   
@@ -229,9 +229,9 @@ void recordBeerEnd() {
   This function will reset all of the relevant variables scoring beer statistics for a given night.
 */
 void resetTonightCounts() {
-  totalBeersTonight=0;
-  totalVolumeTonight=0;
-  fastestBeerTonightTime=0;
+  tonightTotalBeerCount=0;
+  tonightTotalVolume=0;
+  tonightFastestBeerTime=0;
 }
 
 /*
@@ -262,8 +262,8 @@ boolean shouldPrintBeerTime() {
 */
 void printStatusReport() {
   Serial.println(STR_BEER_TIMING + getBeerCompletionDuration() + STR_BEER_TIMING_UNIT);
-  Serial.println(STR_LIFETIME_COUNT + lifetimeBeerCount);
-  Serial.println(STR_LIFETIME_VOLUME + lifetimeVolume + STR_LIFETIME_VOLUME_UNIT);
+  Serial.println(STR_LIFETIME_COUNT + lifetimeTotalBeerCount);
+  Serial.println(STR_LIFETIME_VOLUME + lifetimeTotalVolume + STR_LIFETIME_VOLUME_UNIT);
 }
 
 //***************
@@ -328,24 +328,24 @@ int getFastestBeer() {
 }
 
 void storeFastestBeer() {
-  storeData(ADDR_FASTEST_BEER,fastestBeerTime);
+  storeData(ADDR_FASTEST_BEER,lifetimeFastestBeerTime);
 }
 
-int getLifetimeBeerCount() {
+int getlifetimeTotalBeerCount() {
   getIntegerData(ADDR_BEER_COUNT);
 }
 
-void storeLifetimeBeerCount() {
-  storeData(ADDR_BEER_COUNT,lifetimeBeerCount);
+void storelifetimeTotalBeerCount() {
+  storeData(ADDR_BEER_COUNT,lifetimeTotalBeerCount);
 
 }
 
-float getLifetimeVolume() {
+float getlifetimeTotalVolume() {
   return getFloatData(ADDR_LIFETIME_VOLUME);
 }
 
-void storeLifetimeVolume() {
-  storeFloatData(ADDR_LIFETIME_VOLUME,lifetimeVolume);
+void storelifetimeTotalVolume() {
+  storeFloatData(ADDR_LIFETIME_VOLUME,lifetimeTotalVolume);
 }
 
 /*
