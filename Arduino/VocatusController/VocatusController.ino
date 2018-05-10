@@ -1,6 +1,6 @@
 /*--------------------------
   @title:   Vocatus: Flow Meter - Making the world a better place
-  @author:  Stephen Lago & Taylor White 
+  @author:  Stephen Lago & Taylor White  
   @date:    May 2, 2018
   @purpose: Store and calculate flow meter data for a beer bong.
   --------------------------
