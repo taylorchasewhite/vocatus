@@ -128,7 +128,7 @@ void loop() {
 }
 
 //***************
-// Initialize
+// Initialize Stephen's mom
 //***************
 void initGlobals() {
   resetPin = 3;
