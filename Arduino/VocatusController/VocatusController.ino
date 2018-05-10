@@ -100,7 +100,7 @@ unsigned long currentBeerCompletionInstant;
 boolean booDirtyPrint;
 
 //Flags
-boolean sendToStatusBoard; 
+boolean statusBoardEnabled; 
 boolean debugModeOn; 
 
 //***************
@@ -426,7 +426,7 @@ void clearEEPROM() {
  * Only print to the serial monitor if debug mode is turned on and if not using a status board
  */
 boolean shouldPrint() {
-  return(debugModeOn && !sendToStatusBoard); 
+  return(debugModeOn && !statusBoardEnabled); 
 }
 
 /*
@@ -472,6 +472,8 @@ String buildComString(int lifeCountVar,float lifeRecordVar,int curCountVar,float
   return (toSend);
 }
 
+/*
+ * Send info to the status board
  */
 void sendToStatusBoard()
 {
@@ -479,3 +481,4 @@ void sendToStatusBoard()
 
   Serial.println(comString);  
 }
+
