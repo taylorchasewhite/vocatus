@@ -143,10 +143,15 @@ void initGlobals() {
   pulsesPerCup = 89;
   multiplier = 2.647;
 
-<<<<<<< HEAD
   currCount = 0;
   prevCount = -1;
-  booDirtyPrint = false;
+  
+  currCount=0;
+  prevCount=-1;
+  booDirtyPrint=false;
+  
+  sendToStatusBoard = false; //set to true to have output sent via serial message to a statusboard (e.g. processing)
+  debugModeOn = true;
   startingUp = false;
   
   readFromStorage();
@@ -159,14 +164,6 @@ void initializeDisplay() {
     printStatusReport(true);
     startingUp=true;
   }
-=======
-  currCount=0;
-  prevCount=-1;
-  booDirtyPrint=false;
-  
-  sendToStatusBoard = false; //set to true to have output sent via serial message to a statusboard (e.g. processing)
-  debugModeOn = true;
->>>>>>> master
 }
 
 //***************
@@ -302,27 +299,18 @@ boolean shouldPrintBeerTime() {
   
   @param storage boolean indicating where to read the data from
 */
-<<<<<<< HEAD
 void printStatusReport(bool storage) {
   if (storage) {
-    //Serial.println(STR_BEER_TIMING + getBeerCompletionDuration() + STR_BEER_TIMING_UNIT);
-    Serial.println(STR_LIFETIME_COUNT + getLifetimeBeerCount());
-    Serial.println(STR_LIFETIME_VOLUME + getLifetimeVolume() + STR_LIFETIME_VOLUME_UNIT);
+    debugPrintln(STR_LIFETIME_COUNT + getLifetimeBeerCount());
+    debugPrintln(STR_LIFETIME_VOLUME + getLifetimeVolume() + STR_LIFETIME_VOLUME_UNIT);
     
-    Serial.println(STR_FASTEST_TIME + getFastestBeerTime() + STR_BEER_TIMING_UNIT);
+    debugPrintln(STR_FASTEST_TIME + getFastestBeerTime() + STR_BEER_TIMING_UNIT);
   }
   else {
-    Serial.println(STR_BEER_TIMING + getBeerCompletionDuration() + STR_BEER_TIMING_UNIT);
-    Serial.println(STR_LIFETIME_COUNT + lifetimeBeerCount);
-    Serial.println(STR_LIFETIME_VOLUME + lifetimeVolume + STR_LIFETIME_VOLUME_UNIT);
+    debugPrintln(STR_BEER_TIMING + getBeerCompletionDuration() + STR_BEER_TIMING_UNIT);
+    debugPrintln(STR_LIFETIME_COUNT + lifetimeBeerCount);
+    debugPrintln(STR_LIFETIME_VOLUME + lifetimeVolume + STR_LIFETIME_VOLUME_UNIT);
   }
-=======
-void printStatusReport() {
-  debugPrintln(STR_BEER_TIMING + getBeerCompletionDuration() + STR_BEER_TIMING_UNIT);
-  debugPrintln(STR_LIFETIME_COUNT + lifetimeTotalBeerCount);
-  debugPrintln(STR_LIFETIME_VOLUME + lifetimeTotalVolume + STR_LIFETIME_VOLUME_UNIT);
->>>>>>> master
-}
 
 //***************
 // Storage
@@ -427,10 +415,6 @@ void clearEEPROM() {
       EEPROM.write(i, 0);                       //write 0 to address i
     }
   }
-<<<<<<< HEAD
-  Serial.println("EEPROM erased");
-}
-=======
   debugPrintln("EEPROM erased");
 }
 
@@ -486,4 +470,3 @@ String buildComString(int lifeCountVar,float lifeRecordVar,int curCountVar,float
   
   return (toSend);
 }
->>>>>>> master
