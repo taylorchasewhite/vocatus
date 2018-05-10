@@ -99,6 +99,9 @@ unsigned long currentBeerCompletionInstant;
 // States
 boolean booDirtyPrint;
 
+//Flags
+boolean sendToStatusBoard; 
+boolean debugModeOn; 
 
 //***************
 // Core
@@ -125,8 +128,8 @@ void loop() {
     resetBeerSession();
   } 
   else if (prevCount!=currCount) {
-    //Serial.println(STR_PREV_COUNT + prevCount);
-    //Serial.println(STR_CURR_COUNT + currCount);
+    //debugPrintln(STR_PREV_COUNT + prevCount);
+    //debugPrintln(STR_CURR_COUNT + currCount);
   }
 }
 
@@ -140,6 +143,7 @@ void initGlobals() {
   pulsesPerCup = 89;
   multiplier = 2.647;
 
+<<<<<<< HEAD
   currCount = 0;
   prevCount = -1;
   booDirtyPrint = false;
@@ -155,6 +159,14 @@ void initializeDisplay() {
     printStatusReport(true);
     startingUp=true;
   }
+=======
+  currCount=0;
+  prevCount=-1;
+  booDirtyPrint=false;
+  
+  sendToStatusBoard = false; //set to true to have output sent via serial message to a statusboard (e.g. processing)
+  debugModeOn = true;
+>>>>>>> master
 }
 
 //***************
@@ -167,7 +179,7 @@ void Flow() {
   }
   count++;
   beerPulse();
-  Serial.println(count);
+  if(shouldPrint()){ debugPrintln(count); }
 }
 
 void DisplayChange() {
@@ -290,6 +302,7 @@ boolean shouldPrintBeerTime() {
   
   @param storage boolean indicating where to read the data from
 */
+<<<<<<< HEAD
 void printStatusReport(bool storage) {
   if (storage) {
     //Serial.println(STR_BEER_TIMING + getBeerCompletionDuration() + STR_BEER_TIMING_UNIT);
@@ -303,6 +316,12 @@ void printStatusReport(bool storage) {
     Serial.println(STR_LIFETIME_COUNT + lifetimeBeerCount);
     Serial.println(STR_LIFETIME_VOLUME + lifetimeVolume + STR_LIFETIME_VOLUME_UNIT);
   }
+=======
+void printStatusReport() {
+  debugPrintln(STR_BEER_TIMING + getBeerCompletionDuration() + STR_BEER_TIMING_UNIT);
+  debugPrintln(STR_LIFETIME_COUNT + lifetimeTotalBeerCount);
+  debugPrintln(STR_LIFETIME_VOLUME + lifetimeTotalVolume + STR_LIFETIME_VOLUME_UNIT);
+>>>>>>> master
 }
 
 //***************
@@ -346,9 +365,9 @@ float getFloatData(int address) {
 */
 void storeData(int address, int value) {
   EEPROM.put(address,value);
-  Serial.print(value);
-  Serial.print(" stored at address ");
-  Serial.println(address);
+  debugPrint(value);
+  debugPrint(" stored at address ");
+  debugPrintln(address);
 }
 
 /*
@@ -361,9 +380,9 @@ void storeData(int address, int value) {
 */
 void storeFloatData(int address, float value) {
   EEPROM.put(address,value);
-  Serial.print(value);
-  Serial.print(" stored at address ");
-  Serial.println(address);
+  debugPrint(value);
+  debugPrint(" stored at address ");
+  debugPrintln(address);
 }
 
 int getFastestBeerTime() {
@@ -408,5 +427,63 @@ void clearEEPROM() {
       EEPROM.write(i, 0);                       //write 0 to address i
     }
   }
+<<<<<<< HEAD
   Serial.println("EEPROM erased");
 }
+=======
+  debugPrintln("EEPROM erased");
+}
+
+//***************
+// Serial Management
+//***************
+/*
+ * Only print to the serial monitor if debug mode is turned on and if not using a status board
+ */
+boolean shouldPrint() {
+  return(debugModeOn && !sendToStatusBoard); 
+}
+
+/*
+ * Method used to print debug messages
+ * First checks whether it is appropriate to send text to the serial monitor
+ */
+void debugPrint(String debugText) { if(shouldPrint()){ Serial.print(debugText); }}
+void debugPrintln(String debugText) { if(shouldPrint()){ Serial.println(debugText); }}
+void debugPrint(int debugText) { if(shouldPrint()){ Serial.print(debugText); }}
+void debugPrintln(int debugText) { if(shouldPrint()){ Serial.println(debugText); }}
+void debugPrint(long debugText) { if(shouldPrint()){ Serial.print(debugText); }}
+void debugPrintln(long debugText) { if(shouldPrint()){ Serial.println(debugText); }}
+void debugPrint(unsigned long debugText) { if(shouldPrint()){ Serial.print(debugText); }}
+void debugPrintln(unsigned long debugText) { if(shouldPrint()){ Serial.println(debugText); }}
+void debugPrint(float debugText) { if(shouldPrint()){ Serial.print(debugText); }}
+void debugPrintln(float debugText) { if(shouldPrint()){ Serial.println(debugText); }}
+void debugPrint(double debugText) { if(shouldPrint()){ Serial.print(debugText); }}
+void debugPrintln(double debugText) { if(shouldPrint()){ Serial.println(debugText); }}
+
+/*
+ * Serial String to send to processing as output
+ * 
+ */
+String buildComString(int lifeCountVar,float lifeRecordVar,int curCountVar,float curRecordVar,float lastSpeedVar, bool validDrinkVar, float lastVolumeVar)
+{
+  String toSend = "";
+  
+  toSend += lifeCountVar;
+  toSend += ";";
+  toSend += lifeRecordVar;
+  toSend += ";";
+  toSend += curCountVar;
+  toSend += ";";
+  toSend += curRecordVar;
+  toSend += ";";
+  toSend += lastSpeedVar;
+  toSend += ";";
+  toSend += validDrinkVar;
+  toSend += ";";
+  toSend += lastVolumeVar;
+  toSend += ";";
+  
+  return (toSend);
+}
+>>>>>>> master
