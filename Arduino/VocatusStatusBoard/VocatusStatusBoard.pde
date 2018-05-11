@@ -1,7 +1,7 @@
 import processing.serial.*;
 
   Serial myPort;        // The serial port
-  boolean debugMode = true;  //set to true to see noisy output in the serial window
+  boolean debugMode = false;  //set to true to see noisy output in the serial window
   
   int xPos = 1;         // current horizontal position of the graph
   float inByte = 0;
@@ -28,7 +28,7 @@ import processing.serial.*;
     // I know that the first port in the serial list on my Mac is always my
     // Arduino, so I open Serial.list()[0].
     // Open whatever port is the one you're using.
-    myPort = new Serial(this, Serial.list()[2], 19200);
+    myPort = new Serial(this, Serial.list()[2], 9600);
 
     // don't generate a serialEvent() unless you get a newline character:
     myPort.bufferUntil('\n');
@@ -276,7 +276,6 @@ import processing.serial.*;
   void serialEvent (Serial myPort) {
     // get the ASCII string:
     String inString = myPort.readStringUntil('\n');
-    //println(inString);
     
     String[] inVars = split(inString,';');
     
