@@ -298,6 +298,21 @@ void resetBeerSession() {
   firstDropOfBeer=true; // print it out
 }
 
+/*
+ * Completely reset all tracked values, including tonight and lifetime
+ */
+void totalReset() {
+  lifetimeTotalBeerCount = 0;
+  tonightTotalBeerCount = 0;
+
+  lifetimeFastestBeerTime = 0;
+  tonightFastestBeerTime = 0;
+  mostRecentBeerTime = 0;
+
+  lifetimeTotalVolume = 0.0;
+  tonightTotalVolume = 0.0;
+  mostRecentVolume = 0.0;
+}
 
 //***************
 // Printing
@@ -315,8 +330,8 @@ boolean shouldPrintBeerTime() {
   
   @param storage boolean indicating where to read the data from
 */
-void printStatusReport(bool storage) {
-  if (storage) {
+void printStatusReport(bool readFromStorage) {
+  if (readFromStorage) {
     debugPrintln(STR_LIFETIME_COUNT + getLifetimeBeerCount());
     debugPrintln(STR_LIFETIME_VOLUME + getLifetimeVolume() + STR_LIFETIME_VOLUME_UNIT);
     
