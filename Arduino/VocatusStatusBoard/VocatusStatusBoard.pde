@@ -1,7 +1,7 @@
 import processing.serial.*;
 
   Serial myPort;        // The serial port
-  boolean debugMode = false;  //set to true to see noisy output in the serial window
+  boolean debugMode = true;  //set to true to see noisy output in the serial window
   
   int xPos = 1;         // current horizontal position of the graph
   float inByte = 0;
