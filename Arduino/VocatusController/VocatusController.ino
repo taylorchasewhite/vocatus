@@ -1,6 +1,6 @@
 /*--------------------------
   @title:   Vocatus: Flow Meter - Making the world a better place
-  @author:  Stephen Lago & Taylor White 
+  @author:  Stephen Lago & Taylor White  
   @date:    May 2, 2018
   @purpose: Store and calculate flow meter data for a beer bong.
   --------------------------
@@ -73,13 +73,13 @@ const String STR_LIFETIME_VOLUME_UNIT = " ml";
 const String STR_TONIGHT              = " tonight";
 
 // Addresses
-const int ADDR_FASTEST_BEER           = 0;
-const int ADDR_BEER_COUNT             = 1*sizeof(int);
-const int ADDR_LIFETIME_VOLUME        = 2*sizeof(int);
+const int ADDR_BEER_COUNT             = 0;
+const int ADDR_LIFETIME_VOLUME        = 1*sizeof(float);
+const int ADDR_FASTEST_BEER           = 2*sizeof(float);
 
-const int ADDR_TONIGHT_FASTEST_BEER   = 10*sizeof(int);
-const int ADDR_TONIGHT_BEER_COUNT     = 11*sizeof(int);
-const int ADDR_TONIGHT_VOLUME         = 12*sizeof(int);
+const int ADDR_TONIGHT_FASTEST_BEER   = 10*sizeof(float);
+const int ADDR_TONIGHT_BEER_COUNT     = 11*sizeof(float);
+const int ADDR_TONIGHT_VOLUME         = 12*sizeof(float);
 
 
 // Timing
@@ -87,6 +87,7 @@ unsigned long endTime;
 unsigned long startTime;
 int lastBeerDay;
 int lastBeerHour;
+int lastBeerDuration; // The time it took in ms to finish the last beer
 int currentBeerDay;
 int currentBeerHour;
 
@@ -95,11 +96,12 @@ unsigned long lastBeerCompletionInstant;
 unsigned long currentBeerCompletionInstant;
 
 // States
-boolean booDirtyPrint;
+bool firstDropOfBeer;
 
 //Flags
-boolean statusBoardEnabled; 
-boolean debugModeOn; 
+bool statusBoardEnabled; 
+bool debugModeOn; 
+bool startingUp;
 
 //***************
 // Core
@@ -107,6 +109,7 @@ boolean debugModeOn;
 void setup() {
   initGlobals();
   Serial.begin(bitsPerSecond);
+  initializeDisplay(); // @TODO: Would like to get this to run here...not in loop.
   
   pinMode(flowPin, INPUT);           //Sets the pin as an input
   attachInterrupt(0, Flow, RISING);  //Configures interrupt 0 (pin 2 on the Arduino Uno) to run the function "Flow" 
@@ -121,7 +124,7 @@ void loop() {
   noInterrupts(); //Disable the interrupts on the Arduino
   if (shouldPrintBeerTime()) {
     recordBeerEnd();
-    printStatusReport();
+    printStatusReport(false);
     resetBeerSession();
   } 
   else if (prevCount!=currCount) {
@@ -138,14 +141,29 @@ void initGlobals() {
   flowPin = 2;
   bitsPerSecond = 9600;   // initialize serial communication at 9600 bits per second:
   pulsesPerCup = 89;
-  multiplier=2.647;
+  multiplier = 2.647;
 
+  currCount = 0;
+  prevCount = -1;
+  
   currCount=0;
   prevCount=-1;
-  booDirtyPrint=false;
-  
+  firstDropOfBeer=false;
+    
   statusBoardEnabled = true; //set to true to have output sent via serial message to a statusboard (e.g. processing)
   debugModeOn = false;
+  startingUp = false;
+
+  readFromStorage();
+}
+
+void initializeDisplay() {
+  if (!startingUp) {
+    Serial.println("Welcome to the Red Solo Cup Saver!");
+    Serial.println("----------------------------------");
+    printStatusReport(true);
+    startingUp=true;
+  }
 }
 
 //***************
@@ -154,7 +172,7 @@ void initGlobals() {
 void Flow() {
   if (count==0) {
       beerStart();
-      booDirtyPrint=true;
+      firstDropOfBeer=true;
   }
   count++;
   beerPulse();
@@ -196,8 +214,16 @@ void resetTiming() {
  
   @return How long it took to complete the last beer.
 */
-unsigned long getBeerCompletionDuration() {
-  return endTime-startTime;
+int getBeerCompletionDuration() {
+  return lastBeerDuration;
+}
+
+void setBeerCompletionDuration(int startTime, int endTime) {
+  lastBeerDuration = endTime-startTime;
+  if ((lastBeerDuration < getFastestBeerTime()) || (getFastestBeerTime()<=0)) {
+    lifetimeFastestBeerTime = lastBeerDuration;
+    storeFastestBeerTime();
+  }
 }
 
 /*
@@ -221,9 +247,14 @@ boolean isNewDay() {
 //***************
 void recordBeerEnd() {
   lifetimeTotalBeerCount++;
-  lifetimeTotalVolume+=count*multiplier;
+  storeLifetimeBeerCount(); // @TODO: Abstract these two calls to a function
   
-  setBeerCompletionDateTime();
+  lifetimeTotalVolume+=count*multiplier;
+  storeLifetimeVolume();
+  
+  setBeerCompletionDuration(startTime,endTime);
+  
+  setBeerCompletionDateTime(); // @TODO: This function does nothing
   
   if (isNewDay()) {
     resetTonightCounts();
@@ -248,7 +279,7 @@ void resetBeerSession() {
   currCount=0;
   prevCount=0;
   resetTiming();
-  booDirtyPrint=true; // print it out
+  firstDropOfBeer=true; // print it out
 }
 
 
@@ -260,18 +291,28 @@ void resetBeerSession() {
   Determines whether or not to print out the beer completion data. 
 */
 boolean shouldPrintBeerTime() {
-  return ((currCount>0) && (booDirtyPrint) && (currCount==prevCount));
+  return ((currCount>0) && (firstDropOfBeer) && (currCount==prevCount));
 }
 
 /*
   Print out status of the device given the last beer that was completed.
+  
+  @param storage boolean indicating where to read the data from
 */
-void printStatusReport() {
-  debugPrintln(STR_BEER_TIMING + getBeerCompletionDuration() + STR_BEER_TIMING_UNIT);
-  debugPrintln(STR_LIFETIME_COUNT + lifetimeTotalBeerCount);
-  debugPrintln(STR_LIFETIME_VOLUME + lifetimeTotalVolume + STR_LIFETIME_VOLUME_UNIT);
-
-  if(statusBoardEnabled) { sendToStatusBoard(); }
+void printStatusReport(bool storage) {
+  if (storage) {
+    debugPrintln(STR_LIFETIME_COUNT + getLifetimeBeerCount());
+    debugPrintln(STR_LIFETIME_VOLUME + getLifetimeVolume() + STR_LIFETIME_VOLUME_UNIT);
+    
+    debugPrintln(STR_FASTEST_TIME + getFastestBeerTime() + STR_BEER_TIMING_UNIT);
+  }
+  else {
+    debugPrintln(STR_BEER_TIMING + getBeerCompletionDuration() + STR_BEER_TIMING_UNIT);
+    debugPrintln(STR_LIFETIME_COUNT + lifetimeTotalBeerCount);
+    debugPrintln(STR_LIFETIME_VOLUME + lifetimeTotalVolume + STR_LIFETIME_VOLUME_UNIT);
+  }
+  
+  sendToStatusBoard();
 }
 
 //***************
@@ -298,6 +339,10 @@ int getIntegerData(int address) {
 float getFloatData(int address) {
   float value;
   EEPROM.get(address,value);
+  /*Serial.print("Read ");
+  Serial.print(value);
+  Serial.print(" from ");
+  Serial.println(address);*/
   return value;
 }
 
@@ -331,29 +376,35 @@ void storeFloatData(int address, float value) {
   debugPrintln(address);
 }
 
-int getFastestBeer() {
-  return getIntegerData(ADDR_FASTEST_BEER);
+int getFastestBeerTime() {
+  return getFloatData(ADDR_FASTEST_BEER);
 }
 
-void storeFastestBeer() {
-  storeData(ADDR_FASTEST_BEER,lifetimeFastestBeerTime);
+void storeFastestBeerTime() {
+  storeFloatData(ADDR_FASTEST_BEER,lifetimeFastestBeerTime);
 }
 
-int getlifetimeTotalBeerCount() {
-  getIntegerData(ADDR_BEER_COUNT);
+float getLifetimeBeerCount() {
+  return getFloatData(ADDR_BEER_COUNT);
 }
 
-void storelifetimeTotalBeerCount() {
-  storeData(ADDR_BEER_COUNT,lifetimeTotalBeerCount);
+void storeLifetimeBeerCount() {
+  storeFloatData(ADDR_BEER_COUNT,lifetimeTotalBeerCount);
 
 }
 
-float getlifetimeTotalVolume() {
+float getLifetimeVolume() {
   return getFloatData(ADDR_LIFETIME_VOLUME);
 }
 
-void storelifetimeTotalVolume() {
+void storeLifetimeVolume() {
   storeFloatData(ADDR_LIFETIME_VOLUME,lifetimeTotalVolume);
+}
+
+void readFromStorage() {
+  lifetimeFastestBeerTime = getFastestBeerTime();
+  lifetimeTotalVolume=getLifetimeVolume();
+  lifetimeTotalBeerCount = getLifetimeBeerCount();
 }
 
 /*
@@ -428,8 +479,10 @@ String buildComString(int lifeCountVar,float lifeRecordVar,int curCountVar,float
  */
 void sendToStatusBoard()
 {
-  String comString = buildComString(lifetimeTotalBeerCount,lifetimeFastestBeerTime,tonightTotalBeerCount,tonightFastestBeerTime,0,false,0); //TODO modify this new string builder based on TCW's variables
-
-  Serial.println(comString);  
+  if(statusBoardEnabled) { 
+    String comString = buildComString(lifetimeTotalBeerCount,lifetimeFastestBeerTime,tonightTotalBeerCount,tonightFastestBeerTime,0,false,0); 
+    //TODO modify this new string builder based on TCW's variables
+    Serial.println(comString);  
+  }
 }
 
