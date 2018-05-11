@@ -5,13 +5,18 @@ import processing.serial.*;
   
   int xPos = 1;         // current horizontal position of the graph
   float inByte = 0;
-  int lifeCount = 0;
-  int lifeRecord = 0;
-  int curCount = 0;
-  int curRecord = 0;
-  int lastSpeed = 0;
-  int sessionInProgress = 0;
-  int lastVolume = 0; 
+  
+  int lifetimeTotalBeerCount = 0;
+  int tonightTotalBeerCount = 0;
+  
+  int lifetimeFastestBeerTime = 0;
+  int tonightFastestBeerTime = 0;
+  int mostRecentBeerTime = 0;
+  
+  float lifetimeTotalVolume = 0.0;
+  float tonightTotalVolume = 0.0; 
+  float mostRecentVolume = 0.0; 
+
 
   void setup () {
     // set the window size:
@@ -25,8 +30,8 @@ import processing.serial.*;
       println(Serial.list());
     }
 
-    // I know that the first port in the serial list on my Mac is always my
-    // Arduino, so I open Serial.list()[0].
+    // I know that the last port in the serial list on my computer is always my
+    // Arduino, so I open Serial.list()[2].
     // Open whatever port is the one you're using.
     myPort = new Serial(this, Serial.list()[2], 9600);
 
@@ -38,14 +43,17 @@ import processing.serial.*;
   }
   
   //input container variables
-  String inLifeCount;
-  String inLifeRecord;
-  String inCurCount;
-  String inCurRecord;
-  String inLastSpeed;
-  String inGraph;
-  String inSessionInProgress;
-  String inLastVolume; 
+  String inLifetimeTotalBeerCount;
+  String inTonightTotalBeerCount;
+  String inLifetimeFastestBeerTime;
+  String inTonightFastestBeerTime;
+  String inMostRecentBeerTime;
+  String inLifetimeTotalVolume;
+  String inTonightTotalVolume;
+  String inMostRecentVolume;
+  
+  //com String delimiter
+  String delim = ";";
   
   //UI variables
   int textSize = 45;
@@ -59,220 +67,151 @@ import processing.serial.*;
   int boxUnitX = 270;
   int boxUnitY = 120;
 
-  int lifeCountX = 90;
-  int lifeCountY = 100;
+  int lifetimeTotalBeerCountX = 90;
+  int lifetimeTotalBeerCountY = 100;
 
-  int lifeRecordX = lifeCountX;
-  int lifeRecordY = 300;
+  int tonightTotalBeerCountX = lifetimeTotalBeerCountX;
+  int tonightTotalBeerCountY = 300;
   
-  int curCountX = lifeCountX;
-  int curCountY = 500;
+  int lifetimeFastestBeerTimeX = lifetimeTotalBeerCountX;
+  int lifetimeFastestBeerTimeY = 500;
   
-  int curRecordX = lifeCountX;
-  int curRecordY = 700;
+  int tonightFastestBeerTimeX = lifetimeTotalBeerCountX;
+  int tonightFastestBeerTimeY = 700;
   
-  int lastSpeedX = lifeCountX;
-  int lastSpeedY = 900;
+  int mostRecentBeerTimeX = lifetimeTotalBeerCountX;
+  int mostRecentBeerTimeY = 700;
   
-  int graphWidth = 1200-180;
-  int graphHeight = boxHeight;
-  int graphX = 100;
-  int graphY = 1100;
+  int lifetimeTotalVolumeX = lifetimeTotalBeerCountX;
+  int lifetimeTotalVolumeY = 900;
   
-  int sessionInProgressX = 600;
-  int sessionInProgressY = 100;
-  int statusX = 75;
+  int tonightTotalVolumeX = 600;
+  int tonightTotalVolumeY = 100;
   
-  int lastVolumeX = 600;
-  int lastVolumeY = 300;
+  int mostRecentVolumeX = 600;
+  int mostRecentVolumeY = 300;
 
   void draw () {
     
-    //handle lifeCount
-    if (inLifeCount != null) {
-      // trim off any whitespace:
-      inLifeCount = trim(inLifeCount);
-      // convert to an int and map to the screen height:
-      lifeCount = int(inLifeCount);
-      if(debugMode){ 
-        print(lifeCount);
-        print("; ");
-      }
-    }
+    //lifetime count
+    lifetimeTotalBeerCount = convertToInt(inLifetimeTotalBeerCount);
+    drawStandardInfoBoxInt(lifetimeTotalBeerCountX,lifetimeTotalBeerCountY,"Lifetime:",lifetimeTotalBeerCount,"drinks");
     
-    //handle LifeRecord
-    if (inLifeRecord != null) {
-      // trim off any whitespace:
-      inLifeRecord = trim(inLifeRecord);
-      // convert to an int and map to the screen height:
-      lifeRecord = int(inLifeRecord);
-      if(debugMode){
-        print(lifeRecord);
-        print("; ");
-      }
-    }
-
-    //handle curCount
-    if (inCurCount != null) {
-      // trim off any whitespace:
-      inCurCount = trim(inCurCount);
-      // convert to an int and map to the screen height:
-      curCount = int(inCurCount);
-      if(debugMode){
-        print(curCount);
-        print("; ");
-      }
-    }
+    //tonight count
+    tonightTotalBeerCount = convertToInt(inTonightTotalBeerCount);
+    drawStandardInfoBoxInt(tonightTotalBeerCountX,tonightTotalBeerCountY,"Tonight:",tonightTotalBeerCount,"drinks");
     
-    //handle curRecord
-    if (inCurRecord != null) {
-      // trim off any whitespace:
-      inCurRecord = trim(inCurRecord);
-      // convert to an int and map to the screen height:
-      curRecord = int(inCurRecord);
-      if(debugMode){
-        print(curRecord);
-        print("; ");
-      }
-    }
-
-    //handle lastSpeed
-    if (inLastSpeed != null) {
-      // trim off any whitespace:
-      inLastSpeed = trim(inLastSpeed);
-      // convert to an int and map to the screen height:
-      lastSpeed = int(inLastSpeed);
-      if(debugMode){
-        print(lastSpeed);
-        print("; ");
-      }
-    }
+    //lifetime record //TODO:: handle case where there is no record with an "N/A"
+    lifetimeFastestBeerTime = convertToInt(inLifetimeFastestBeerTime);
+    drawStandardInfoBoxInt(lifetimeFastestBeerTimeX,lifetimeFastestBeerTimeY,"All-Time Record:",lifetimeFastestBeerTime,"ms");
+   
+    //tonight record
+    tonightFastestBeerTime = convertToInt(inTonightFastestBeerTime);
+    drawStandardInfoBoxInt(tonightFastestBeerTimeX,tonightFastestBeerTimeY,"Tonight's Record:",tonightFastestBeerTime,"ms");
     
-    //handle sessionInProgress
-    if (inSessionInProgress != null) {
-      // trim off any whitespace:
-      inSessionInProgress = trim(inSessionInProgress);
-      // convert to an int and map to the screen height:
-      sessionInProgress = int(inSessionInProgress);
-      if(debugMode){
-        print(sessionInProgress);
-        print("; ");
-      }
-    }
+    //most recent speed
+    mostRecentBeerTime = convertToInt(inMostRecentBeerTime);
+    drawStandardInfoBoxInt(mostRecentBeerTimeX,mostRecentBeerTimeY,"Last drink:",mostRecentBeerTime,"ms");
     
-    //handle lastVolume
-    if (inLastVolume != null) {
-      // trim off any whitespace:
-      inLastVolume = trim(inLastVolume);
-      // convert to an int and map to the screen height:
-      lastVolume = int(inLastVolume);
-      if(debugMode){
-        print(lastVolume);
-        print("; ");
-      }
-    }
-    if(debugMode){println();}
+    //lifetime volume
+    //TODO
     
-    //draw lifeCount box
+    //tonight volume
+    //TODO
+    
+    //most recent volume
+    //TODO
+  }
+  
+    /*
+   *  Draws a standard info box for an int value
+   *  Assumes: black fill, white outline, green value, textSize 45 
+   */
+  void drawStandardInfoBoxInt(int xPos, int yPos, String labelText, int value, String unitText) {
+    //draw box
     fill(0,0,0);
     textSize(45);
     stroke(255,255,255); //white
-    rect(lifeCountX,lifeCountY,boxWidth,boxHeight);
+    rect(xPos,yPos,boxWidth,boxHeight);
     fill(255,255,255); //white
-    text("Lifetime:",lifeCountX+boxLabelX,lifeCountY+boxLabelY);
+    text(labelText,xPos+boxLabelX,yPos+boxLabelY);
     fill(127,255,0); //lime green
-    text(lifeCount,lifeCountX+boxValueLineX,lifeCountY+boxValueLineY);
+    text(value,xPos+boxValueLineX,yPos+boxValueLineY);
     fill(255,255,255); //white
-    text("drinks",lifeCountX+boxUnitX,lifeCountY+boxUnitY);
-    
-    //draw lifeRecord box
+    text(unitText,xPos+boxUnitX,yPos+boxUnitY);
+  }
+  
+  /*
+   *  Draws a standard info box for a float value //<>//
+   *  Assumes: black fill, white outline, green value, textSize 45 
+   */
+  void drawStandardInfoBoxFloat(int xPos, int yPos, String labelText, float value, String unitText) {
+    //draw lastVolume
     fill(0,0,0);
     textSize(45);
     stroke(255,255,255); //white
-    rect(lifeRecordX,lifeRecordY,boxWidth,boxHeight);
+    rect(xPos,yPos,boxWidth,boxHeight);
     fill(255,255,255); //white
-    text("All-Time Record:",lifeRecordX+boxLabelX,lifeRecordY+boxLabelY);
+    text(labelText,xPos+boxLabelX,yPos+boxLabelY);
     fill(127,255,0); //lime green
-    if(lifeRecord < 0) {
-      text("N/A",lifeRecordX+boxValueLineX,lifeRecordY+boxValueLineY);
-    }else {
-      text(lifeRecord,lifeRecordX+boxValueLineX,lifeRecordY+boxValueLineY);
-    }
+    text(value,xPos+boxValueLineX,yPos+boxValueLineY);
     fill(255,255,255); //white
-    text("ms",lifeRecordX+boxUnitX,lifeRecordY+boxUnitY);
-    
-    //draw curCount box
-    fill(0,0,0);
-    textSize(45);
-    stroke(255,255,255); //white
-    rect(curCountX,curCountY,boxWidth,boxHeight);
-    fill(255,255,255); //white
-    text("Tonight:",curCountX+boxLabelX,curCountY+boxLabelY);
-    fill(127,255,0); //lime green
-    text(curCount,curCountX+boxValueLineX,curCountY+boxValueLineY);
-    fill(255,255,255); //white
-    text("drinks",curCountX+boxUnitX,curCountY+boxUnitY);
-    
-    //draw curRecord box
-    fill(0,0,0);
-    textSize(45);
-    stroke(255,255,255); //white
-    rect(curRecordX,curRecordY,boxWidth,boxHeight);
-    fill(255,255,255); //white
-    text("Tonight's Record:",curRecordX+boxLabelX,curRecordY+boxLabelY);
-    fill(127,255,0); //lime green
-    if(curRecord < 0) {
-      text("N/A",curRecordX+boxValueLineX,curRecordY+boxValueLineY);
-    }else {
-      text(curRecord,curRecordX+boxValueLineX,curRecordY+boxValueLineY);
-    }
-    fill(255,255,255); //white
-    text("ms",curRecordX+boxUnitX,curRecordY+boxUnitY);
-    
-    //draw lastSpeed box
-    fill(0,0,0);
-    textSize(45);
-    stroke(255,255,255); //white
-    rect(lastSpeedX,lastSpeedY,boxWidth,boxHeight);
-    fill(255,255,255); //white
-    text("Last Drink:",lastSpeedX+boxLabelX,lastSpeedY+boxLabelY);
-    fill(127,255,0); //lime green
-    if(lastSpeed < 0) {
-      text("N/A",lastSpeedX+boxValueLineX,lastSpeedY+boxValueLineY);
-    } else {
-      text(lastSpeed,lastSpeedX+boxValueLineX,lastSpeedY+boxValueLineY);
-    }
-    fill(255,255,255); //white
-    text("ms",lastSpeedX+boxUnitX,lastSpeedY+boxUnitY);
-        
-    //draw Session Status
-    textSize(45);
-    stroke(255,255,0); //yellow
-    fill(0,0,0);
-    rect(sessionInProgressX,sessionInProgressY,boxWidth,boxHeight);
-    fill(255,255,255); //white
-    text("Session Status:",sessionInProgressX+boxLabelX,sessionInProgressY+boxLabelY);
-    if(sessionInProgress == 1) {  
-      fill(127,255,0); //lime green
-      text("Started",sessionInProgressX+statusX,sessionInProgressY+boxValueLineY);
-    }else {
-      fill(255,0,0); //red
-      text("Not Started",sessionInProgressX+statusX,sessionInProgressY+boxValueLineY);
-    }
-    
-    //draw lastVolume box
-    fill(0,0,0);
-    textSize(45);
-    stroke(255,255,0); //yellow
-    rect(lastVolumeX,lastVolumeY,boxWidth,boxHeight);
-    fill(255,255,255); //white
-    text("Last Volume:",lastVolumeX+boxLabelX,lastVolumeY+boxLabelY);
-    fill(127,255,0); //lime green
-    text(lastVolume,lastVolumeX+boxValueLineX,lastVolumeY+boxValueLineY);
-    fill(255,255,255); //white
-    text("mL",lastVolumeX+boxUnitX,lastVolumeY+boxUnitY);
+    text(unitText,xPos+boxUnitX,yPos+boxUnitY);
   }
 
+  /*
+   * Converts the given string to an int
+   */
+  int convertToInt(String inValue) {
+    int newValue = 0;
+    
+    if(inValue != null) {
+      // trim off any whitespace:
+      inValue = trim(inValue);
+      // convert to an int
+      newValue = int(inValue);
+      //output debug message if enabled
+      if(debugMode){ 
+        print(newValue);
+        print(delim);
+        print(" ");
+      }
+    }
+    
+    return (newValue);
+  }
+  
+  /*
+   * Converts the given string to a float
+   */
+  float convertToFloat(String inValue) {
+    float newValue = 0.0;
+    
+    if(inValue != null) {
+      // trim off any whitespace:
+      inValue = trim(inValue);
+      // convert to a float
+      newValue = float(inValue);
+      //output debug message if enabled
+      if(debugMode){ 
+        print(newValue);
+        print(delim);
+        print(" ");
+      }
+    }
+    
+    return (newValue);
+  }
+  
+  
+  /*
+   * Only print to the Serial Monitor if debug mode is enabled
+   */
+//TODO
+
+  /*
+   * Catch the com string and parse it into its component pieces
+   */
   void serialEvent (Serial myPort) {
     // get the ASCII string:
     String inString = myPort.readStringUntil('\n');
@@ -280,13 +219,12 @@ import processing.serial.*;
     String[] inVars = split(inString,';');
     
     //assign variables
-    inLifeCount = inVars[0];
-    inLifeRecord = inVars[1];
-    inCurCount = inVars[2];
-    inCurRecord = inVars[3];
-    inLastSpeed = inVars[4];
-    inGraph = inVars[5];
-    inSessionInProgress = inVars[6];
-    inLastVolume= inVars[7];
-    
+    inLifetimeTotalBeerCount = inVars[0];
+    inTonightTotalBeerCount = inVars[1];
+    inLifetimeFastestBeerTime = inVars[2];
+    inTonightFastestBeerTime = inVars[3];
+    inMostRecentBeerTime = inVars[4];
+    inLifetimeTotalVolume = inVars[5];
+    inTonightTotalVolume = inVars[6];
+    inMostRecentVolume= inVars[7];
   }
