@@ -407,8 +407,9 @@ float readFloatData(int address) {
   @param value integer value you desire to store into EEPROM.
 */
 void storeData(int address, int value) {
-  EEPROM.put(address,value);
-  debugPrint(value);
+  float floatVal  = value;
+  EEPROM.put(address,floatVal);
+  debugPrint(floatVal);
   debugPrint(" stored at address ");
   debugPrintln(address);
 }
@@ -428,7 +429,7 @@ void storeData(int address, float value) {
   debugPrintln(address);
 }
 
-//Getters and setters //TODO:: is there a reason we're storing int values as float?
+//Getters and setters
 int readLifetimeFastestBeerTime() { return readFloatData(ADDR_FASTEST_BEER); }
 void storeLifetimeFastestBeerTime() { storeData(ADDR_FASTEST_BEER,lifetimeFastestBeerTime); }
 
