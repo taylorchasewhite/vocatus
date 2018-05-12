@@ -167,7 +167,7 @@ void initGlobals() {
   buttonInPin = 3;
   buttonOutPin = 13;
   bitsPerSecond = 9600;   // initialize serial communication at 9600 bits per second:
-  multiplier = 2.647;
+  multiplier = 3.05; //TCW: 2.647  Chode: 3.05
 
   currCount = 0;
   prevCount = -1;
