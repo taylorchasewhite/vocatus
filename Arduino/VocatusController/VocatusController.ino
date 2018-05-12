@@ -51,11 +51,13 @@ int prevCount;
 int lifetimeTotalBeerCount;
 int tonightTotalBeerCount;
 
-float lifetimeTotalVolume;
-float tonightTotalVolume;
-
 int lifetimeFastestBeerTime;
 int tonightFastestBeerTime;
+int mostRecentBeerTime;  // The time it took in ms to finish the last beer
+
+float lifetimeTotalVolume;
+float tonightTotalVolume;
+float mostRecentVolume;
 float multiplier;
 
 double flowRate;
@@ -87,7 +89,6 @@ unsigned long endTime;
 unsigned long startTime;
 int lastBeerDay;
 int lastBeerHour;
-int lastBeerDuration; // The time it took in ms to finish the last beer
 int currentBeerDay;
 int currentBeerHour;
 
@@ -97,11 +98,11 @@ unsigned long currentBeerCompletionInstant;
 
 // States
 bool firstDropOfBeer;
+bool startingUp;
 
 //Flags
 bool statusBoardEnabled; 
 bool debugModeOn; 
-bool startingUp;
 
 //***************
 // Core
@@ -148,19 +149,33 @@ void initGlobals() {
   
   currCount=0;
   prevCount=-1;
+  
   firstDropOfBeer=false;
-    
-  statusBoardEnabled = true; //set to true to have output sent via serial message to a statusboard (e.g. processing)
-  debugModeOn = false;
   startingUp = false;
+
+  //initialize all tracking variables to 0 in case they are not read from storage
+  lifetimeTotalBeerCount = 0;
+  tonightTotalBeerCount = 0;
+
+  lifetimeFastestBeerTime = 0;
+  tonightFastestBeerTime = 0;
+  mostRecentBeerTime = 0;
+
+  lifetimeTotalVolume = 0.0;
+  tonightTotalVolume = 0.0;
+  mostRecentVolume = 0.0;
+
+  //set flags for initial desired state
+  statusBoardEnabled = true; //set to true to have output sent via serial message to a statusboard (e.g. processing)
+  debugModeOn = false; //set to true to enable noisy output (e.g. messages sent to Serial Monitor)
 
   readFromStorage();
 }
 
 void initializeDisplay() {
   if (!startingUp) {
-    Serial.println("Welcome to the Red Solo Cup Saver!");
-    Serial.println("----------------------------------");
+    debugPrintln("Welcome to the Red Solo Cup Saver!");
+    debugPrintln("----------------------------------");
     printStatusReport(true);
     startingUp=true;
   }
@@ -215,13 +230,13 @@ void resetTiming() {
   @return How long it took to complete the last beer.
 */
 int getBeerCompletionDuration() {
-  return lastBeerDuration;
+  return mostRecentBeerTime;
 }
 
 void setBeerCompletionDuration(int startTime, int endTime) {
-  lastBeerDuration = endTime-startTime;
-  if ((lastBeerDuration < getFastestBeerTime()) || (getFastestBeerTime()<=0)) {
-    lifetimeFastestBeerTime = lastBeerDuration;
+  mostRecentBeerTime = endTime-startTime;
+  if ((mostRecentBeerTime < getFastestBeerTime()) || (getFastestBeerTime()<=0)) {
+    lifetimeFastestBeerTime = mostRecentBeerTime;
     storeFastestBeerTime();
   }
 }
@@ -282,6 +297,21 @@ void resetBeerSession() {
   firstDropOfBeer=true; // print it out
 }
 
+/*
+ * Completely reset all tracked values, including tonight and lifetime
+ */
+void totalReset() {
+  lifetimeTotalBeerCount = 0;
+  tonightTotalBeerCount = 0;
+
+  lifetimeFastestBeerTime = 0;
+  tonightFastestBeerTime = 0;
+  mostRecentBeerTime = 0;
+
+  lifetimeTotalVolume = 0.0;
+  tonightTotalVolume = 0.0;
+  mostRecentVolume = 0.0;
+}
 
 //***************
 // Printing
@@ -299,8 +329,8 @@ boolean shouldPrintBeerTime() {
   
   @param storage boolean indicating where to read the data from
 */
-void printStatusReport(bool storage) {
-  if (storage) {
+void printStatusReport(bool readFromStorage) {
+  if (readFromStorage) {
     debugPrintln(STR_LIFETIME_COUNT + getLifetimeBeerCount());
     debugPrintln(STR_LIFETIME_VOLUME + getLifetimeVolume() + STR_LIFETIME_VOLUME_UNIT);
     
@@ -452,24 +482,27 @@ void debugPrintln(double debugText) { if(shouldPrint()){ Serial.println(debugTex
  * Serial String to send to processing as output
  * 
  */
-String buildComString(int lifeCountVar,float lifeRecordVar,int curCountVar,float curRecordVar,float lastSpeedVar, bool validDrinkVar, float lastVolumeVar)
+String buildComString(int lifetimeTotalBeerCountVar,int tonightTotalBeerCountVar,int lifetimeFastestBeerTimeVar,int tonightFastestBeerTimeVar,int mostRecentBeerTimeVar, float lifetimeTotalVolumeVar, float tonightTotalVolumVar, float mostRecentVolumeVar)
 {
   String toSend = "";
+  String delim = ";";
   
-  toSend += lifeCountVar;
-  toSend += ";";
-  toSend += lifeRecordVar;
-  toSend += ";";
-  toSend += curCountVar;
-  toSend += ";";
-  toSend += curRecordVar;
-  toSend += ";";
-  toSend += lastSpeedVar;
-  toSend += ";";
-  toSend += validDrinkVar;
-  toSend += ";";
-  toSend += lastVolumeVar;
-  toSend += ";";
+  toSend += lifetimeTotalBeerCountVar;
+  toSend += delim;
+  toSend += tonightTotalBeerCountVar;
+  toSend += delim;
+  toSend += lifetimeFastestBeerTimeVar;
+  toSend += delim;
+  toSend += tonightFastestBeerTimeVar;
+  toSend += delim;
+  toSend += mostRecentBeerTimeVar;
+  toSend += delim;
+  toSend += lifetimeTotalVolumeVar;
+  toSend += delim;
+  toSend += tonightTotalVolumVar;
+  toSend += delim;
+  toSend += mostRecentVolumeVar;
+  toSend += delim;  
   
   return (toSend);
 }
@@ -480,7 +513,7 @@ String buildComString(int lifeCountVar,float lifeRecordVar,int curCountVar,float
 void sendToStatusBoard()
 {
   if(statusBoardEnabled) { 
-    String comString = buildComString(lifetimeTotalBeerCount,lifetimeFastestBeerTime,tonightTotalBeerCount,tonightFastestBeerTime,0,false,0); 
+    String comString = buildComString(lifetimeTotalBeerCount,tonightTotalBeerCount,lifetimeFastestBeerTime,tonightFastestBeerTime,mostRecentBeerTime,lifetimeTotalVolume,tonightTotalVolume,mostRecentVolume); 
     //TODO modify this new string builder based on TCW's variables
     Serial.println(comString);  
   }
