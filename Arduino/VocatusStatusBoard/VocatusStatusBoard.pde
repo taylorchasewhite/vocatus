@@ -106,10 +106,8 @@ import processing.serial.*;
     println("Running...");
     
     // List all the available serial ports
-    // if using Processing 2.1 or later, use Serial.printArray()
-    if(debugMode) {
-      println(Serial.list());
-    }
+    // if using Processing 2.1 or later, use Serial.debugPrintArray()
+    debugPrintln(Serial.list());
 
     // I know that the last port in the serial list on my computer is always my
     // Arduino, so I open Serial.list()[2].
@@ -253,11 +251,9 @@ import processing.serial.*;
       // convert to an int
       newValue = int(inValue);
       //output debug message if enabled
-      if(debugMode){ 
-        print(newValue);
-        print(delim);
-        print(" ");
-      }
+      debugPrint(newValue);
+      debugPrint(delim);
+      debugPrint(" ");
     }
     
     return (newValue);
@@ -275,11 +271,9 @@ import processing.serial.*;
       // convert to a float
       newValue = float(inValue);
       //output debug message if enabled
-      if(debugMode){ 
-        print(newValue);
-        print(delim);
-        print(" ");
-      }
+      debugPrint(newValue);
+      debugPrint(delim);
+      debugPrint(" ");
     }
     
     return (newValue);
@@ -291,9 +285,28 @@ import processing.serial.*;
 /****************************************************************/
   
   /*
-   * Only print to the Serial Monitor if debug mode is enabled
+   * Only debugPrint to the Serial Monitor if debug mode is enabled
    */
-//TODO
+   boolean shouldPrint() {
+     return(debugMode);
+   }
+   
+   /*
+   * Method used to print debug messages
+   * First checks whether it is appropriate to send text to the serial monitor
+   */
+   void debugPrint(String debugVal) { if(shouldPrint()) { print(debugVal); }}
+   void debugPrintln(String debugVal) { if(shouldPrint()) { println(debugVal); }}
+   void debugPrint(String[] debugVal) { if(shouldPrint()) { print(debugVal); }}
+   void debugPrintln(String[] debugVal) { if(shouldPrint()) { println(debugVal); }}
+   void debugPrint(int debugVal) { if(shouldPrint()) { print(debugVal); }}
+   void debugPrintln(int debugVal) { if(shouldPrint()) { println(debugVal); }}
+   void debugPrint(long debugVal) { if(shouldPrint()) { print(debugVal); }}
+   void debugPrintln(long debugVal) { if(shouldPrint()) { println(debugVal); }}
+   void debugPrint(float debugVal) { if(shouldPrint()) { print(debugVal); }}
+   void debugPrintln(float debugVal) { if(shouldPrint()) { println(debugVal); }}
+   void debugPrint(double debugVal) { if(shouldPrint()) { print(debugVal); }}
+   void debugPrintln(double debugVal) { if(shouldPrint()) { println(debugVal); }}
 
   /*
    * Catch the com string and parse it into its component pieces

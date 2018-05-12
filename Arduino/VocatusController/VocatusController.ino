@@ -144,6 +144,7 @@ void loop() {
   
   if (buttonVal == LOW) {
     totalReset();
+    printStatusReport(true);
   } 
   
 }
@@ -274,12 +275,12 @@ boolean isNewDay() {
 void recordBeerEnd() {
   lifetimeTotalBeerCount++;
   tonightTotalBeerCount++;
-  storeLifetimeBeerCount(); // @TODO: Abstract these two calls to a function
 
   mostRecentVolume=count*multiplier;
   tonightTotalVolume+=mostRecentVolume;
   lifetimeTotalVolume+=mostRecentVolume;
-  storeLifetimeVolume();
+  
+  storeAllValues();
   
   setBeerCompletionDuration(startTime,endTime);
   
@@ -330,6 +331,8 @@ void totalReset() {
   lifetimeTotalVolume = 0.0;
   tonightTotalVolume = 0.0;
   mostRecentVolume = 0.0;
+
+  storeAllValues();
 }
 
 /****************************************************************/
@@ -454,6 +457,11 @@ void readFromStorage() {
   lifetimeFastestBeerTime = getFastestBeerTime();
   lifetimeTotalVolume=getLifetimeVolume();
   lifetimeTotalBeerCount = getLifetimeBeerCount();
+}
+
+void storeAllValues() {
+  storeLifetimeBeerCount();
+  storeLifetimeVolume();
 }
 
 /*
