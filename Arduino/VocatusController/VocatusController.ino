@@ -33,16 +33,15 @@
 
 #include <EEPROM.h>
 
-//***************
-// Globals
-//***************
+/****************************************************************/
+/********************        Globals        *********************/
+/****************************************************************/
 // Init & Constants
 int bitsPerSecond;
 int changeDisplayPin;
 int flowPin;
-int rebootPin;
-int resetPin;
-int pulsesPerCup;
+int buttonInPin;
+int buttonOutPin;
 
 // Counts
 int currCount;
@@ -62,6 +61,26 @@ float multiplier;
 
 double flowRate;
 volatile int count;
+
+// Timing
+unsigned long endTime;
+unsigned long startTime;
+int lastBeerDay;
+int lastBeerHour;
+int currentBeerDay;
+int currentBeerHour;
+
+const unsigned long SECONDS_IN_DAY = 86400;
+unsigned long lastBeerCompletionInstant;
+unsigned long currentBeerCompletionInstant;
+
+// States
+bool firstDropOfBeer;
+bool startingUp;
+
+//Flags
+bool statusBoardEnabled; 
+bool debugModeOn; 
 
 // Display strings
 const String STR_BEER_TIMING          = "Time: ";
@@ -84,45 +103,35 @@ const int ADDR_TONIGHT_BEER_COUNT     = 11*sizeof(float);
 const int ADDR_TONIGHT_VOLUME         = 12*sizeof(float);
 
 
-// Timing
-unsigned long endTime;
-unsigned long startTime;
-int lastBeerDay;
-int lastBeerHour;
-int currentBeerDay;
-int currentBeerHour;
 
-const unsigned long SECONDS_IN_DAY = 86400;
-unsigned long lastBeerCompletionInstant;
-unsigned long currentBeerCompletionInstant;
-
-// States
-bool firstDropOfBeer;
-bool startingUp;
-
-//Flags
-bool statusBoardEnabled; 
-bool debugModeOn; 
-
-//***************
-// Core
-//***************
+/****************************************************************/
+/********************         Core          *********************/
+/****************************************************************/
 void setup() {
   initGlobals();
   Serial.begin(bitsPerSecond);
   initializeDisplay(); // @TODO: Would like to get this to run here...not in loop.
+
+  //Setup pins
+  pinMode(flowPin, INPUT);           
+  pinMode(buttonInPin, INPUT_PULLUP);
+  pinMode(buttonOutPin, OUTPUT);
   
-  pinMode(flowPin, INPUT);           //Sets the pin as an input
   attachInterrupt(0, Flow, RISING);  //Configures interrupt 0 (pin 2 on the Arduino Uno) to run the function "Flow" 
 
 }
 
 void loop() {
+  //read the pushbutton value into a variable
+  int buttonVal = digitalRead(buttonInPin);
+  
   prevCount=currCount;
   currCount=count;
+  
   interrupts();   //Enables interrupts on the Arduino
   delay (1000);   //Wait 1 second 
   noInterrupts(); //Disable the interrupts on the Arduino
+  
   if (shouldPrintBeerTime()) {
     recordBeerEnd();
     printStatusReport(false);
@@ -132,16 +141,31 @@ void loop() {
     //debugPrintln(STR_PREV_COUNT + prevCount);
     //debugPrintln(STR_CURR_COUNT + currCount);
   }
+  
+  if (buttonVal == LOW) {
+    totalReset();
+  } 
+  
 }
 
-//***************
-// Initialize
-//***************
+void Flow() {
+  if (count==0) {
+      beerStart();
+      firstDropOfBeer=true;
+  }
+  count++;
+  beerPulse();
+  if(shouldPrint()){ debugPrintln(count); }
+}
+
+/****************************************************************/
+/********************      Initialize       *********************/
+/****************************************************************/
 void initGlobals() {
-  resetPin = 3;
   flowPin = 2;
+  buttonInPin = 3;
+  buttonOutPin = 13;
   bitsPerSecond = 9600;   // initialize serial communication at 9600 bits per second:
-  pulsesPerCup = 89;
   multiplier = 2.647;
 
   currCount = 0;
@@ -181,26 +205,13 @@ void initializeDisplay() {
   }
 }
 
-//***************
-// Interrupts
-//***************
-void Flow() {
-  if (count==0) {
-      beerStart();
-      firstDropOfBeer=true;
-  }
-  count++;
-  beerPulse();
-  if(shouldPrint()){ debugPrintln(count); }
-}
-
 void DisplayChange() {
   
 }
 
-//***************
-// Timing
-//***************
+/****************************************************************/
+/********************        Timing         *********************/
+/****************************************************************/
 /*
   Called the first time the hall effect sensor has been triggered since the last beer session completed.
 */
@@ -257,9 +268,9 @@ boolean isNewDay() {
   return (lastBeerCompletionInstant < (currentBeerCompletionInstant-SECONDS_IN_DAY));
 }
 
-//***************
-// Statistics & State Change
-//***************
+/****************************************************************/
+/***************** Statistics and State Change ******************/
+/****************************************************************/
 void recordBeerEnd() {
   lifetimeTotalBeerCount++;
   storeLifetimeBeerCount(); // @TODO: Abstract these two calls to a function
@@ -301,6 +312,11 @@ void resetBeerSession() {
  * Completely reset all tracked values, including tonight and lifetime
  */
 void totalReset() {
+  count=0;
+  currCount=0;
+  prevCount=0;
+  resetTiming();
+  
   lifetimeTotalBeerCount = 0;
   tonightTotalBeerCount = 0;
 
@@ -313,9 +329,9 @@ void totalReset() {
   mostRecentVolume = 0.0;
 }
 
-//***************
-// Printing
-//***************
+/****************************************************************/
+/********************        Printing       *********************/
+/****************************************************************/
 
 /*
   Determines whether or not to print out the beer completion data. 
@@ -345,9 +361,9 @@ void printStatusReport(bool readFromStorage) {
   sendToStatusBoard();
 }
 
-//***************
-// Storage
-//***************
+/****************************************************************/
+/********************        Storage        *********************/
+/****************************************************************/
 /*
   Get integer value held in permanent storage from EEPROM data.
   
@@ -451,9 +467,9 @@ void clearEEPROM() {
   debugPrintln("EEPROM erased");
 }
 
-//***************
-// Serial Management
-//***************
+/****************************************************************/
+/********************   Serial Management   *********************/
+/****************************************************************/
 /*
  * Only print to the serial monitor if debug mode is turned on and if not using a status board
  */
@@ -479,8 +495,9 @@ void debugPrint(double debugText) { if(shouldPrint()){ Serial.print(debugText); 
 void debugPrintln(double debugText) { if(shouldPrint()){ Serial.println(debugText); }}
 
 /*
- * Serial String to send to processing as output
+ * Serial String to send to processing as output (e.g. to statusboard)
  * 
+ * @return a semicolon delimited string containing the information to send as output
  */
 String buildComString(int lifetimeTotalBeerCountVar,int tonightTotalBeerCountVar,int lifetimeFastestBeerTimeVar,int tonightFastestBeerTimeVar,int mostRecentBeerTimeVar, float lifetimeTotalVolumeVar, float tonightTotalVolumVar, float mostRecentVolumeVar)
 {
