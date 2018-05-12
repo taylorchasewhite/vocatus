@@ -53,7 +53,7 @@ int tonightTotalBeerCount;
 
 int lifetimeFastestBeerTime;
 int tonightFastestBeerTime;
-int mostRecentBeerTime;
+int mostRecentBeerTime;  // The time it took in ms to finish the last beer
 
 float lifetimeTotalVolume;
 float tonightTotalVolume;
@@ -89,7 +89,6 @@ unsigned long endTime;
 unsigned long startTime;
 int lastBeerDay;
 int lastBeerHour;
-int lastBeerDuration; // The time it took in ms to finish the last beer
 int currentBeerDay;
 int currentBeerHour;
 
@@ -231,13 +230,13 @@ void resetTiming() {
   @return How long it took to complete the last beer.
 */
 int getBeerCompletionDuration() {
-  return lastBeerDuration;
+  return mostRecentBeerTime;
 }
 
 void setBeerCompletionDuration(int startTime, int endTime) {
-  lastBeerDuration = endTime-startTime;
-  if ((lastBeerDuration < getFastestBeerTime()) || (getFastestBeerTime()<=0)) {
-    lifetimeFastestBeerTime = lastBeerDuration;
+  mostRecentBeerTime = endTime-startTime;
+  if ((mostRecentBeerTime < getFastestBeerTime()) || (getFastestBeerTime()<=0)) {
+    lifetimeFastestBeerTime = mostRecentBeerTime;
     storeFastestBeerTime();
   }
 }

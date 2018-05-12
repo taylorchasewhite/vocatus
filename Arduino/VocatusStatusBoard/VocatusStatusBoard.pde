@@ -1,7 +1,11 @@
 import processing.serial.*;
 
+/****************************************************************/
+/********************        Globals        *********************/
+/****************************************************************/
+
   Serial myPort;        // The serial port
-  boolean debugMode = true;  //set to true to see noisy output in the serial window
+  boolean debugMode = false;  //set to true to see noisy output in the serial window
   
   int xPos = 1;         // current horizontal position of the graph
   float inByte = 0;
@@ -16,31 +20,6 @@ import processing.serial.*;
   float lifetimeTotalVolume = 0.0;
   float tonightTotalVolume = 0.0; 
   float mostRecentVolume = 0.0; 
-
-
-  void setup () {
-    // set the window size:
-    size(1200, 1400);
-      
-    println("Running...");
-    
-    // List all the available serial ports
-    // if using Processing 2.1 or later, use Serial.printArray()
-    if(debugMode) {
-      println(Serial.list());
-    }
-
-    // I know that the last port in the serial list on my computer is always my
-    // Arduino, so I open Serial.list()[2].
-    // Open whatever port is the one you're using.
-    myPort = new Serial(this, Serial.list()[2], 9600);
-
-    // don't generate a serialEvent() unless you get a newline character:
-    myPort.bufferUntil('\n');
-
-    // set initial background:
-    background(0);
-  }
   
   //input container variables
   String inLifetimeTotalBeerCount;
@@ -67,30 +46,123 @@ import processing.serial.*;
   int boxUnitX = 270;
   int boxUnitY = 120;
 
-  int lifetimeTotalBeerCountX = 90;
-  int lifetimeTotalBeerCountY = 100;
+  int col1 = 90;
+  int colWidth = 510;
+  int row1 = 100;
+  int rowHeight = 200;
+  
+  int lifeTimeTotalBeerCountCol = 0;
+  int lifetimeTotalBeerCountRow = 0;
+  int lifetimeTotalBeerCountX;
+  int lifetimeTotalBeerCountY;
 
-  int tonightTotalBeerCountX = lifetimeTotalBeerCountX;
-  int tonightTotalBeerCountY = 300;
+  int tonightTotalBeerCountCol = 1;
+  int tonightTotalBeerCountRow = 0;
+  int tonightTotalBeerCountX;
+  int tonightTotalBeerCountY;
   
-  int lifetimeFastestBeerTimeX = lifetimeTotalBeerCountX;
-  int lifetimeFastestBeerTimeY = 500;
-  
-  int tonightFastestBeerTimeX = lifetimeTotalBeerCountX;
-  int tonightFastestBeerTimeY = 700;
-  
-  int mostRecentBeerTimeX = lifetimeTotalBeerCountX;
-  int mostRecentBeerTimeY = 700;
-  
-  int lifetimeTotalVolumeX = lifetimeTotalBeerCountX;
-  int lifetimeTotalVolumeY = 900;
-  
-  int tonightTotalVolumeX = 600;
-  int tonightTotalVolumeY = 100;
-  
-  int mostRecentVolumeX = 600;
-  int mostRecentVolumeY = 300;
+  int lifetimeFastestBeerTimeCol = 0;
+  int lifetimeFastestBeerTimeRow = 2;
+  int lifetimeFastestBeerTimeX;
+  int lifetimeFastestBeerTimeY;
 
+  int tonightFastestBeerTimeCol = 0;
+  int tonightFastestBeerTimeRow = 3;
+  int tonightFastestBeerTimeX;
+  int tonightFastestBeerTimeY;
+  
+  int mostRecentBeerTimeCol = 0;
+  int mostRecentBeerTimeRow = 4;
+  int mostRecentBeerTimeX;
+  int mostRecentBeerTimeY;
+  
+  int lifetimeTotalVolumeCol = 1;
+  int lifetimeTotalVolumeRow = 2;
+  int lifetimeTotalVolumeX;
+  int lifetimeTotalVolumeY;
+  
+  int tonightTotalVolumeCol = 1;
+  int tonightTotalVolumeRow = 3;
+  int tonightTotalVolumeX;
+  int tonightTotalVolumeY;
+  
+  int mostRecentVolumeCol = 1;
+  int mostRecentVolumeRow = 4;
+  int mostRecentVolumeX;
+  int mostRecentVolumeY;
+
+/****************************************************************/
+/********************         Setup         *********************/
+/****************************************************************/
+  void setup () {
+    // set the window size:
+    size(1200, 1400);
+      
+    println("Running...");
+    
+    // List all the available serial ports
+    // if using Processing 2.1 or later, use Serial.printArray()
+    if(debugMode) {
+      println(Serial.list());
+    }
+
+    // I know that the last port in the serial list on my computer is always my
+    // Arduino, so I open Serial.list()[2].
+    // Open whatever port is the one you're using.
+    myPort = new Serial(this, Serial.list()[2], 9600);
+
+    // don't generate a serialEvent() unless you get a newline character:
+    myPort.bufferUntil('\n');
+
+    //setup values
+    initPosValues();
+
+    // set initial background:
+    background(0);
+  }
+  
+  
+  //Use a col/row system to init the x/y values, where the cols and rows are 0-indexed
+  void initPosValues() {
+    lifetimeTotalBeerCountX = colToX(lifeTimeTotalBeerCountCol);
+    lifetimeTotalBeerCountY = rowToY(lifetimeTotalBeerCountRow);
+    
+    tonightTotalBeerCountX = colToX(tonightTotalBeerCountCol);
+    tonightTotalBeerCountY = rowToY(tonightTotalBeerCountRow);
+    
+    lifetimeFastestBeerTimeX = colToX(lifetimeFastestBeerTimeCol);
+    lifetimeFastestBeerTimeY = rowToY(lifetimeFastestBeerTimeRow);
+    
+    tonightFastestBeerTimeX = colToX(tonightFastestBeerTimeCol);
+    tonightFastestBeerTimeY = rowToY(tonightFastestBeerTimeRow);
+    
+    mostRecentBeerTimeX = colToX(mostRecentBeerTimeCol);
+    mostRecentBeerTimeY = rowToY(mostRecentBeerTimeRow);
+    
+    lifetimeTotalVolumeX = colToX(lifetimeTotalVolumeCol);
+    lifetimeTotalVolumeY = rowToY(lifetimeTotalVolumeRow);
+    
+    tonightTotalVolumeX = colToX(tonightTotalVolumeCol);
+    tonightTotalVolumeY = rowToY(tonightTotalVolumeRow);
+    
+    mostRecentVolumeX = colToX(mostRecentVolumeCol);
+    mostRecentVolumeY = rowToY(mostRecentVolumeRow);
+  }
+  
+  //trandslate a row value to a corresponding x value
+  int colToX(int colVal) {
+    return(col1 + (colVal * colWidth)); 
+  }
+  
+  //trandslate a row value to a corresponding x value
+  int rowToY(int rowVal) {
+    return(row1 + (rowVal * rowHeight)); 
+  }
+
+
+/****************************************************************/
+/********************         Draw          *********************/
+/****************************************************************/
   void draw () {
     
     //lifetime count
@@ -114,13 +186,16 @@ import processing.serial.*;
     drawStandardInfoBoxInt(mostRecentBeerTimeX,mostRecentBeerTimeY,"Last drink:",mostRecentBeerTime,"ms");
     
     //lifetime volume
-    //TODO
+    lifetimeTotalVolume = convertToFloat(inLifetimeTotalVolume);
+    drawStandardInfoBoxFloat(lifetimeTotalVolumeX,lifetimeTotalVolumeY,"All-time volume:",lifetimeTotalVolume,"mL");
     
     //tonight volume
-    //TODO
+    tonightTotalVolume = convertToFloat(inTonightTotalVolume);
+    drawStandardInfoBoxFloat(tonightTotalVolumeX,tonightTotalVolumeY,"Tonight's volume:",tonightTotalVolume,"mL");
     
     //most recent volume
-    //TODO
+    mostRecentVolume = convertToFloat(inMostRecentVolume);
+    drawStandardInfoBoxFloat(mostRecentVolumeX,mostRecentVolumeY,"Last volume:",mostRecentVolume,"mL");
   }
   
     /*
@@ -203,6 +278,10 @@ import processing.serial.*;
     return (newValue);
   }
   
+  
+/****************************************************************/
+/********************     Input/Output      *********************/
+/****************************************************************/
   
   /*
    * Only print to the Serial Monitor if debug mode is enabled
