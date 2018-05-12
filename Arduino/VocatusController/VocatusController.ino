@@ -406,7 +406,7 @@ float readFloatData(int address) {
   @param address integer value denoting where to store the data to
   @param value integer value you desire to store into EEPROM.
 */
-void storeIntData(int address, int value) {
+void storeData(int address, int value) {
   EEPROM.put(address,value);
   debugPrint(value);
   debugPrint(" stored at address ");
@@ -421,22 +421,22 @@ void storeIntData(int address, int value) {
   @param address integer value denoting where to store the data to
   @param value float value you desire to store into EEPROM.
 */
-void storeFloatData(int address, float value) {
+void storeData(int address, float value) {
   EEPROM.put(address,value);
   debugPrint(value);
   debugPrint(" stored at address ");
   debugPrintln(address);
 }
 
-//Getters and setters
+//Getters and setters //TODO:: is there a reason we're storing int values as float?
 int readLifetimeFastestBeerTime() { return readFloatData(ADDR_FASTEST_BEER); }
-void storeLifetimeFastestBeerTime() { storeFloatData(ADDR_FASTEST_BEER,lifetimeFastestBeerTime); }
+void storeLifetimeFastestBeerTime() { storeData(ADDR_FASTEST_BEER,lifetimeFastestBeerTime); }
 
 float readLifetimeTotalVolume() { return readFloatData(ADDR_LIFETIME_VOLUME); }
-void storeLifetimeTotalVolume() { storeFloatData(ADDR_LIFETIME_VOLUME,lifetimeTotalVolume); }
+void storeLifetimeTotalVolume() { storeData(ADDR_LIFETIME_VOLUME,lifetimeTotalVolume); }
 
 float readLifetimeTotalBeerCount() { return readFloatData(ADDR_BEER_COUNT); }
-void storeLifetimeTotalBeerCount() { storeFloatData(ADDR_BEER_COUNT,lifetimeTotalBeerCount); }
+void storeLifetimeTotalBeerCount() { storeData(ADDR_BEER_COUNT,lifetimeTotalBeerCount); }
 
 
 void readFromStorage() {
