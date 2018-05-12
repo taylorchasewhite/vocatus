@@ -167,7 +167,7 @@ void initGlobals() {
   buttonInPin = 3;
   buttonOutPin = 13;
   bitsPerSecond = 9600;   // initialize serial communication at 9600 bits per second:
-  multiplier = 2.647;
+  multiplier = 3.05; //TCW: 2.647  Chode: 3.05
 
   currCount = 0;
   prevCount = -1;
@@ -247,9 +247,10 @@ int getBeerCompletionDuration() {
 
 void setBeerCompletionDuration(int startTime, int endTime) {
   mostRecentBeerTime = endTime-startTime;
-  if ((mostRecentBeerTime < getFastestBeerTime()) || (getFastestBeerTime()<=0)) {
+  //TODO:: we should be using globals unless there's a reason to read from memory
+  if ((mostRecentBeerTime < readLifetimeFastestBeerTime()) || (readLifetimeFastestBeerTime()<=0)) {
     lifetimeFastestBeerTime = mostRecentBeerTime;
-    storeFastestBeerTime();
+    storeLifetimeFastestBeerTime();
   }
 }
 
@@ -353,10 +354,9 @@ boolean shouldPrintBeerTime() {
 */
 void printStatusReport(bool readFromStorage) {
   if (readFromStorage) {
-    debugPrintln(STR_LIFETIME_COUNT + getLifetimeBeerCount());
-    debugPrintln(STR_LIFETIME_VOLUME + getLifetimeVolume() + STR_LIFETIME_VOLUME_UNIT);
-    
-    debugPrintln(STR_FASTEST_TIME + getFastestBeerTime() + STR_BEER_TIMING_UNIT);
+    debugPrintln(STR_LIFETIME_COUNT + readLifetimeTotalBeerCount());
+    debugPrintln(STR_LIFETIME_VOLUME + readLifetimeTotalVolume() + STR_LIFETIME_VOLUME_UNIT);
+    debugPrintln(STR_FASTEST_TIME + readLifetimeFastestBeerTime() + STR_BEER_TIMING_UNIT);
   }
   else {
     debugPrintln(STR_BEER_TIMING + getBeerCompletionDuration() + STR_BEER_TIMING_UNIT);
@@ -376,7 +376,7 @@ void printStatusReport(bool readFromStorage) {
   @param address integer value denoting where to read from
   @return the integer value stored in the desired address.
 */
-int getIntegerData(int address) {
+int readIntegerData(int address) {
   int value;
   EEPROM.get(address, value);
   return value;
@@ -388,7 +388,7 @@ int getIntegerData(int address) {
   @param address integer value denoting where to read from
   @return the float value stored in the desired address.
 */
-float getFloatData(int address) {
+float readFloatData(int address) {
   float value;
   EEPROM.get(address,value);
   /*Serial.print("Read ");
@@ -407,8 +407,9 @@ float getFloatData(int address) {
   @param value integer value you desire to store into EEPROM.
 */
 void storeData(int address, int value) {
-  EEPROM.put(address,value);
-  debugPrint(value);
+  float floatVal  = value;
+  EEPROM.put(address,floatVal);
+  debugPrint(floatVal);
   debugPrint(" stored at address ");
   debugPrintln(address);
 }
@@ -421,47 +422,34 @@ void storeData(int address, int value) {
   @param address integer value denoting where to store the data to
   @param value float value you desire to store into EEPROM.
 */
-void storeFloatData(int address, float value) {
+void storeData(int address, float value) {
   EEPROM.put(address,value);
   debugPrint(value);
   debugPrint(" stored at address ");
   debugPrintln(address);
 }
 
-int getFastestBeerTime() {
-  return getFloatData(ADDR_FASTEST_BEER);
-}
+//Getters and setters
+float readLifetimeTotalBeerCount() { return readFloatData(ADDR_BEER_COUNT); }
+void storeLifetimeTotalBeerCount() { storeData(ADDR_BEER_COUNT,lifetimeTotalBeerCount); }
 
-void storeFastestBeerTime() {
-  storeFloatData(ADDR_FASTEST_BEER,lifetimeFastestBeerTime);
-}
+int readLifetimeFastestBeerTime() { return readFloatData(ADDR_FASTEST_BEER); }
+void storeLifetimeFastestBeerTime() { storeData(ADDR_FASTEST_BEER,lifetimeFastestBeerTime); }
 
-float getLifetimeBeerCount() {
-  return getFloatData(ADDR_BEER_COUNT);
-}
+float readLifetimeTotalVolume() { return readFloatData(ADDR_LIFETIME_VOLUME); }
+void storeLifetimeTotalVolume() { storeData(ADDR_LIFETIME_VOLUME,lifetimeTotalVolume); }
 
-void storeLifetimeBeerCount() {
-  storeFloatData(ADDR_BEER_COUNT,lifetimeTotalBeerCount);
-
-}
-
-float getLifetimeVolume() {
-  return getFloatData(ADDR_LIFETIME_VOLUME);
-}
-
-void storeLifetimeVolume() {
-  storeFloatData(ADDR_LIFETIME_VOLUME,lifetimeTotalVolume);
-}
 
 void readFromStorage() {
-  lifetimeFastestBeerTime = getFastestBeerTime();
-  lifetimeTotalVolume=getLifetimeVolume();
-  lifetimeTotalBeerCount = getLifetimeBeerCount();
+  lifetimeTotalBeerCount = readLifetimeTotalBeerCount();
+  lifetimeFastestBeerTime = readLifetimeFastestBeerTime();
+  lifetimeTotalVolume=readLifetimeTotalVolume();
 }
 
 void storeAllValues() {
-  storeLifetimeBeerCount();
-  storeLifetimeVolume();
+  storeLifetimeTotalBeerCount();
+  storeLifetimeFastestBeerTime();
+  storeLifetimeTotalVolume();
 }
 
 /*
