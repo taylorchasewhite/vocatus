@@ -273,9 +273,12 @@ boolean isNewDay() {
 /****************************************************************/
 void recordBeerEnd() {
   lifetimeTotalBeerCount++;
+  tonightTotalBeerCount++;
   storeLifetimeBeerCount(); // @TODO: Abstract these two calls to a function
-  
-  lifetimeTotalVolume+=count*multiplier;
+
+  mostRecentVolume=count*multiplier;
+  tonightTotalVolume+=mostRecentVolume;
+  lifetimeTotalVolume+=mostRecentVolume;
   storeLifetimeVolume();
   
   setBeerCompletionDuration(startTime,endTime);

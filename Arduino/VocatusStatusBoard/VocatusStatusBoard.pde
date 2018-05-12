@@ -35,6 +35,11 @@ import processing.serial.*;
   String delim = ";";
   
   //UI variables
+  int black = #000000;
+  int white = #FFFFFF;
+  int limeGreen = #7FFF00;
+  int yellow = #FFFF00;
+  int purple = #FF00FF;
   int textSize = 45;
   
   int boxWidth = 420;
@@ -167,52 +172,53 @@ import processing.serial.*;
     
     //lifetime count
     lifetimeTotalBeerCount = convertToInt(inLifetimeTotalBeerCount);
-    drawStandardInfoBoxInt(lifetimeTotalBeerCountX,lifetimeTotalBeerCountY,"Lifetime:",lifetimeTotalBeerCount,"drinks");
+    drawStandardInfoBoxInt(lifetimeTotalBeerCountX,lifetimeTotalBeerCountY,"Lifetime:",lifetimeTotalBeerCount,"drinks",white);
     
     //tonight count
     tonightTotalBeerCount = convertToInt(inTonightTotalBeerCount);
-    drawStandardInfoBoxInt(tonightTotalBeerCountX,tonightTotalBeerCountY,"Tonight:",tonightTotalBeerCount,"drinks");
+    drawStandardInfoBoxInt(tonightTotalBeerCountX,tonightTotalBeerCountY,"Tonight:",tonightTotalBeerCount,"drinks",white);
     
     //lifetime record //TODO:: handle case where there is no record with an "N/A"
     lifetimeFastestBeerTime = convertToInt(inLifetimeFastestBeerTime);
-    drawStandardInfoBoxInt(lifetimeFastestBeerTimeX,lifetimeFastestBeerTimeY,"All-Time Record:",lifetimeFastestBeerTime,"ms");
+    drawStandardInfoBoxInt(lifetimeFastestBeerTimeX,lifetimeFastestBeerTimeY,"All-Time Record:",lifetimeFastestBeerTime,"ms",yellow);
    
     //tonight record
     tonightFastestBeerTime = convertToInt(inTonightFastestBeerTime);
-    drawStandardInfoBoxInt(tonightFastestBeerTimeX,tonightFastestBeerTimeY,"Tonight's Record:",tonightFastestBeerTime,"ms");
+    drawStandardInfoBoxInt(tonightFastestBeerTimeX,tonightFastestBeerTimeY,"Tonight's Record:",tonightFastestBeerTime,"ms",yellow);
     
     //most recent speed
     mostRecentBeerTime = convertToInt(inMostRecentBeerTime);
-    drawStandardInfoBoxInt(mostRecentBeerTimeX,mostRecentBeerTimeY,"Last drink:",mostRecentBeerTime,"ms");
+    drawStandardInfoBoxInt(mostRecentBeerTimeX,mostRecentBeerTimeY,"Last drink:",mostRecentBeerTime,"ms",yellow);
     
     //lifetime volume
     lifetimeTotalVolume = convertToFloat(inLifetimeTotalVolume);
-    drawStandardInfoBoxFloat(lifetimeTotalVolumeX,lifetimeTotalVolumeY,"All-time volume:",lifetimeTotalVolume,"mL");
+    drawStandardInfoBoxFloat(lifetimeTotalVolumeX,lifetimeTotalVolumeY,"All-time volume:",lifetimeTotalVolume,"mL",purple);
     
     //tonight volume
     tonightTotalVolume = convertToFloat(inTonightTotalVolume);
-    drawStandardInfoBoxFloat(tonightTotalVolumeX,tonightTotalVolumeY,"Tonight's volume:",tonightTotalVolume,"mL");
+    drawStandardInfoBoxFloat(tonightTotalVolumeX,tonightTotalVolumeY,"Tonight's volume:",tonightTotalVolume,"mL",purple);
     
     //most recent volume
     mostRecentVolume = convertToFloat(inMostRecentVolume);
-    drawStandardInfoBoxFloat(mostRecentVolumeX,mostRecentVolumeY,"Last volume:",mostRecentVolume,"mL");
+    drawStandardInfoBoxFloat(mostRecentVolumeX,mostRecentVolumeY,"Last volume:",mostRecentVolume,"mL",purple);
   }
   
     /*
    *  Draws a standard info box for an int value
    *  Assumes: black fill, white outline, green value, textSize 45 
    */
-  void drawStandardInfoBoxInt(int xPos, int yPos, String labelText, int value, String unitText) {
+  void drawStandardInfoBoxInt(int xPos, int yPos, String labelText, int value, String unitText, int borderColor) {
     //draw box
-    fill(0,0,0);
+    fill(black);
     textSize(45);
-    stroke(255,255,255); //white
+    stroke(borderColor); 
     rect(xPos,yPos,boxWidth,boxHeight);
-    fill(255,255,255); //white
+    //draw text
+    fill(white); 
     text(labelText,xPos+boxLabelX,yPos+boxLabelY);
-    fill(127,255,0); //lime green
+    fill(limeGreen); 
     text(value,xPos+boxValueLineX,yPos+boxValueLineY);
-    fill(255,255,255); //white
+    fill(white); 
     text(unitText,xPos+boxUnitX,yPos+boxUnitY);
   }
   
@@ -220,17 +226,18 @@ import processing.serial.*;
    *  Draws a standard info box for a float value //<>//
    *  Assumes: black fill, white outline, green value, textSize 45 
    */
-  void drawStandardInfoBoxFloat(int xPos, int yPos, String labelText, float value, String unitText) {
+  void drawStandardInfoBoxFloat(int xPos, int yPos, String labelText, float value, String unitText, int borderColor) {
     //draw lastVolume
-    fill(0,0,0);
+    fill(black);
     textSize(45);
-    stroke(255,255,255); //white
+    stroke(borderColor); 
     rect(xPos,yPos,boxWidth,boxHeight);
-    fill(255,255,255); //white
+    //draw text
+    fill(white); 
     text(labelText,xPos+boxLabelX,yPos+boxLabelY);
-    fill(127,255,0); //lime green
+    fill(limeGreen);
     text(value,xPos+boxValueLineX,yPos+boxValueLineY);
-    fill(255,255,255); //white
+    fill(white);
     text(unitText,xPos+boxUnitX,yPos+boxUnitY);
   }
 
