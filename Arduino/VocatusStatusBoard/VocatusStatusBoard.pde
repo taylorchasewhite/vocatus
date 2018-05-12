@@ -152,12 +152,12 @@ import processing.serial.*;
     mostRecentVolumeY = rowToY(mostRecentVolumeRow);
   }
   
-  //trandslate a row value to a corresponding x value
+  //trandslate a col value to a corresponding x value
   int colToX(int colVal) {
     return(col1 + (colVal * colWidth)); 
   }
   
-  //trandslate a row value to a corresponding x value
+  //trandslate a row value to a corresponding y value
   int rowToY(int rowVal) {
     return(row1 + (rowVal * rowHeight)); 
   }
@@ -170,42 +170,42 @@ import processing.serial.*;
     
     //lifetime count
     lifetimeTotalBeerCount = convertToInt(inLifetimeTotalBeerCount);
-    drawStandardInfoBoxInt(lifetimeTotalBeerCountX,lifetimeTotalBeerCountY,"Lifetime:",lifetimeTotalBeerCount,"drinks",white);
+    drawStandardInfoBox(lifetimeTotalBeerCountX,lifetimeTotalBeerCountY,"Lifetime:",lifetimeTotalBeerCount,"drinks",white);
     
     //tonight count
     tonightTotalBeerCount = convertToInt(inTonightTotalBeerCount);
-    drawStandardInfoBoxInt(tonightTotalBeerCountX,tonightTotalBeerCountY,"Tonight:",tonightTotalBeerCount,"drinks",white);
+    drawStandardInfoBox(tonightTotalBeerCountX,tonightTotalBeerCountY,"Tonight:",tonightTotalBeerCount,"drinks",white);
     
     //lifetime record //TODO:: handle case where there is no record with an "N/A"
     lifetimeFastestBeerTime = convertToInt(inLifetimeFastestBeerTime);
-    drawStandardInfoBoxInt(lifetimeFastestBeerTimeX,lifetimeFastestBeerTimeY,"All-Time Record:",lifetimeFastestBeerTime,"ms",yellow);
+    drawStandardInfoBox(lifetimeFastestBeerTimeX,lifetimeFastestBeerTimeY,"All-Time Record:",lifetimeFastestBeerTime,"ms",yellow);
    
     //tonight record
     tonightFastestBeerTime = convertToInt(inTonightFastestBeerTime);
-    drawStandardInfoBoxInt(tonightFastestBeerTimeX,tonightFastestBeerTimeY,"Tonight's Record:",tonightFastestBeerTime,"ms",yellow);
+    drawStandardInfoBox(tonightFastestBeerTimeX,tonightFastestBeerTimeY,"Tonight's Record:",tonightFastestBeerTime,"ms",yellow);
     
     //most recent speed
     mostRecentBeerTime = convertToInt(inMostRecentBeerTime);
-    drawStandardInfoBoxInt(mostRecentBeerTimeX,mostRecentBeerTimeY,"Last drink:",mostRecentBeerTime,"ms",yellow);
+    drawStandardInfoBox(mostRecentBeerTimeX,mostRecentBeerTimeY,"Last drink:",mostRecentBeerTime,"ms",yellow);
     
     //lifetime volume
     lifetimeTotalVolume = convertToFloat(inLifetimeTotalVolume);
-    drawStandardInfoBoxFloat(lifetimeTotalVolumeX,lifetimeTotalVolumeY,"All-time volume:",lifetimeTotalVolume,"mL",purple);
+    drawStandardInfoBox(lifetimeTotalVolumeX,lifetimeTotalVolumeY,"All-time volume:",lifetimeTotalVolume,"mL",purple);
     
     //tonight volume
     tonightTotalVolume = convertToFloat(inTonightTotalVolume);
-    drawStandardInfoBoxFloat(tonightTotalVolumeX,tonightTotalVolumeY,"Tonight's volume:",tonightTotalVolume,"mL",purple);
+    drawStandardInfoBox(tonightTotalVolumeX,tonightTotalVolumeY,"Tonight's volume:",tonightTotalVolume,"mL",purple);
     
     //most recent volume
     mostRecentVolume = convertToFloat(inMostRecentVolume);
-    drawStandardInfoBoxFloat(mostRecentVolumeX,mostRecentVolumeY,"Last volume:",mostRecentVolume,"mL",purple);
+    drawStandardInfoBox(mostRecentVolumeX,mostRecentVolumeY,"Last volume:",mostRecentVolume,"mL",purple);
   }
   
     /*
    *  Draws a standard info box for an int value
    *  Assumes: black fill, white outline, green value, textSize 45 
    */
-  void drawStandardInfoBoxInt(int xPos, int yPos, String labelText, int value, String unitText, int borderColor) {
+  void drawStandardInfoBox(int xPos, int yPos, String labelText, int value, String unitText, int borderColor) {
     //draw box
     fill(black);
     textSize(45);
@@ -224,7 +224,7 @@ import processing.serial.*;
    *  Draws a standard info box for a float value //<>//
    *  Assumes: black fill, white outline, green value, textSize 45 
    */
-  void drawStandardInfoBoxFloat(int xPos, int yPos, String labelText, float value, String unitText, int borderColor) {
+  void drawStandardInfoBox(int xPos, int yPos, String labelText, float value, String unitText, int borderColor) {
     //draw lastVolume
     fill(black);
     textSize(45);
