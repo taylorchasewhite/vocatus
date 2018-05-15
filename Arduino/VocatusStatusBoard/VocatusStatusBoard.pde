@@ -6,7 +6,7 @@ import processing.serial.*;
 
   Serial myPort;        // The serial port
   boolean debugMode = false;  //set to true to see noisy output in the serial window
-  boolean deviceAttached = false; //set this to false when testing code without a device attached to the computer
+  boolean deviceAttached = true; //set this to false when testing code without a device attached to the computer (skips any messing around with Serial stuff)
   
   int xPos = 1;         // current horizontal position of the graph
   float inByte = 0;
@@ -139,10 +139,9 @@ import processing.serial.*;
     initPosValues();
     initSkins();
     assignSkin();
-
-    // Background Markup
+    
+    // Background Markup; draw this once for performance benefit
     drawBackgroundMarkup();
-    drawBoxes();
   }
   
   
@@ -247,6 +246,10 @@ import processing.serial.*;
 /********************    Dynamic Draw       *********************/
 /****************************************************************/
   void draw () {
+
+    //draw the boxes/background each time //TODO:: we could still gain performance here if we wanted to by only overwriting the value portion of the display, but I think we're hitting diminishing returns at that point
+    drawBoxes();
+    
     //lifetime count
     lifetimeTotalBeerCount = convertToInt(inLifetimeTotalBeerCount);
     drawStandardInfoBox(lifetimeTotalBeerCountX,lifetimeTotalBeerCountY,lifetimeTotalBeerCount);
