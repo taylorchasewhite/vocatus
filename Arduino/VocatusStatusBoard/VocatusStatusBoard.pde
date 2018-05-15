@@ -54,7 +54,7 @@ import processing.serial.*;
   int col1 = 50;
   int colWidth = 510;
   int row1 = 50;
-  int rowHeight = 200;
+  int rowHeight = 180;
   
   int lifeTimeTotalBeerCountCol = 0;
   int lifetimeTotalBeerCountRow = 0;
@@ -95,6 +95,24 @@ import processing.serial.*;
   int mostRecentVolumeRow = 4;
   int mostRecentVolumeX;
   int mostRecentVolumeY;
+  
+  Style backgroundStyle;
+  enum Style {
+    ALTITUDE,
+    VERDANT,
+    DEEPBLUE,
+    LAVENDAR,
+    LOWLIGHT
+  };
+  
+  static final String IMAGE_PATH="./ZeroStateImages/";
+  static final String IMAGE_SUFFIX = "_Zero-State";
+  static final String ICON_SUFFIX = "-Icon";
+  static final String IMAGE_TYPE = ".png";
+  
+  // Background Images
+  PImage backgroundImage;
+  PImage foregroundImage;
 
 /****************************************************************/
 /********************         Setup         *********************/
@@ -120,8 +138,8 @@ import processing.serial.*;
     //setup values
     initPosValues();
 
-    // set initial background:
-    background(0);
+    // Background Markup
+    drawBackgroundMarkup();
   }
   
   
@@ -199,6 +217,7 @@ import processing.serial.*;
     //most recent volume
     mostRecentVolume = convertToFloat(inMostRecentVolume);
     drawStandardInfoBox(mostRecentVolumeX,mostRecentVolumeY,"Last volume:",mostRecentVolume,"mL",purple);
+  
   }
   
     /*
@@ -237,6 +256,127 @@ import processing.serial.*;
     text(value,xPos+boxValueLineX,yPos+boxValueLineY);
     fill(white);
     text(unitText,xPos+boxUnitX,yPos+boxUnitY);
+  }
+  
+  void drawBackgroundMarkup() {
+    int random = floor(random(5)); // Cast to an int
+    switch(random) {
+      case 0:
+        backgroundStyle=Style.ALTITUDE;
+        break;
+      case 1:
+        backgroundStyle=Style.DEEPBLUE;
+        break;
+      case 2:
+        backgroundStyle=Style.LAVENDAR;
+        break;
+      case 3:
+        backgroundStyle=Style.VERDANT;
+        break;
+      case 4:
+        backgroundStyle=Style.LOWLIGHT;
+        break;
+    }
+    backgroundImage = loadImage(getImageURLFromTheme());
+    foregroundImage = loadImage(getIconURLFromTheme());
+    background(getBackgroundColorFromTheme());
+    image(backgroundImage,0,0,1024,768);
+    image(foregroundImage,426.5,238.5); // 298.5 is halfway down, icon is 171x171
+    drawStatusBoardTitle();
+  }
+  
+  void drawStatusBoardTitle() {
+    PFont pencilPete,pencilPeteSmall;
+    pencilPete = createFont("pencilPete FONT",32);
+    textFont(pencilPete,32);
+    fill(getFontColorFromTheme());
+    text("Solo Cup Saver", 426.5, 248);
+    textFont(pencilPete,12);
+    //text("©", 475, 235);
+  }
+  
+  
+  color getBackgroundColorFromTheme() {
+    color backgroundColor=color(0,0,0);
+    switch(backgroundStyle) {
+      case ALTITUDE:
+        backgroundColor=color(238,247,255);
+        break;
+      case LOWLIGHT:
+        backgroundColor=color(211,213,218);
+        break;
+      case DEEPBLUE:
+        backgroundColor=color(240,242,244);
+        break;
+      case LAVENDAR:
+        backgroundColor=color(244,244,251);
+        break;
+      case VERDANT:
+        backgroundColor=color(242,250,248);
+        break;
+    }
+    return backgroundColor;
+  }
+  
+  color getFontColorFromTheme() {
+        switch(backgroundStyle) {
+      case ALTITUDE:
+        return color(0, 145, 234);
+      case LOWLIGHT:
+        return color(0, 57, 107);
+      case DEEPBLUE:
+        return color(0, 57, 107);
+      case LAVENDAR:
+        return color(156, 39, 176);
+      case VERDANT:
+        return color(14, 150, 152);
+    }
+    return color(156, 39, 176);
+  }
+  
+  String getImageURLFromTheme() {
+    
+    String themeName="";
+    switch(backgroundStyle) {
+      case ALTITUDE:
+        themeName="Altitude";
+        break;
+      case LOWLIGHT:
+        themeName="Low-Light";
+        break;
+      case DEEPBLUE:
+        themeName="Deep-Blue";
+        break;
+      case LAVENDAR:
+        themeName="Lavender";
+        break;
+      case VERDANT:
+        themeName="Verdant";
+        break;
+    }
+    return IMAGE_PATH+themeName+IMAGE_SUFFIX+IMAGE_TYPE;
+  }
+  
+  String getIconURLFromTheme() {
+    String themeName="";
+    switch(backgroundStyle) {
+      case ALTITUDE:
+        themeName="Altitude";
+        break;
+      case LOWLIGHT:
+        themeName="Low-Light";
+        break;
+      case DEEPBLUE:
+        themeName="Deep-Blue";
+        break;
+      case LAVENDAR:
+        themeName="Lavender";
+        break;
+      case VERDANT:
+        themeName="Verdant";
+        break;
+    }
+    return IMAGE_PATH+themeName+IMAGE_SUFFIX+ICON_SUFFIX+IMAGE_TYPE;
   }
 
   /*
