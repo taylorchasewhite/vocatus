@@ -430,14 +430,28 @@ void storeData(int address, float value) {
 }
 
 //Getters and setters
-float readLifetimeTotalBeerCount() { return readFloatData(ADDR_BEER_COUNT); }
-void storeLifetimeTotalBeerCount() { storeData(ADDR_BEER_COUNT,lifetimeTotalBeerCount); }
+float readLifetimeTotalBeerCount() { 
+  return readFloatData(ADDR_BEER_COUNT); 
+}
+void storeLifetimeTotalBeerCount() { 
+  storeData(ADDR_BEER_COUNT,lifetimeTotalBeerCount); 
+  
+}
 
-int readLifetimeFastestBeerTime() { return readFloatData(ADDR_FASTEST_BEER); }
-void storeLifetimeFastestBeerTime() { storeData(ADDR_FASTEST_BEER,lifetimeFastestBeerTime); }
+int readLifetimeFastestBeerTime() { 
+  return readFloatData(ADDR_FASTEST_BEER); 
+}
+void storeLifetimeFastestBeerTime() { 
+  storeData(ADDR_FASTEST_BEER,lifetimeFastestBeerTime); 
+}
 
-float readLifetimeTotalVolume() { return readFloatData(ADDR_LIFETIME_VOLUME); }
-void storeLifetimeTotalVolume() { storeData(ADDR_LIFETIME_VOLUME,lifetimeTotalVolume); }
+float readLifetimeTotalVolume() { 
+  return readFloatData(ADDR_LIFETIME_VOLUME); 
+}
+
+void storeLifetimeTotalVolume() { 
+  storeData(ADDR_LIFETIME_VOLUME,lifetimeTotalVolume); 
+}
 
 
 void readFromStorage() {
@@ -534,4 +548,3 @@ void sendToStatusBoard()
     Serial.println(comString);  
   }
 }
-
