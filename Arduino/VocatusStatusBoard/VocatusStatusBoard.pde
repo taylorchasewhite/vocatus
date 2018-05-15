@@ -140,6 +140,7 @@ import processing.serial.*;
 
     // Background Markup
     drawBackgroundMarkup();
+    drawBoxes();
   }
   
   
@@ -168,6 +169,7 @@ import processing.serial.*;
     
     mostRecentVolumeX = colToX(mostRecentVolumeCol);
     mostRecentVolumeY = rowToY(mostRecentVolumeRow);
+    
   }
   
   //trandslate a col value to a corresponding x value
@@ -188,74 +190,82 @@ import processing.serial.*;
     
     //lifetime count
     lifetimeTotalBeerCount = convertToInt(inLifetimeTotalBeerCount);
-    drawStandardInfoBox(lifetimeTotalBeerCountX,lifetimeTotalBeerCountY,"Lifetime:",lifetimeTotalBeerCount,"drinks",white);
+    drawStandardInfoBox(lifetimeTotalBeerCountX,lifetimeTotalBeerCountY,lifetimeTotalBeerCount);
     
     //tonight count
     tonightTotalBeerCount = convertToInt(inTonightTotalBeerCount);
-    drawStandardInfoBox(tonightTotalBeerCountX,tonightTotalBeerCountY,"Tonight:",tonightTotalBeerCount,"drinks",white);
+    drawStandardInfoBox(tonightTotalBeerCountX,tonightTotalBeerCountY,tonightTotalBeerCount);
     
     //lifetime record //TODO:: handle case where there is no record with an "N/A"
     lifetimeFastestBeerTime = convertToInt(inLifetimeFastestBeerTime);
-    drawStandardInfoBox(lifetimeFastestBeerTimeX,lifetimeFastestBeerTimeY,"All-Time Record:",lifetimeFastestBeerTime,"ms",yellow);
+    drawStandardInfoBox(lifetimeFastestBeerTimeX,lifetimeFastestBeerTimeY,lifetimeFastestBeerTime);
    
     //tonight record
     tonightFastestBeerTime = convertToInt(inTonightFastestBeerTime);
-    drawStandardInfoBox(tonightFastestBeerTimeX,tonightFastestBeerTimeY,"Tonight's Record:",tonightFastestBeerTime,"ms",yellow);
+    drawStandardInfoBox(tonightFastestBeerTimeX,tonightFastestBeerTimeY,tonightFastestBeerTime);
     
     //most recent speed
     mostRecentBeerTime = convertToInt(inMostRecentBeerTime);
-    drawStandardInfoBox(mostRecentBeerTimeX,mostRecentBeerTimeY,"Last drink:",mostRecentBeerTime,"ms",yellow);
+    drawStandardInfoBox(mostRecentBeerTimeX,mostRecentBeerTimeY,mostRecentBeerTime);
     
     //lifetime volume
     lifetimeTotalVolume = convertToFloat(inLifetimeTotalVolume);
-    drawStandardInfoBox(lifetimeTotalVolumeX,lifetimeTotalVolumeY,"All-time volume:",lifetimeTotalVolume,"mL",purple);
+    drawStandardInfoBox(lifetimeTotalVolumeX,lifetimeTotalVolumeY,lifetimeTotalVolume);
     
     //tonight volume
     tonightTotalVolume = convertToFloat(inTonightTotalVolume);
-    drawStandardInfoBox(tonightTotalVolumeX,tonightTotalVolumeY,"Tonight's volume:",tonightTotalVolume,"mL",purple);
+    drawStandardInfoBox(tonightTotalVolumeX,tonightTotalVolumeY,tonightTotalVolume);
     
     //most recent volume
     mostRecentVolume = convertToFloat(inMostRecentVolume);
-    drawStandardInfoBox(mostRecentVolumeX,mostRecentVolumeY,"Last volume:",mostRecentVolume,"mL",purple);
+    drawStandardInfoBox(mostRecentVolumeX,mostRecentVolumeY, mostRecentVolume);
   
   }
+  
+ void drawBoxes() {
+    drawLabelBox(lifetimeTotalBeerCountX,lifetimeTotalBeerCountY,"Lifetime:","drinks",white);
+    drawLabelBox(tonightTotalBeerCountX,tonightTotalBeerCountY,"Tonight:","drinks",white);
+    drawLabelBox(lifetimeFastestBeerTimeX,lifetimeFastestBeerTimeY,"All-Time Record:","ms",yellow);
+    drawLabelBox(tonightFastestBeerTimeX,tonightFastestBeerTimeY,"Tonight's Record:","ms",yellow);
+    drawLabelBox(mostRecentBeerTimeX,mostRecentBeerTimeY,"Last drink:","ms",yellow); 
+    drawLabelBox(lifetimeTotalVolumeX,lifetimeTotalVolumeY,"All-time volume:","mL",purple);
+    drawLabelBox(tonightTotalVolumeX,tonightTotalVolumeY,"Tonight's volume:","mL",purple);    
+    drawLabelBox(mostRecentVolumeX,mostRecentVolumeY,"Last volume:","mL",purple);  
+ }
+ 
+ void drawLabelBox(int xPos, int yPos, String labelText, String unitText, int borderColor) {
+    fill(getChalkboardColor(),120);
+    stroke(borderColor); 
+    rect(xPos,yPos,boxWidth,boxHeight);
+    
+    //draw text
+    textSize(45);
+    fill(getFontColorFromTheme());
+    text(labelText,xPos+boxLabelX,yPos+boxLabelY);
+    //fill(limeGreen); 
+    //text(value,xPos+boxValueLineX,yPos+boxValueLineY);
+    //fill(getFontColorFromTheme());
+    fill(white); 
+    text(unitText,xPos+boxUnitX,yPos+boxUnitY);
+ }
   
     /*
    *  Draws a standard info box for an int value
    *  Assumes: black fill, white outline, green value, textSize 45 
    */
-  void drawStandardInfoBox(int xPos, int yPos, String labelText, int value, String unitText, int borderColor) {
-    //draw box
-    fill(black);
-    textSize(45);
-    stroke(borderColor); 
-    rect(xPos,yPos,boxWidth,boxHeight);
-    //draw text
+  void drawStandardInfoBox(int xPos, int yPos, int value) {
+
     fill(white); 
-    text(labelText,xPos+boxLabelX,yPos+boxLabelY);
-    fill(limeGreen); 
     text(value,xPos+boxValueLineX,yPos+boxValueLineY);
-    fill(white); 
-    text(unitText,xPos+boxUnitX,yPos+boxUnitY);
   }
   
   /*
    *  Draws a standard info box for a float value //<>//
    *  Assumes: black fill, white outline, green value, textSize 45 
    */
-  void drawStandardInfoBox(int xPos, int yPos, String labelText, float value, String unitText, int borderColor) {
-    //draw lastVolume
-    fill(black);
-    textSize(45);
-    stroke(borderColor); 
-    rect(xPos,yPos,boxWidth,boxHeight);
-    //draw text
-    fill(white); 
-    text(labelText,xPos+boxLabelX,yPos+boxLabelY);
-    fill(limeGreen);
-    text(value,xPos+boxValueLineX,yPos+boxValueLineY);
+  void drawStandardInfoBox(int xPos, int yPos, float value) {
     fill(white);
-    text(unitText,xPos+boxUnitX,yPos+boxUnitY);
+    text(value,xPos+boxValueLineX,yPos+boxValueLineY);
   }
   
   void drawBackgroundMarkup() {
@@ -287,7 +297,7 @@ import processing.serial.*;
   
   void drawStatusBoardTitle() {
     PFont pencilPete,pencilPeteSmall;
-    pencilPete = createFont("pencilPete FONT",32);
+    pencilPete = createFont("pencilPete FONT",64);
     textFont(pencilPete,32);
     fill(getFontColorFromTheme());
     text("Solo Cup Saver", 426.5, 248);
@@ -332,6 +342,10 @@ import processing.serial.*;
         return color(14, 150, 152);
     }
     return color(156, 39, 176);
+  }
+  
+  color getChalkboardColor() {
+    return color(47,79,79);
   }
   
   String getImageURLFromTheme() {
