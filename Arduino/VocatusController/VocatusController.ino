@@ -32,6 +32,7 @@
 */
 
 #include <EEPROM.h>
+#include <LiquidCrystal.h>
 
 /****************************************************************/
 /********************        Globals        *********************/
@@ -80,7 +81,12 @@ bool startingUp;
 
 //Flags
 bool statusBoardEnabled; 
+bool lcdModeEnabled;
 bool debugModeOn; 
+
+//LCD values
+const int rs = 7, en = 8, d4 = 9, d5 = 10, d6 = 11, d7 = 12;
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
 // Display strings
 const String STR_BEER_TIMING          = "Time: ";
@@ -116,6 +122,11 @@ void setup() {
   pinMode(flowPin, INPUT);           
   pinMode(buttonInPin, INPUT_PULLUP);
   pinMode(buttonOutPin, OUTPUT);
+
+  if(lcdModeEnabled) {
+    lcd.begin(16,2);
+    lcd.print("Running...");
+  }
   
   attachInterrupt(0, Flow, RISING);  //Configures interrupt 0 (pin 2 on the Arduino Uno) to run the function "Flow" 
 
@@ -193,6 +204,7 @@ void initGlobals() {
   //set flags for initial desired state
   statusBoardEnabled = true; //set to true to have output sent via serial message to a statusboard (e.g. processing)
   debugModeOn = false; //set to true to enable noisy output (e.g. messages sent to Serial Monitor)
+  lcdModeEnabled = false; //set to true to enable output to an LCD
 
   readFromStorage();
 }
