@@ -227,7 +227,7 @@ import processing.serial.*;
     fill(mySkin.fontColor);
     text("Solo Cup Saver", 426.5, 248);
     textFont(pencilPete,12);
-    //text("©", 475, 235); //TODO:: Remove?
+    //text("©", 475, 235); //TODO:: Remove this comment?
   }
   
   //TODO these outline colors don't work with all themes
