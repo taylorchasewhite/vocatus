@@ -51,9 +51,9 @@ import processing.serial.*;
   int boxUnitX = 270;
   int boxUnitY = 120;
 
-  int col1 = 90;
+  int col1 = 50;
   int colWidth = 510;
-  int row1 = 100;
+  int row1 = 50;
   int rowHeight = 200;
   
   int lifeTimeTotalBeerCountCol = 0;
@@ -101,7 +101,7 @@ import processing.serial.*;
 /****************************************************************/
   void setup () {
     // set the window size:
-    size(1200, 1400);
+    size(1024, 768);
       
     println("Running...");
     
