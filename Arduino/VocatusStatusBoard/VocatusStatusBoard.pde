@@ -129,7 +129,7 @@ import processing.serial.*;
       // I know that the last port in the serial list on my computer is always my
       // Arduino, so I open Serial.list()[2].
       // Open whatever port is the one you're using.
-      myPort = new Serial(this, Serial.list()[2], 9600);
+      myPort = new Serial(this, Serial.list()[Serial.list().length-1], 9600);
   
       // don't generate a serialEvent() unless you get a newline character:
       myPort.bufferUntil('\n');
