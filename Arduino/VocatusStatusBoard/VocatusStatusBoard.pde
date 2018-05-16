@@ -230,14 +230,14 @@ import processing.serial.*;
   }
   
   void drawLabels() {
-    drawLabel(lifetimeTotalBeerCountX,lifetimeTotalBeerCountY,"Lifetime:");
-    drawLabel(tonightTotalBeerCountX,tonightTotalBeerCountY,"Tonight:");
-    drawLabel(lifetimeFastestBeerTimeX,lifetimeFastestBeerTimeY,"All-Time Record:");
-    drawLabel(tonightFastestBeerTimeX,tonightFastestBeerTimeY,"Tonight's Record:");
-    drawLabel(mostRecentBeerTimeX,mostRecentBeerTimeY,"Last drink:"); 
-    drawLabel(lifetimeTotalVolumeX,lifetimeTotalVolumeY,"All-time volume:");
-    drawLabel(tonightTotalVolumeX,tonightTotalVolumeY,"Tonight's volume:");    
-    drawLabel(mostRecentVolumeX,mostRecentVolumeY,"Last volume:");      
+    drawLabel(lifetimeTotalBeerCountX,lifetimeTotalBeerCountY,"Lifetime");
+    drawLabel(tonightTotalBeerCountX,tonightTotalBeerCountY,"Tonight");
+    drawLabel(lifetimeFastestBeerTimeX,lifetimeFastestBeerTimeY,"All-Time Record");
+    drawLabel(tonightFastestBeerTimeX,tonightFastestBeerTimeY,"Tonight's Record");
+    drawLabel(mostRecentBeerTimeX,mostRecentBeerTimeY,"Last drink"); 
+    drawLabel(lifetimeTotalVolumeX,lifetimeTotalVolumeY,"All-time volume");
+    drawLabel(tonightTotalVolumeX,tonightTotalVolumeY,"Tonight's volume");    
+    drawLabel(mostRecentVolumeX,mostRecentVolumeY,"Last volume");      
   }
   
   void updateValues() {
