@@ -77,7 +77,6 @@ unsigned long lastBeerCompletionInstant;
 unsigned long currentBeerCompletionInstant;
 
 // States
-bool firstDropOfBeer;
 bool startingUp;
 
 //Flags
@@ -158,22 +157,19 @@ void loop() {
     recordBeerEnd();
     printStatusReport(false);
     resetBeerSession();
-  } 
-  else if (prevCount!=currCount) {
-    //debugPrintln(STR_PREV_COUNT + prevCount);
-    //debugPrintln(STR_CURR_COUNT + currCount);
   }
 
+  //if the mode cycle button is pressed
   if (modeCycleButtonVal == LOW) {
     cycleMode();
     printStatusReport(true);
   } 
-  
+
+  //if the reset button is pressed
   if (resetButtonVal == LOW) {
     totalReset();
     printStatusReport(true);
   } 
-  
 }
 
 /*
@@ -182,11 +178,10 @@ void loop() {
 void Flow() {
   if (count==0) {
       beerStart();
-      firstDropOfBeer=true;
   }
   count++;
   beerPulse();
-  if(shouldPrint()){ debugPrintln(count); }
+  debugPrintln(count);
 }
 
 /****************************************************************/
@@ -209,7 +204,6 @@ void initGlobals() {
   currCount=0;
   prevCount=-1;
   
-  firstDropOfBeer=false;
   startingUp = false;
   lcdDisplayMode = LIFECOUNT;
 
@@ -228,7 +222,7 @@ void initGlobals() {
   //set flags for initial desired state
   statusBoardEnabled = true; //set to true to have output sent via serial message to a statusboard (e.g. processing)
   debugModeOn = false; //set to true to enable noisy output (e.g. messages sent to Serial Monitor)
-  lcdModeEnabled = false; //set to true to enable output to an LCD
+  lcdModeEnabled = true; //set to true to enable output to an LCD
 
   readFromStorage();
 }
@@ -342,18 +336,14 @@ void resetBeerSession() {
   currCount=0;
   prevCount=0;
   resetTiming();
-  firstDropOfBeer=true; // print it out
 }
 
 /*
  * Completely reset all tracked values, including tonight and lifetime
  */
 void totalReset() {
-  count=0;
-  currCount=0;
-  prevCount=0;
-  resetTiming();
-  
+  resetBeerSession();
+
   lifetimeTotalBeerCount = 0;
   tonightTotalBeerCount = 0;
 
@@ -376,7 +366,7 @@ void totalReset() {
   Determines whether or not to print out the beer completion data. 
 */
 boolean shouldPrintBeerTime() {
-  return ((currCount>0) && (firstDropOfBeer) && (currCount==prevCount));
+  return ((currCount>0) && (currCount==prevCount));
 }
 
 /*
