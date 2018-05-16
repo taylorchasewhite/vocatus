@@ -41,8 +41,9 @@
 int bitsPerSecond;
 int changeDisplayPin;
 int flowPin;
-int buttonInPin;
-int buttonOutPin;
+int resetButtonInPin;
+int resetButtonOutPin;
+int modeCycleButtonInPin;
 
 // Counts
 int currCount;
@@ -87,6 +88,14 @@ bool debugModeOn;
 //LCD values
 const int rs = 7, en = 8, d4 = 9, d5 = 10, d6 = 11, d7 = 12;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
+enum DisplayMode {
+  LIFECOUNT = 0, //explicitly set this guy to 0 to support cycling
+  TONIGHTCOUNT,
+  LIFESPEED,
+  TONIGHTSPEED,
+  LASTSPEED,
+  ENDVALUE //this calue should always be last to support cycling; add new values before this guy
+} lcdDisplayMode;
 
 // Display strings
 const String STR_BEER_TIMING          = "Time: ";
@@ -120,8 +129,9 @@ void setup() {
 
   //Setup pins
   pinMode(flowPin, INPUT);           
-  pinMode(buttonInPin, INPUT_PULLUP);
-  pinMode(buttonOutPin, OUTPUT);
+  pinMode(resetButtonInPin, INPUT_PULLUP);
+  pinMode(resetButtonOutPin, OUTPUT);
+  pinMode(modeCycleButtonInPin, INPUT_PULLUP);
 
   if(lcdModeEnabled) {
     lcd.begin(16,2);
@@ -134,7 +144,8 @@ void setup() {
 
 void loop() {
   //read the pushbutton value into a variable
-  int buttonVal = digitalRead(buttonInPin);
+  int resetButtonVal = digitalRead(resetButtonInPin);
+  int modeCycleButtonVal = digitalRead(modeCycleButtonInPin);
   
   prevCount=currCount;
   currCount=count;
@@ -152,8 +163,13 @@ void loop() {
     //debugPrintln(STR_PREV_COUNT + prevCount);
     //debugPrintln(STR_CURR_COUNT + currCount);
   }
+
+  if (modeCycleButtonVal == LOW) {
+    cycleMode();
+    printStatusReport(true);
+  } 
   
-  if (buttonVal == LOW) {
+  if (resetButtonVal == LOW) {
     totalReset();
     printStatusReport(true);
   } 
@@ -175,8 +191,9 @@ void Flow() {
 /****************************************************************/
 void initGlobals() {
   flowPin = 2;
-  buttonInPin = 3;
-  buttonOutPin = 13;
+  resetButtonInPin = 3;
+  resetButtonOutPin = 13;
+  modeCycleButtonInPin = 4;
   bitsPerSecond = 9600;   // initialize serial communication at 9600 bits per second:
   multiplier = 3.05; //TCW: 2.647  Chode: 3.05
 
@@ -188,6 +205,7 @@ void initGlobals() {
   
   firstDropOfBeer=false;
   startingUp = false;
+  lcdDisplayMode = LIFECOUNT;
 
   //initialize all tracking variables to 0 in case they are not read from storage
   lifetimeTotalBeerCount = 0;
@@ -218,8 +236,16 @@ void initializeDisplay() {
   }
 }
 
-void DisplayChange() {
-  
+/*
+ * Cycle through to the next display mode according to the 
+ */
+void cycleMode() {
+  int intValue = (int) lcdDisplayMode;
+  intValue++; //increment by one
+  if(intValue == ENDVALUE) {
+    intValue = 0; //close the cycle
+  }
+  lcdDisplayMode = (DisplayMode) intValue;
 }
 
 /****************************************************************/
@@ -377,6 +403,7 @@ void printStatusReport(bool readFromStorage) {
   }
   
   sendToStatusBoard();
+  sendToLcd();
 }
 
 /****************************************************************/
@@ -560,3 +587,53 @@ void sendToStatusBoard()
     Serial.println(comString);  
   }
 }
+
+/****************************************************************/
+/********************     LCD Management    *********************/
+/****************************************************************/
+/*
+ * Only print to the lcd display if lcd mode is turned on
+ */
+bool shouldSendToLcd() {
+  return(lcdModeEnabled);
+}
+
+
+void sendToLcd()
+{
+  if(!shouldSendToLcd()) { return; } //short circuit this if we shouldn't be doing anything
+
+  String toDisplayLabel = "";
+  String toDisplayValue = "";
+  String toDisplayUnit = "";
+
+  switch(lcdDisplayMode) {
+    case LIFECOUNT:
+      toDisplayLabel = "Lifetime:";
+      toDisplayValue = lifetimeTotalBeerCount;
+      toDisplayUnit = "beers"; //TODO:: handle 1 drink
+    case TONIGHTCOUNT:
+      toDisplayLabel = "Tonight:";
+      toDisplayValue = tonightTotalBeerCount;
+      toDisplayUnit = "beers"; //TODO:: handle 1 drink
+    case LIFESPEED:
+      toDisplayLabel = "All-Time Record:";
+      toDisplayValue = lifetimeFastestBeerTime;
+      toDisplayUnit = "ms";
+    case TONIGHTSPEED:
+      toDisplayLabel = "Tonight's Record";
+      toDisplayValue = tonightFastestBeerTime;
+      toDisplayUnit = "ms";
+    case LASTSPEED:
+      toDisplayLabel = "Last Drink";
+      toDisplayValue = mostRecentBeerTime;
+      toDisplayUnit = "ms";
+  }
+
+  lcd.setCursor(0,0); //set cursor to the first line
+  lcd.print(toDisplayLabel);
+  
+  lcd.setCursor(0,1); //set cursor to the second line
+  lcd.print(toDisplayValue + " " + toDisplayUnit);
+}
+
