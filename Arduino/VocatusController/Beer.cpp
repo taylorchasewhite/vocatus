@@ -4,6 +4,8 @@
  * beers in the controller's runtime environment.
  * Created by Taylor White, Stephen Lago, May 15, 2018
  * See https://www.arduino.cc/en/Hacking/LibraryTutorial for information on class conventions here.
+ * http://www.cplusplus.com/doc/tutorial/templates/
+ * 
  */
 #include "Arduino.h"
 #include "StorageManager.h"
@@ -36,5 +38,5 @@ int Beer::flowRate() {
 	return flowRate;
 }
 int Beer::completionDuration() {
-	
+
 }

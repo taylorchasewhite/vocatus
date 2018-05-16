@@ -5,6 +5,7 @@
  * such that the controller just uses get/set commands.
  * Created by Taylor White, Stephen Lago, May 15, 2018
  * See https://www.arduino.cc/en/Hacking/LibraryTutorial for information on class conventions here.
+ * https://stackoverflow.com/questions/2043493/where-to-declare-define-class-scope-constants-in-c
  * 
 */
 #include "Arduino.h"
