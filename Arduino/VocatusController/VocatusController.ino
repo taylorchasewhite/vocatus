@@ -176,6 +176,9 @@ void loop() {
   
 }
 
+/*
+ * The method to run each time we recieve input from the device
+ */
 void Flow() {
   if (count==0) {
       beerStart();
@@ -189,6 +192,9 @@ void Flow() {
 /****************************************************************/
 /********************      Initialize       *********************/
 /****************************************************************/
+/*
+ * Set starting values for globals
+ */
 void initGlobals() {
   flowPin = 2;
   resetButtonInPin = 3;
@@ -234,18 +240,6 @@ void initializeDisplay() {
     printStatusReport(true);
     startingUp=true;
   }
-}
-
-/*
- * Cycle through to the next display mode according to the 
- */
-void cycleMode() {
-  int intValue = (int) lcdDisplayMode;
-  intValue++; //increment by one
-  if(intValue == ENDVALUE) {
-    intValue = 0; //close the cycle
-  }
-  lcdDisplayMode = (DisplayMode) intValue;
 }
 
 /****************************************************************/
@@ -474,7 +468,6 @@ float readLifetimeTotalBeerCount() {
 }
 void storeLifetimeTotalBeerCount() { 
   storeData(ADDR_BEER_COUNT,lifetimeTotalBeerCount); 
-  
 }
 
 int readLifetimeFastestBeerTime() { 
@@ -530,7 +523,7 @@ boolean shouldPrint() {
 }
 
 /*
- * Method used to print debug messages
+ * Methods used to print debug messages
  * First checks whether it is appropriate to send text to the serial monitor
  */
 void debugPrint(String debugText) { if(shouldPrint()){ Serial.print(debugText); }}
@@ -599,6 +592,22 @@ bool shouldSendToLcd() {
 }
 
 
+/*
+ * Cycle through to the next display mode according to the order in the enum
+ */
+void cycleMode() {
+  int intValue = (int) lcdDisplayMode;
+  intValue++; //increment by one
+  if(intValue == ENDVALUE) {
+    intValue = 0; //close the cycle
+  }
+  lcdDisplayMode = (DisplayMode) intValue;
+}
+
+
+/*
+ * Send the relevant info for display on the LCD, based on the current lcdDisplayMode
+ */
 void sendToLcd()
 {
   if(!shouldSendToLcd()) { return; } //short circuit this if we shouldn't be doing anything
@@ -607,6 +616,7 @@ void sendToLcd()
   String toDisplayValue = "";
   String toDisplayUnit = "";
 
+  //use the current mode to determine what to show on the LCD
   switch(lcdDisplayMode) {
     case LIFECOUNT:
       toDisplayLabel = "Lifetime:";
@@ -628,12 +638,17 @@ void sendToLcd()
       toDisplayLabel = "Last Drink";
       toDisplayValue = mostRecentBeerTime;
       toDisplayUnit = "ms";
+    default:  //might as well have a saftey case //TODO:: do we want to remove this in the final product for less noisy errors?
+      toDisplayLabel = "ERROR:";
+      toDisplayValue = "BAD ENUM VALUE"; 
   }
 
-  lcd.setCursor(0,0); //set cursor to the first line
+  //print the first line
+  lcd.setCursor(0,0); 
   lcd.print(toDisplayLabel);
-  
-  lcd.setCursor(0,1); //set cursor to the second line
+
+  //print the second line
+  lcd.setCursor(0,1); 
   lcd.print(toDisplayValue + " " + toDisplayUnit);
 }
 
