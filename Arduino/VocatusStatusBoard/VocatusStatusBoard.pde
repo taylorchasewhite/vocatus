@@ -32,68 +32,72 @@ import processing.serial.*;
   String inTonightTotalVolume;
   String inMostRecentVolume;
   
-  //com String delimiter
-  String delim = ";";
+  //com String DELIMiter
+  static String DELIM = ";";
   
-  //UI variables
-  int BLACK = #000000;
-  int WHITE = #FFFFFF;
-  int LIME_GREEN = #7FFF00;
-  int YELLOW = #FFFF00;
-  int PURPLE = #FF00FF;
-  int textSize = 45;
+  //UI variables  
+  color CHALKBOARD =color(0,150,136);
+  color CHALKBOARD_SHADOW =color(47,79,79);
   
-  int boxWidth = 420;
-  int boxHeight = 150;
-  int boxLabelX = 25;
-  int boxLabelY = 50;
-  int boxValueLineX = 25;
-  int boxValueLineY = 120;
-  int boxUnitX = 270;
-  int boxUnitY = 120;
+  static color BLACK = #000000;
+  static color WHITE = #FFFFFF;
+  static color LIME_GREEN = #7FFF00;
+  static color YELLOW = #FFFF00;
+  static color PURPLE = #FF00FF;
+  static color textSize = 45;
+  
+  static int BOX_WIDTH = 420;
+  static int BOX_HEIGHT = 50;
+  static int BOX_LABEL_X = 25;
+  static int BOX_LABEL_Y = 50;
+  static int BOX_VALUE_X = 25;
+  static int BOX_VALUE_Y = 120;
+  static int BOX_UNIT_X = 270;
+  static int BOX_UNIT_Y = BOX_VALUE_Y;
+  static int LABEL_OFFSET=80;
 
-  int col1 = 50;
-  int colWidth = 510;
-  int row1 = 50;
-  int rowHeight = 180;
+  static int col1 = 50;
+  static int colWidth = 510;
+  static int row1 = 50;
+  static int rowHeight = 140;
   
-  int lifeTimeTotalBeerCountCol = 0;
-  int lifetimeTotalBeerCountRow = 0;
+  static int LIFETIME_TOTAL_BEER_COUNT_COL = 0;
+  static int LIFETIME_TOTAL_BEER_COUNT_ROW = 0;
   int lifetimeTotalBeerCountX;
   int lifetimeTotalBeerCountY;
 
-  int tonightTotalBeerCountCol = 1;
-  int tonightTotalBeerCountRow = 0;
+  static int TONIGHT_TOTAL_BEER_COUNT_COL = 1;
+  static int TONIGHT_TOTAL_BEER_COUNT_ROW = 0;
   int tonightTotalBeerCountX;
   int tonightTotalBeerCountY;
   
-  int lifetimeFastestBeerTimeCol = 0;
-  int lifetimeFastestBeerTimeRow = 2;
+  static int LIFETIME_FASTEST_BEER_TIME_COL = 0;
+  static int LIFETIME_FASTEST_BEER_TIME_ROW = 2;
   int lifetimeFastestBeerTimeX;
   int lifetimeFastestBeerTimeY;
 
-  int tonightFastestBeerTimeCol = 0;
-  int tonightFastestBeerTimeRow = 3;
+  static int TONIGHT_FASTEST_BEER_TIME_COL = 0;
+  static int TONIGHT_FASTEST_BEER_TIME_ROW = 3;
   int tonightFastestBeerTimeX;
   int tonightFastestBeerTimeY;
   
-  int mostRecentBeerTimeCol = 0;
-  int mostRecentBeerTimeRow = 4;
+  static int MOST_RECENT_BEER_TIME_COL = 0;
+  static int MOST_RECENT_BEER_TIME_ROW = 4;
   int mostRecentBeerTimeX;
   int mostRecentBeerTimeY;
   
-  int lifetimeTotalVolumeCol = 1;
-  int lifetimeTotalVolumeRow = 2;
+  static int LIFETIME_TOTAL_VOLUME_COL = 1;
+  static int LIFETIME_TOTAL_VOLUME_ROW = 2;
   int lifetimeTotalVolumeX;
   int lifetimeTotalVolumeY;
   
-  int tonightTotalVolumeCol = 1;
-  int tonightTotalVolumeRow = 3;
+  static int TONIGHT_TOTAL_VOLUME_COL = 1;
+  static int TONIGHT_TOTAL_VOLUME_ROW = 3;
   int tonightTotalVolumeX;
   int tonightTotalVolumeY;
   
-  int mostRecentVolumeCol = 1;
-  int mostRecentVolumeRow = 4;
+  static int MOST_RECENT_VOLUME_COL = 1;
+  static int MOST_RECENT_VOLUME_ROW = 4;
   int mostRecentVolumeX;
   int mostRecentVolumeY;
   
@@ -106,17 +110,13 @@ import processing.serial.*;
   DisplaySkin lavender;
   DisplaySkin lowLight;  
   
-  static final String IMAGE_PATH="./ZeroStateImages/";
-  static final String IMAGE_SUFFIX = "_Zero-State";
-  static final String ICON_SUFFIX = "-Icon";
-  static final String IMAGE_TYPE = ".png";
 
 /****************************************************************/
 /********************         Setup         *********************/
 /****************************************************************/
   void setup () {
     // set the window size:
-    size(1024, 768); //TODO:: window size to small; cutting off the "most recent" info
+    size(1024, 768);
       
     println("Running...");
     
@@ -147,29 +147,29 @@ import processing.serial.*;
   
   //Use a col/row system to init the x/y values, where the cols and rows are 0-indexed
   void initPosValues() {
-    lifetimeTotalBeerCountX = colToX(lifeTimeTotalBeerCountCol);
-    lifetimeTotalBeerCountY = rowToY(lifetimeTotalBeerCountRow);
+    lifetimeTotalBeerCountX = colToX(LIFETIME_TOTAL_BEER_COUNT_COL);
+    lifetimeTotalBeerCountY = rowToY(LIFETIME_TOTAL_BEER_COUNT_ROW);
     
-    tonightTotalBeerCountX = colToX(tonightTotalBeerCountCol);
-    tonightTotalBeerCountY = rowToY(tonightTotalBeerCountRow);
+    tonightTotalBeerCountX = colToX(TONIGHT_TOTAL_BEER_COUNT_COL);
+    tonightTotalBeerCountY = rowToY(TONIGHT_TOTAL_BEER_COUNT_ROW);
     
-    lifetimeFastestBeerTimeX = colToX(lifetimeFastestBeerTimeCol);
-    lifetimeFastestBeerTimeY = rowToY(lifetimeFastestBeerTimeRow);
+    lifetimeFastestBeerTimeX = colToX(LIFETIME_FASTEST_BEER_TIME_COL);
+    lifetimeFastestBeerTimeY = rowToY(LIFETIME_FASTEST_BEER_TIME_ROW);
     
-    tonightFastestBeerTimeX = colToX(tonightFastestBeerTimeCol);
-    tonightFastestBeerTimeY = rowToY(tonightFastestBeerTimeRow);
+    tonightFastestBeerTimeX = colToX(TONIGHT_FASTEST_BEER_TIME_COL);
+    tonightFastestBeerTimeY = rowToY(TONIGHT_FASTEST_BEER_TIME_ROW);
     
-    mostRecentBeerTimeX = colToX(mostRecentBeerTimeCol);
-    mostRecentBeerTimeY = rowToY(mostRecentBeerTimeRow);
+    mostRecentBeerTimeX = colToX(MOST_RECENT_BEER_TIME_COL);
+    mostRecentBeerTimeY = rowToY(MOST_RECENT_BEER_TIME_ROW);
     
-    lifetimeTotalVolumeX = colToX(lifetimeTotalVolumeCol);
-    lifetimeTotalVolumeY = rowToY(lifetimeTotalVolumeRow);
+    lifetimeTotalVolumeX = colToX(LIFETIME_TOTAL_VOLUME_COL);
+    lifetimeTotalVolumeY = rowToY(LIFETIME_TOTAL_VOLUME_ROW);
     
-    tonightTotalVolumeX = colToX(tonightTotalVolumeCol);
-    tonightTotalVolumeY = rowToY(tonightTotalVolumeRow);
+    tonightTotalVolumeX = colToX(TONIGHT_TOTAL_VOLUME_COL);
+    tonightTotalVolumeY = rowToY(TONIGHT_TOTAL_VOLUME_ROW);
     
-    mostRecentVolumeX = colToX(mostRecentVolumeCol);
-    mostRecentVolumeY = rowToY(mostRecentVolumeRow);
+    mostRecentVolumeX = colToX(MOST_RECENT_VOLUME_COL);
+    mostRecentVolumeY = rowToY(MOST_RECENT_VOLUME_ROW);
     
   }
   
@@ -217,6 +217,7 @@ import processing.serial.*;
     image(mySkin.backgroundImage,0,0,1024,768);
     image(mySkin.foregroundImage,426.5,238.5); // 298.5 is halfway down, icon is 171x171
     drawStatusBoardTitle();
+    drawLabels();
   }
   
   void drawStatusBoardTitle() {
@@ -226,99 +227,124 @@ import processing.serial.*;
     fill(mySkin.fontColor);
     text("Solo Cup Saver", 426.5, 248);
     textFont(pencilPete,12);
-    //text("©", 475, 235); //TODO:: Remove this comment?
   }
   
-  //TODO these outline colors don't work with all themes
-  void drawBoxes() {
-    drawLabelBox(lifetimeTotalBeerCountX,lifetimeTotalBeerCountY,"Lifetime:","drinks",WHITE);
-    drawLabelBox(tonightTotalBeerCountX,tonightTotalBeerCountY,"Tonight:","drinks",WHITE);
-    drawLabelBox(lifetimeFastestBeerTimeX,lifetimeFastestBeerTimeY,"All-Time Record:","ms",YELLOW);
-    drawLabelBox(tonightFastestBeerTimeX,tonightFastestBeerTimeY,"Tonight's Record:","ms",YELLOW);
-    drawLabelBox(mostRecentBeerTimeX,mostRecentBeerTimeY,"Last drink:","ms",YELLOW); 
-    drawLabelBox(lifetimeTotalVolumeX,lifetimeTotalVolumeY,"All-time volume:","mL",PURPLE);
-    drawLabelBox(tonightTotalVolumeX,tonightTotalVolumeY,"Tonight's volume:","mL",PURPLE);    
-    drawLabelBox(mostRecentVolumeX,mostRecentVolumeY,"Last volume:","mL",PURPLE);  
+  void drawLabels() {
+    drawLabel(lifetimeTotalBeerCountX,lifetimeTotalBeerCountY,"Lifetime:");
+    drawLabel(tonightTotalBeerCountX,tonightTotalBeerCountY,"Tonight:");
+    drawLabel(lifetimeFastestBeerTimeX,lifetimeFastestBeerTimeY,"All-Time Record:");
+    drawLabel(tonightFastestBeerTimeX,tonightFastestBeerTimeY,"Tonight's Record:");
+    drawLabel(mostRecentBeerTimeX,mostRecentBeerTimeY,"Last drink:"); 
+    drawLabel(lifetimeTotalVolumeX,lifetimeTotalVolumeY,"All-time volume:");
+    drawLabel(tonightTotalVolumeX,tonightTotalVolumeY,"Tonight's volume:");    
+    drawLabel(mostRecentVolumeX,mostRecentVolumeY,"Last volume:");      
   }
-
+  
+  void updateValues() {
+    //lifetime count
+    lifetimeTotalBeerCount = convertToInt(inLifetimeTotalBeerCount);
+    
+    //tonight count
+    tonightTotalBeerCount = convertToInt(inTonightTotalBeerCount);
+    
+    //lifetime record
+    lifetimeFastestBeerTime = convertToInt(inLifetimeFastestBeerTime);
+   
+    //tonight record
+    tonightFastestBeerTime = convertToInt(inTonightFastestBeerTime);
+    
+    //most recent speed
+    mostRecentBeerTime = convertToInt(inMostRecentBeerTime);
+    
+    //lifetime volume
+    lifetimeTotalVolume = convertToFloat(inLifetimeTotalVolume);
+    
+    //tonight volume
+    tonightTotalVolume = convertToFloat(inTonightTotalVolume);
+    
+    //most recent volume
+    mostRecentVolume = convertToFloat(inMostRecentVolume);
+  }
 
 /****************************************************************/
 /********************    Dynamic Draw       *********************/
 /****************************************************************/
   void draw () {
-
-    //draw the boxes/background each time //TODO:: we could still gain performance here if we wanted to by only overwriting the value portion of the display, but I think we're hitting diminishing returns at that point
+    updateValues();
     drawBoxes();
-    
-    //lifetime count
-    lifetimeTotalBeerCount = convertToInt(inLifetimeTotalBeerCount);
-    drawStandardInfoBox(lifetimeTotalBeerCountX,lifetimeTotalBeerCountY,lifetimeTotalBeerCount);
-    
-    //tonight count
-    tonightTotalBeerCount = convertToInt(inTonightTotalBeerCount);
-    drawStandardInfoBox(tonightTotalBeerCountX,tonightTotalBeerCountY,tonightTotalBeerCount);
-    
-    //lifetime record //TODO:: handle case where there is no record with an "N/A"
-    lifetimeFastestBeerTime = convertToInt(inLifetimeFastestBeerTime);
-    drawStandardInfoBox(lifetimeFastestBeerTimeX,lifetimeFastestBeerTimeY,lifetimeFastestBeerTime);
-   
-    //tonight record
-    tonightFastestBeerTime = convertToInt(inTonightFastestBeerTime);
-    drawStandardInfoBox(tonightFastestBeerTimeX,tonightFastestBeerTimeY,tonightFastestBeerTime);
-    
-    //most recent speed
-    mostRecentBeerTime = convertToInt(inMostRecentBeerTime);
-    drawStandardInfoBox(mostRecentBeerTimeX,mostRecentBeerTimeY,mostRecentBeerTime);
-    
-    //lifetime volume
-    lifetimeTotalVolume = convertToFloat(inLifetimeTotalVolume);
-    drawStandardInfoBox(lifetimeTotalVolumeX,lifetimeTotalVolumeY,lifetimeTotalVolume);
-    
-    //tonight volume
-    tonightTotalVolume = convertToFloat(inTonightTotalVolume);
-    drawStandardInfoBox(tonightTotalVolumeX,tonightTotalVolumeY,tonightTotalVolume);
-    
-    //most recent volume
-    mostRecentVolume = convertToFloat(inMostRecentVolume);
-    drawStandardInfoBox(mostRecentVolumeX,mostRecentVolumeY, mostRecentVolume);
   }
- 
-  void drawLabelBox(int xPos, int yPos, String labelText, String unitText, int borderColor) {
-    fill(getChalkboardColor(),120);
-    stroke(borderColor); 
-    rect(xPos,yPos,boxWidth,boxHeight);
-    
+  
+  void drawBoxes() {
+    drawValueBox(lifetimeTotalBeerCountX,lifetimeTotalBeerCountY,"drinks",lifetimeTotalBeerCount,WHITE,false);
+    drawValueBox(tonightTotalBeerCountX,tonightTotalBeerCountY,"drinks",tonightTotalBeerCount,WHITE,false);
+    drawValueBox(lifetimeFastestBeerTimeX,lifetimeFastestBeerTimeY,"ms",lifetimeFastestBeerTime,CHALKBOARD_SHADOW,true);
+    drawValueBox(tonightFastestBeerTimeX,tonightFastestBeerTimeY,"ms",tonightFastestBeerTime,CHALKBOARD_SHADOW,true);
+    drawValueBox(mostRecentBeerTimeX,mostRecentBeerTimeY,"ms",mostRecentBeerTime,CHALKBOARD_SHADOW,true); 
+    drawValueBox(lifetimeTotalVolumeX,lifetimeTotalVolumeY,"mL",lifetimeTotalVolume,CHALKBOARD_SHADOW,false);
+    drawValueBox(tonightTotalVolumeX,tonightTotalVolumeY,"mL",tonightTotalVolume,CHALKBOARD_SHADOW,false);    
+    drawValueBox(mostRecentVolumeX,mostRecentVolumeY,"mL",mostRecentVolume,CHALKBOARD_SHADOW,false);  
+  }
+  
+  void drawLabel(int xPos, int yPos, String labelText) {
     //draw text
     textSize(45);
     fill(mySkin.fontColor);
-    text(labelText,xPos+boxLabelX,yPos+boxLabelY);
-    fill(WHITE); 
-    text(unitText,xPos+boxUnitX,yPos+boxUnitY);
+    text(labelText,xPos+BOX_LABEL_X,yPos+BOX_LABEL_Y);
   }
   
   /*
-   *  Draws a standard info box for an int value
-   *  Assumes: black fill, white outline, green value, textSize 45 
+   *  Draws a value box for an int value
+   *  Assumes: white text, textSize 45 
    */
-  void drawStandardInfoBox(int xPos, int yPos, int value) {
-
-    fill(WHITE); 
-    text(value,xPos+boxValueLineX,yPos+boxValueLineY);
+  void drawValueBox(int xPos, int yPos, String unitText, int value, color borderColor, boolean mustBeNonZero) {
+    drawBoxBackdrop(xPos,yPos,borderColor);
+    
+    if (mustBeNonZero) {      
+      text(getFormattedRecordValue(value),xPos+BOX_VALUE_X,yPos+BOX_VALUE_Y);
+      if (value > 0) {
+        text(unitText,xPos+BOX_UNIT_X,yPos+BOX_UNIT_Y);
+      }
+    }
+    else {
+      text(value,xPos+BOX_VALUE_X,yPos+BOX_VALUE_Y);
+      text(unitText,xPos+BOX_UNIT_X,yPos+BOX_UNIT_Y);
+    }
   }
   
   /*
-   *  Draws a standard info box for a float value //<>//
-   *  Assumes: black fill, white outline, green value, textSize 45 
+   *  Draws a value box for an float value
+   *  Assumes: white text, textSize 45 
    */
-  void drawStandardInfoBox(int xPos, int yPos, float value) {
-    fill(WHITE);
-    text(value,xPos+boxValueLineX,yPos+boxValueLineY);
+  void drawValueBox(int xPos, int yPos, String unitText, float value, color borderColor, boolean mustBeNonZero) {
+    drawBoxBackdrop(xPos,yPos,borderColor);
+    
+    if (mustBeNonZero) {
+      text(getFormattedRecordValue(value),xPos+BOX_VALUE_X,yPos+BOX_VALUE_Y);
+      if (value >0) {
+        text(unitText,xPos+BOX_UNIT_X,yPos+BOX_UNIT_Y);
+      }
+    }
+    else {
+      text(value,xPos+BOX_VALUE_X,yPos+BOX_VALUE_Y);
+      text(unitText,xPos+BOX_UNIT_X,yPos+BOX_UNIT_Y);
+    }
   }
   
-  //TODO:: Why is this here? Should this be a global variable with the other colors?
-  color getChalkboardColor() {
-    return color(47,79,79);
-  }
+  /*
+   * Helper function, draws the backdrop for the value box.
+   * Assumes that this is called right before drawing the values, as it sets up the text size and color.
+   */
+  void drawBoxBackdrop(int xPos, int yPos, color borderColor) {
+    fill(CHALKBOARD);
+    strokeWeight(6);
+    stroke(borderColor,5); 
+    rect(xPos,yPos+LABEL_OFFSET,BOX_WIDTH,BOX_HEIGHT);  
+    
+    //draw text
+    textSize(45);
+    fill(WHITE); 
+    
+  } //<>//
 
   /*
    * Converts the given string to an int
@@ -333,7 +359,7 @@ import processing.serial.*;
       newValue = int(inValue);
       //output debug message if enabled
       debugPrint(newValue);
-      debugPrint(delim);
+      debugPrint(DELIM);
       debugPrint(" ");
     }
     
@@ -353,7 +379,7 @@ import processing.serial.*;
       newValue = float(inValue);
       //output debug message if enabled
       debugPrint(newValue);
-      debugPrint(delim);
+      debugPrint(DELIM);
       debugPrint(" ");
     }
     
@@ -419,6 +445,11 @@ import processing.serial.*;
     int backgroundColor;
     int fontColor; 
     
+    static final String IMAGE_PATH="./ZeroStateImages/";
+    static final String IMAGE_SUFFIX = "_Zero-State";
+    static final String ICON_SUFFIX = "-Icon";
+    static final String IMAGE_TYPE = ".png";
+   
     /*
      * Constructor for DisplaySkin
      * Image urls are created automatically based off of the theme name 
@@ -437,3 +468,36 @@ import processing.serial.*;
       fontColor = inFontColor;
     }
   }
+  
+  /****************************************************************/
+  /*********************      Utility       ***********************/
+  /****************************************************************/
+   /*
+    * Provide a nicely formatted display value for the records stored in the arduino.
+    * Any integer passed in with a value of 0 or less is interpreted as no stored record.
+    * 
+    * @param value: the record value we may want to format (if a reserved/special value)
+    * @return: Returns a formatted record value
+    */  
+  String getFormattedRecordValue(int value) {
+    if (value <=0) {
+      return "No record on file!";
+    }
+    
+    return str(value); 
+}
+
+   /*
+    * Provide a nicely formatted display value for the records stored in the arduino.
+    * Any integer passed in with a value of 0 or less is interpreted as no stored record.
+    * 
+    * @param value: the record value we may want to format (if a reserved/special value)
+    * @return: Returns a formatted record value
+    */  
+  String getFormattedRecordValue(float value) {
+    if (value <=0) {
+      return "No record on file!";
+    }
+    
+    return str(value); 
+}
