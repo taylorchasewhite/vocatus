@@ -42,7 +42,6 @@ int bitsPerSecond;
 int changeDisplayPin;
 int flowPin;
 int resetButtonInPin;
-int resetButtonOutPin;
 int modeCycleButtonInPin;
 
 // Counts
@@ -129,11 +128,11 @@ void setup() {
   //Setup pins
   pinMode(flowPin, INPUT);           
   pinMode(resetButtonInPin, INPUT_PULLUP);
-  pinMode(resetButtonOutPin, OUTPUT);
   pinMode(modeCycleButtonInPin, INPUT_PULLUP);
 
   if(lcdModeEnabled) {
     lcd.begin(16,2);
+    lcd.clear();
     lcd.print("Running...");
   }
   
@@ -161,12 +160,14 @@ void loop() {
 
   //if the mode cycle button is pressed
   if (modeCycleButtonVal == LOW) {
+    debugPrintln("Mode cycle button pushed");
     cycleMode();
     printStatusReport(true);
   } 
 
   //if the reset button is pressed
   if (resetButtonVal == LOW) {
+    debugPrintln("Reset button pushed");
     totalReset();
     printStatusReport(true);
   } 
@@ -193,8 +194,7 @@ void Flow() {
 void initGlobals() {
   flowPin = 2;
   resetButtonInPin = 3;
-  resetButtonOutPin = 13;
-  modeCycleButtonInPin = 4;
+  modeCycleButtonInPin = 5;
   bitsPerSecond = 9600;   // initialize serial communication at 9600 bits per second:
   multiplier = 3.05; //TCW: 2.647  Chode: 3.05
 
@@ -220,8 +220,8 @@ void initGlobals() {
   mostRecentVolume = 0.0;
 
   //set flags for initial desired state
-  statusBoardEnabled = true; //set to true to have output sent via serial message to a statusboard (e.g. processing)
-  debugModeOn = false; //set to true to enable noisy output (e.g. messages sent to Serial Monitor)
+  statusBoardEnabled = false; //set to true to have output sent via serial message to a statusboard (e.g. processing)
+  debugModeOn = true; //set to true to enable noisy output (e.g. messages sent to Serial Monitor)
   lcdModeEnabled = true; //set to true to enable output to an LCD
 
   readFromStorage();
@@ -600,6 +600,9 @@ void cycleMode() {
  */
 void sendToLcd()
 {
+  //TODO:: Figure out LEDs
+  //TODO:: fix delay for more responsive button
+  //TODO:: fix gating for less sensitive button presses
   if(!shouldSendToLcd()) { return; } //short circuit this if we shouldn't be doing anything
 
   String toDisplayLabel = "";
@@ -612,26 +615,38 @@ void sendToLcd()
       toDisplayLabel = "Lifetime:";
       toDisplayValue = lifetimeTotalBeerCount;
       toDisplayUnit = "beers"; //TODO:: handle 1 drink
+      break;
     case TONIGHTCOUNT:
       toDisplayLabel = "Tonight:";
       toDisplayValue = tonightTotalBeerCount;
       toDisplayUnit = "beers"; //TODO:: handle 1 drink
+      break;
     case LIFESPEED:
       toDisplayLabel = "All-Time Record:";
       toDisplayValue = lifetimeFastestBeerTime;
       toDisplayUnit = "ms";
+      break;
     case TONIGHTSPEED:
       toDisplayLabel = "Tonight's Record";
       toDisplayValue = tonightFastestBeerTime;
       toDisplayUnit = "ms";
+      break;
     case LASTSPEED:
       toDisplayLabel = "Last Drink";
       toDisplayValue = mostRecentBeerTime;
       toDisplayUnit = "ms";
+      break;
     default:  //might as well have a saftey case //TODO:: do we want to remove this in the final product for less noisy errors?
       toDisplayLabel = "ERROR:";
       toDisplayValue = "BAD ENUM VALUE"; 
+      break;
   }
+
+  debugPrint("LCD Mode: ");
+  debugPrintln(lcdDisplayMode);
+
+  //clear the screen to a blank state
+  lcd.clear();
 
   //print the first line
   lcd.setCursor(0,0); 
