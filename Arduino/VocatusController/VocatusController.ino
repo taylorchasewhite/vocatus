@@ -30,9 +30,11 @@
     
   --------------------------
 */
-
+#include <Beer.h>
+#include <DisplayManager.h>
 #include <EEPROM.h>
 #include <LiquidCrystal.h>
+#include <StorageManager.h>
 
 /****************************************************************/
 /********************        Globals        *********************/
@@ -65,6 +67,10 @@ double flowRate;
 volatile int count;
 
 // Timing
+Beer lifetimeBestBeer;
+Beer tonightBestBeer;
+Beer lastBeer;
+
 unsigned long endTime;
 unsigned long startTime;
 int lastBeerDay;
@@ -98,6 +104,8 @@ enum DisplayMode {
 } lcdDisplayMode;
 
 // Display strings
+DisplayManager display;
+
 const String STR_BEER_TIMING          = "Time: ";
 const String STR_BEER_TIMING_UNIT     = " ms!";
 const String STR_PREV_COUNT           = "Prev: ";
@@ -109,6 +117,8 @@ const String STR_LIFETIME_VOLUME_UNIT = " ml";
 const String STR_TONIGHT              = " tonight";
 
 // Addresses
+StorageManager storage;
+
 const int ADDR_BEER_COUNT             = 0;
 const int ADDR_LIFETIME_VOLUME        = 1*sizeof(float);
 const int ADDR_FASTEST_BEER           = 2*sizeof(float);
