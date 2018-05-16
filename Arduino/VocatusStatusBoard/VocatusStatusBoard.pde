@@ -129,7 +129,7 @@ import processing.serial.*;
       // I know that the last port in the serial list on my computer is always my
       // Arduino, so I open Serial.list()[2].
       // Open whatever port is the one you're using.
-      myPort = new Serial(this, Serial.list()[2], 9600);
+      myPort = new Serial(this, Serial.list()[Serial.list().length-1], 9600);
   
       // don't generate a serialEvent() unless you get a newline character:
       myPort.bufferUntil('\n');
@@ -230,14 +230,14 @@ import processing.serial.*;
   }
   
   void drawLabels() {
-    drawLabel(lifetimeTotalBeerCountX,lifetimeTotalBeerCountY,"Lifetime:");
-    drawLabel(tonightTotalBeerCountX,tonightTotalBeerCountY,"Tonight:");
-    drawLabel(lifetimeFastestBeerTimeX,lifetimeFastestBeerTimeY,"All-Time Record:");
-    drawLabel(tonightFastestBeerTimeX,tonightFastestBeerTimeY,"Tonight's Record:");
-    drawLabel(mostRecentBeerTimeX,mostRecentBeerTimeY,"Last drink:"); 
-    drawLabel(lifetimeTotalVolumeX,lifetimeTotalVolumeY,"All-time volume:");
-    drawLabel(tonightTotalVolumeX,tonightTotalVolumeY,"Tonight's volume:");    
-    drawLabel(mostRecentVolumeX,mostRecentVolumeY,"Last volume:");      
+    drawLabel(lifetimeTotalBeerCountX,lifetimeTotalBeerCountY,"Lifetime");
+    drawLabel(tonightTotalBeerCountX,tonightTotalBeerCountY,"Tonight");
+    drawLabel(lifetimeFastestBeerTimeX,lifetimeFastestBeerTimeY,"All-Time Record");
+    drawLabel(tonightFastestBeerTimeX,tonightFastestBeerTimeY,"Tonight's Record");
+    drawLabel(mostRecentBeerTimeX,mostRecentBeerTimeY,"Last drink"); 
+    drawLabel(lifetimeTotalVolumeX,lifetimeTotalVolumeY,"All-time volume");
+    drawLabel(tonightTotalVolumeX,tonightTotalVolumeY,"Tonight's volume");    
+    drawLabel(mostRecentVolumeX,mostRecentVolumeY,"Last volume");      
   }
   
   void updateValues() {
