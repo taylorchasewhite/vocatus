@@ -26,16 +26,50 @@ StorageManager::StorageManager(int pin)
   _pin = pin;
 }
 
+//Getters and setters
+float StorageManager::lifetimeCount() { 
+  return readFloatData(ADDR_BEER_COUNT); 
+}
+void StorageManager::lifetimeCount(float count) { 
+  storeData(ADDR_BEER_COUNT,count); 
+}
+
+int StorageManager::lifetimeFastestTime() { 
+  return readFloatData(ADDR_FASTEST_BEER); 
+}
+void StorageManager::lifetimeFastestTime(float beerTime) { 
+  storeData(ADDR_FASTEST_BEER,time); 
+}
+
+float StorageManager::lifetimeVolume() { 
+  return readFloatData(ADDR_LIFETIME_VOLUME); 
+}
+
+void StorageManager::lifetimeVolume(float volume) { 
+  storeData(ADDR_LIFETIME_VOLUME,volume); 
+}
+
 /*
-  Get integer value held in permanent storage from EEPROM data.
-  
-  @param address integer value denoting where to read from
-  @return the integer value stored in the desired address.
+  Store all of the records we keep for the lifetime interval.
+  @param beerCount float the float value representing the number of beers drank.
 */
-int StorageManager::readIntegerData(int address) {
-  int value;
-  EEPROM.get(address, value);
-  return value;
+void StorageManager::setLifetimeValues(float beerCount,float beerTime, float beerVolume) {
+  lifetimeCount(beerCount);
+  lifetimeFastestTime(beerTime);
+  lifetimeVolume(beerVolume);
+}
+
+/*
+  Store all of the records we keep for the tonight interval.
+  @param beerCount float the float value representing the number of beers drank.
+  @param beerTime float the float value representing the number of beers drank.
+  @param beerVolume float the total number milliters drank
+*/
+void StorageManager::setTonightValues(float beerCount,float beerTime, float beerVolume) {
+  lifetimeCount(beerCount);
+  lifetimeFastestTime(beerTime);
+  lifetimeVolume(beerVolume);
+
 }
 
 /*
@@ -47,10 +81,18 @@ int StorageManager::readIntegerData(int address) {
 float StorageManager::readFloatData(int address) {
   float value;
   EEPROM.get(address,value);
-  /*Serial.print("Read ");
-  Serial.print(value);
-  Serial.print(" from ");
-  Serial.println(address);*/
+  return value;
+}
+
+/*
+  Get integer value held in permanent storage from EEPROM data.
+  
+  @param address integer value denoting where to read from
+  @return the integer value stored in the desired address.
+*/
+int StorageManager::readIntegerData(int address) {
+  int value;
+  EEPROM.get(address, value);
   return value;
 }
 
@@ -83,4 +125,25 @@ void StorageManager::storeData(int address, float value) {
   debugPrint(value);
   debugPrint(" stored at address ");
   debugPrintln(address);
+}
+
+/*
+  Reset all of the permanent storage in the Arduino. There's no going back once you do this.
+*/ 
+void StorageManager::reset() {
+  clearEEPROM();
+}
+
+/*
+  Only call this when resetting the device to factory settings!
+  Permanently erases all persistent data stored on the arduino or board.
+*/
+private void clearEEPROM() {
+  for (int i = 0 ; i < EEPROM.length() ; i++) {
+    if(EEPROM.read(i) != 0) {                   //skip already "empty" addresses
+    
+      EEPROM.write(i, 0);                       //write 0 to address i
+    }
+  }
+  debugPrintln("EEPROM erased");
 }

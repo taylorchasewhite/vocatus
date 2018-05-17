@@ -17,9 +17,22 @@ class StorageManager
 	float readFloatData(int address);
 	int readIntegerData(int address);
 
+	float StorageManager::getLifetimeCount();
+	void StorageManager::setLifetimeCount(float count);
+
+	int StorageManager::getLifetimeFastestTime();
+	void StorageManager::setLifetimeFastestTime(float beerTime);
+
+	float StorageManager::getLifetimeVolume();
+	void StorageManager::storeLifetimeTotalVolume(float volume);
+
+	void StorageManager::storeAllValues(float beerCount,float beerTime, float beerVolume);
 	void StorageManager::storeData(int address, float value);
 	void StorageManager::storeData(int address, int value);
+	void StorageManager::reset();
+
   private:
     int _pin;
+		void StorageManager::clearEEPROM();
 };
 #endif

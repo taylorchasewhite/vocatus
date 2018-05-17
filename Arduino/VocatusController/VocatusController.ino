@@ -290,9 +290,9 @@ int getBeerCompletionDuration() {
 void setBeerCompletionDuration(int startTime, int endTime) {
   mostRecentBeerTime = endTime-startTime;
   //TODO:: we should be using globals unless there's a reason to read from memory
-  if ((mostRecentBeerTime < readLifetimeFastestBeerTime()) || (readLifetimeFastestBeerTime()<=0)) {
+  if ((mostRecentBeerTime < storage.getLifetimeFastestBeerTime()) || (storage.getLifetimeFastestBeerTime()<=0)) {
     lifetimeFastestBeerTime = mostRecentBeerTime;
-    storeLifetimeFastestBeerTime();
+    storage.setLifetimeFastestTime();
   }
 }
 
@@ -396,9 +396,9 @@ boolean shouldPrintBeerTime() {
 */
 void printStatusReport(bool readFromStorage) {
   if (readFromStorage) {
-    debugPrintln(STR_LIFETIME_COUNT + readLifetimeTotalBeerCount());
-    debugPrintln(STR_LIFETIME_VOLUME + readLifetimeTotalVolume() + STR_LIFETIME_VOLUME_UNIT);
-    debugPrintln(STR_FASTEST_TIME + readLifetimeFastestBeerTime() + STR_BEER_TIMING_UNIT);
+    debugPrintln(STR_LIFETIME_COUNT + storage.getLifetimeBeerCount());
+    debugPrintln(STR_LIFETIME_VOLUME + storage.getLifetimeVolume() + STR_LIFETIME_VOLUME_UNIT);
+    debugPrintln(STR_FASTEST_TIME + storage.storage.getLifetimeFastestBeerTime() + STR_BEER_TIMING_UNIT);
   }
   else {
     debugPrintln(STR_BEER_TIMING + getBeerCompletionDuration() + STR_BEER_TIMING_UNIT);
@@ -414,112 +414,20 @@ void printStatusReport(bool readFromStorage) {
 /********************        Storage        *********************/
 /****************************************************************/
 /*
-  Get integer value held in permanent storage from EEPROM data.
+  Get all of the values we want at startup held in permanent storage from EEPROM data.
   
-  @param address integer value denoting where to read from
   @return the integer value stored in the desired address.
 */
-int readIntegerData(int address) {
-  int value;
-  EEPROM.get(address, value);
-  return value;
-}
-
-/*
-  Get float value held in permanent storage from EEPROM data.
-  
-  @param address integer value denoting where to read from
-  @return the float value stored in the desired address.
-*/
-float readFloatData(int address) {
-  float value;
-  EEPROM.get(address,value);
-  /*Serial.print("Read ");
-  Serial.print(value);
-  Serial.print(" from ");
-  Serial.println(address);*/
-  return value;
-}
-
-/*
-  Store integer value into permanent storage at EEPROM.
-  NOTE: There are a limited number of times this can be called, 
-    try to store to addresses as few times as possible.
-  
-  @param address integer value denoting where to store the data to
-  @param value integer value you desire to store into EEPROM.
-*/
-void storeData(int address, int value) {
-  float floatVal  = value;
-  EEPROM.put(address,floatVal);
-  debugPrint(floatVal);
-  debugPrint(" stored at address ");
-  debugPrintln(address);
-}
-
-/*
-  Store float value into permanent storage at EEPROM.
-  NOTE: There are a limited number of times this can be called, 
-    try to store to addresses as few times as possible.
-  
-  @param address integer value denoting where to store the data to
-  @param value float value you desire to store into EEPROM.
-*/
-void storeData(int address, float value) {
-  EEPROM.put(address,value);
-  debugPrint(value);
-  debugPrint(" stored at address ");
-  debugPrintln(address);
-}
-
-//Getters and setters
-float readLifetimeTotalBeerCount() { 
-  return readFloatData(ADDR_BEER_COUNT); 
-}
-void storeLifetimeTotalBeerCount() { 
-  storeData(ADDR_BEER_COUNT,lifetimeTotalBeerCount); 
-}
-
-int readLifetimeFastestBeerTime() { 
-  return readFloatData(ADDR_FASTEST_BEER); 
-}
-void storeLifetimeFastestBeerTime() { 
-  storeData(ADDR_FASTEST_BEER,lifetimeFastestBeerTime); 
-}
-
-float readLifetimeTotalVolume() { 
-  return readFloatData(ADDR_LIFETIME_VOLUME); 
-}
-
-void storeLifetimeTotalVolume() { 
-  storeData(ADDR_LIFETIME_VOLUME,lifetimeTotalVolume); 
-}
-
-
 void readFromStorage() {
-  lifetimeTotalBeerCount = readLifetimeTotalBeerCount();
-  lifetimeFastestBeerTime = readLifetimeFastestBeerTime();
-  lifetimeTotalVolume=readLifetimeTotalVolume();
+  lifetimeTotalBeerCount = storage.getLifetimeCount();
+  lifetimeFastestBeerTime = storage.getLifetimeFastestTime();
+  lifetimeTotalVolume=storage.getLifetimeVolume();
 }
 
 void storeAllValues() {
-  storeLifetimeTotalBeerCount();
-  storeLifetimeFastestBeerTime();
-  storeLifetimeTotalVolume();
-}
-
-/*
-  Only call this when resetting the device to factory settings!
-  Permanently erases all persistent data stored on the arduino or board.
-*/
-void clearEEPROM() {
-  for (int i = 0 ; i < EEPROM.length() ; i++) {
-    if(EEPROM.read(i) != 0) {                   //skip already "empty" addresses
-    
-      EEPROM.write(i, 0);                       //write 0 to address i
-    }
-  }
-  debugPrintln("EEPROM erased");
+  storage.setLifetimeCount();
+  storage.setLifetimeFastestTime();
+  storage.setLifetimeVolume();
 }
 
 /****************************************************************/
