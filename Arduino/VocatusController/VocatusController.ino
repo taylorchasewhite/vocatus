@@ -71,6 +71,9 @@ Beer lifetimeBestBeer;
 Beer tonightBestBeer;
 Beer lastBeer;
 
+Record lifetime;
+Record tonight;
+
 unsigned long endTime;
 unsigned long startTime;
 int lastBeerDay;
@@ -396,9 +399,9 @@ boolean shouldPrintBeerTime() {
 */
 void printStatusReport(bool readFromStorage) {
   if (readFromStorage) {
-    debugPrintln(STR_LIFETIME_COUNT + storage.getLifetimeBeerCount());
-    debugPrintln(STR_LIFETIME_VOLUME + storage.getLifetimeVolume() + STR_LIFETIME_VOLUME_UNIT);
-    debugPrintln(STR_FASTEST_TIME + storage.storage.getLifetimeFastestBeerTime() + STR_BEER_TIMING_UNIT);
+    debugPrintln(STR_LIFETIME_COUNT + storage.lifetimeCount());
+    debugPrintln(STR_LIFETIME_VOLUME + storage.lifetimeVolume() + STR_LIFETIME_VOLUME_UNIT);
+    debugPrintln(STR_FASTEST_TIME + storage.lifetimeFastestTime() + STR_BEER_TIMING_UNIT);
   }
   else {
     debugPrintln(STR_BEER_TIMING + getBeerCompletionDuration() + STR_BEER_TIMING_UNIT);
@@ -419,15 +422,16 @@ void printStatusReport(bool readFromStorage) {
   @return the integer value stored in the desired address.
 */
 void readFromStorage() {
-  lifetimeTotalBeerCount = storage.getLifetimeCount();
-  lifetimeFastestBeerTime = storage.getLifetimeFastestTime();
-  lifetimeTotalVolume=storage.getLifetimeVolume();
+  lifetime = new Record();
+  lifetime.count(storage.lifetimeCount());
+  lifetime.volume(storage.lifetimeVolume());
+  lifetime.time(storage.lifetimeFastestTime());
 }
 
 void storeAllValues() {
-  storage.setLifetimeCount();
-  storage.setLifetimeFastestTime();
-  storage.setLifetimeVolume();
+  storage.lifetimeCount(lifetimeTotalBeerCount);
+  storage.lifetimeFastestTime(lifetimeFastestBeerTime);
+  storage.lifetimeVolume(lifetimeTotalVolume);
 }
 
 /****************************************************************/
