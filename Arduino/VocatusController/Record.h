@@ -15,7 +15,7 @@ class Record
   public:
   	Record(RecordType type);
 
-	void addBeer(int startTime, int endTime);
+	void addBeer(int startTime, int endTime, float volume);
 
 	int count();
 	void count(int count);

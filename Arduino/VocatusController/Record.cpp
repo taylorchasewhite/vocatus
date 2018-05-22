@@ -28,8 +28,16 @@ Record::Record(enum type) {
 
 }
 
-void Record::addBeer(int startTime, int endTime) {
+void Record::addBeer(int startTime, int endTime, float volume) {
+	addCount();
+	addVolume(volume):
+	if (startTime-endTime < _fastestBeer.timeToFinish()) {
+		
+	}
+}
 
+void Record::addCount() {
+	_count++;
 }
 
 int Record::count() {
@@ -48,10 +56,12 @@ void Record::endTime(int endTime) {
 }
 
 float Record::fastestTime() { // return the completion duration of the fastest beer
-	
+	return _fastestBeer.timeToFinish();
 } 			
 
-	Beer fastestBeer(); 			// Same as fastest time but returns the Beer record.
+Beer Record::fastestBeer() { // Same as fastest time but returns the Beer record.
+	return _fastestBeer;
+} 		
 	  
 int Record::startTime() {
 	return _startTime;

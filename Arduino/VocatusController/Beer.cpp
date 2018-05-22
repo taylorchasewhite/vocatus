@@ -33,10 +33,10 @@ void Beer::startTime(startTime) { _startTime = startTime; }
 
 int Beer::flowRate() {
 	int flowRate=-1;
-	flowRate=_totalVolume/completionDuration();
+	flowRate=_totalVolume/timeToFinish();
 
 	return flowRate;
 }
-int Beer::completionDuration() {
+int Beer::timeToFinish() {
 
 }

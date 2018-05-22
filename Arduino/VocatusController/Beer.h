@@ -21,7 +21,7 @@ class Beer
 	void startTime(startTime);
 	
 	int flowRate();
-	int completionDuration();
+	int timeToFinish();
 
   private:
     int _beerDay;

@@ -308,12 +308,11 @@ boolean isNewDay() {
 /***************** Statistics and State Change ******************/
 /****************************************************************/
 void recordBeerEnd() {
-  lifetimeTotalBeerCount++;
-  tonightTotalBeerCount++;
-
   mostRecentVolume=count*multiplier;
-  tonightTotalVolume+=mostRecentVolume;
-  lifetimeTotalVolume+=mostRecentVolume;
+
+
+  lifetime.addBeer(startTime,endTime,mostRecentVolume);
+  tonight.addBeer(startTime,endTime,mostRecentVolume);
   
   storeAllValues();
   
