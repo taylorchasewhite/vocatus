@@ -51,15 +51,8 @@ int modeCycleButtonInPin;
 int currCount;
 int prevCount;
 
-int lifetimeTotalBeerCount;
-int tonightTotalBeerCount;
-
-int lifetimeFastestBeerTime;
-int tonightFastestBeerTime;
 int mostRecentBeerTime;  // The time it took in ms to finish the last beer
 
-float lifetimeTotalVolume;
-float tonightTotalVolume;
 float mostRecentVolume;
 float multiplier;
 
@@ -227,15 +220,11 @@ void initGlobals() {
   lcdDisplayMode = LIFECOUNT;
 
   //initialize all tracking variables to 0 in case they are not read from storage
-  lifetimeTotalBeerCount = 0;
-  tonightTotalBeerCount = 0;
 
-  lifetimeFastestBeerTime = 0;
-  tonightFastestBeerTime = 0;
+  tonight = new Record();
+  lifetime = new Record();
+  
   mostRecentBeerTime = 0;
-
-  lifetimeTotalVolume = 0.0;
-  tonightTotalVolume = 0.0;
   mostRecentVolume = 0.0;
 
   //set flags for initial desired state
@@ -342,9 +331,7 @@ void recordBeerEnd() {
   This function will reset all of the relevant variables scoring beer statistics for a given night.
 */
 void resetTonightCounts() {
-  tonightTotalBeerCount=0;
-  tonightTotalVolume=0;
-  tonightFastestBeerTime=0;
+  tonight = new Record();
 }
 
 /*
@@ -367,15 +354,10 @@ void totalReset() {
   prevCount=0;
   resetTiming();
   
-  lifetimeTotalBeerCount = 0;
-  tonightTotalBeerCount = 0;
-
-  lifetimeFastestBeerTime = 0;
-  tonightFastestBeerTime = 0;
+  lifetime = new Record();
+  tonight = new Record();
+  
   mostRecentBeerTime = 0;
-
-  lifetimeTotalVolume = 0.0;
-  tonightTotalVolume = 0.0;
   mostRecentVolume = 0.0;
 
   storeAllValues();
@@ -466,24 +448,24 @@ void debugPrintln(double debugText) { if(shouldPrint()){ Serial.println(debugTex
  * 
  * @return a semicolon delimited string containing the information to send as output
  */
-String buildComString(int lifetimeTotalBeerCountVar,int tonightTotalBeerCountVar,int lifetimeFastestBeerTimeVar,int tonightFastestBeerTimeVar,int mostRecentBeerTimeVar, float lifetimeTotalVolumeVar, float tonightTotalVolumVar, float mostRecentVolumeVar)
+String buildComString(Record lifetimeRecord, Record tonightRecord,int mostRecentBeerTimeVar, float mostRecentVolumeVar)
 {
   String toSend = "";
   String delim = ";";
   
-  toSend += lifetimeTotalBeerCountVar;
+  toSend += lifetimeRecord.count();
   toSend += delim;
-  toSend += tonightTotalBeerCountVar;
+  toSend += tonightRecord.count();
   toSend += delim;
-  toSend += lifetimeFastestBeerTimeVar;
+  toSend += lifetimeRecord.fastestTime();
   toSend += delim;
-  toSend += tonightFastestBeerTimeVar;
+  toSend += tonightRecord.fastestTime();
   toSend += delim;
   toSend += mostRecentBeerTimeVar;
   toSend += delim;
-  toSend += lifetimeTotalVolumeVar;
+  toSend += lifetimeRecord.volume();
   toSend += delim;
-  toSend += tonightTotalVolumVar;
+  toSend += lifetimeRecord.volume();
   toSend += delim;
   toSend += mostRecentVolumeVar;
   toSend += delim;  
@@ -497,8 +479,7 @@ String buildComString(int lifetimeTotalBeerCountVar,int tonightTotalBeerCountVar
 void sendToStatusBoard()
 {
   if(statusBoardEnabled) { 
-    String comString = buildComString(lifetimeTotalBeerCount,tonightTotalBeerCount,lifetimeFastestBeerTime,tonightFastestBeerTime,mostRecentBeerTime,lifetimeTotalVolume,tonightTotalVolume,mostRecentVolume); 
-    //TODO modify this new string builder based on TCW's variables
+    String comString = buildComString(lifetime,tonight,mostRecentBeerTime,mostRecentVolume); 
     Serial.println(comString);  
   }
 }
@@ -542,19 +523,19 @@ void sendToLcd()
   switch(lcdDisplayMode) {
     case LIFECOUNT:
       toDisplayLabel = "Lifetime:";
-      toDisplayValue = lifetimeTotalBeerCount;
+      toDisplayValue = lifetime.count();
       toDisplayUnit = "beers"; //TODO:: handle 1 drink
     case TONIGHTCOUNT:
       toDisplayLabel = "Tonight:";
-      toDisplayValue = tonightTotalBeerCount;
+      toDisplayValue = tonight.count();
       toDisplayUnit = "beers"; //TODO:: handle 1 drink
     case LIFESPEED:
       toDisplayLabel = "All-Time Record:";
-      toDisplayValue = lifetimeFastestBeerTime;
+      toDisplayValue = lifetime.fastestTime();
       toDisplayUnit = "ms";
     case TONIGHTSPEED:
       toDisplayLabel = "Tonight's Record";
-      toDisplayValue = tonightFastestBeerTime;
+      toDisplayValue = tonight.fastestTime();
       toDisplayUnit = "ms";
     case LASTSPEED:
       toDisplayLabel = "Last Drink";

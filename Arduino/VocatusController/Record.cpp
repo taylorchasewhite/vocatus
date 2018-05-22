@@ -28,18 +28,58 @@ Record::Record(enum type) {
 
 }
 
-int Beer::endTime() { return _endTime; }
-void Beer::endTime(int endTime) { _endTime = endTime; }
-	
-int Beer::startTime() { return _startTime; }
-void Beer::startTime(startTime) { _startTime = startTime; }
+void Record::addBeer(int startTime, int endTime) {
 
-int Beer::flowRate() {
-	int flowRate=-1;
-	flowRate=_totalVolume/completionDuration();
-
-	return flowRate;
 }
-int Beer::completionDuration() {
 
+int Record::count() {
+	return _count;
+}
+
+void Record::count(int count) {
+	_coount=count;
+}
+	
+int Record::endTime() {
+	return _endTime;
+}
+void Record::endTime(int endTime) {
+	_endTime=endTime;
+}
+
+float Record::fastestTime() { // return the completion duration of the fastest beer
+	
+} 			
+
+	Beer fastestBeer(); 			// Same as fastest time but returns the Beer record.
+	  
+int Record::startTime() {
+	return _startTime;
+}
+void Record::startTime(startTime) {
+	_startTime=startTime;
+}
+	
+/*
+	Return what the average flow rate has been over the course of this record.
+	This should be the calculation of:
+		= Total volume consumed/# of minutes spent consuming.
+	TODO: Implement
+*/ 
+int Record::flowRate() {
+
+}
+
+/*
+	Get back the total volume of liquid consumed during this record's lifetime.
+*/
+float Record::volume() {
+	return _volume;
+}
+
+/*
+	Given a float volume value, add it to this record's total volume
+*/
+void Record::addVolume(float volume) {
+	_volume += volume;
 }

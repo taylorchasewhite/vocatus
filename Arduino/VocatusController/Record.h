@@ -14,25 +14,31 @@ class Record
 {
   public:
   	Record(RecordType type);
+
+	void addBeer(int startTime, int endTime);
+
+	int count();
+	void count(int count);
 	
   	int endTime();
   	void endTime(int endTime);
+
+	float fastestTime(); 			// return the completion duration of the fastest beer
+	Beer fastestBeer(); 			// Same as fastest time but returns the Beer record.
 	  
 	int startTime();
 	void startTime(startTime);
 	
 	int flowRate();
-	int completionDuration();
 
-	float totalVolume();			// what's the total volume consumed for this record's lifetime
-	float fastestTime(); 			// return the completion duration of the fastest beer
-	Beer fastestBeer(); 			// Same as fastest time but returns the Beer record.
+	float volume();			// what's the total volume consumed for this record's lifetime
+	void addVolume(float volume);
 
   private:
-    int _volume;
 	int _count;
 	Beer _fastestBeer;
+    int _endTime;
 	int _startTime;
-	int _totalVolume;
+	int _volume;
 };
 #endif
