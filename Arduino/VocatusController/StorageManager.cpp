@@ -59,12 +59,12 @@ void StorageManager::setLifetimeValues(float beerCount,float beerTime, float bee
   lifetimeVolume(beerVolume);
 }
 
-/*
-  Store all of the records we keep for the tonight interval.
-  @param beerCount float the float value representing the number of beers drank.
-  @param beerTime float the float value representing the number of beers drank.
-  @param beerVolume float the total number milliters drank
-*/
+/**
+ * Store all of the records we keep for the tonight interval.
+ * @param beerCount float the float value representing the number of beers drank.
+ * @param beerTime float the float value representing the number of beers drank.
+ * @param beerVolume float the total number milliters drank
+ */
 void StorageManager::setTonightValues(float beerCount,float beerTime, float beerVolume) {
   lifetimeCount(beerCount);
   lifetimeFastestTime(beerTime);
@@ -72,38 +72,38 @@ void StorageManager::setTonightValues(float beerCount,float beerTime, float beer
 
 }
 
-/*
-  Get float value held in permanent storage from EEPROM data.
-  
-  @param address integer value denoting where to read from
-  @return the float value stored in the desired address.
-*/
+/**
+ * Get float value held in permanent storage from EEPROM data.
+ * 
+ * @param address integer value denoting where to read from
+ * @return the float value stored in the desired address
+ */
 float StorageManager::readFloatData(int address) {
   float value;
   EEPROM.get(address,value);
   return value;
 }
 
-/*
-  Get integer value held in permanent storage from EEPROM data.
-  
-  @param address integer value denoting where to read from
-  @return the integer value stored in the desired address.
-*/
+/**
+ * Get integer value held in permanent storage from EEPROM data.
+ * 
+ * @param address integer value denoting where to read from
+ * @return the integer value stored in the desired address.
+ */
 int StorageManager::readIntegerData(int address) {
   int value;
   EEPROM.get(address, value);
   return value;
 }
 
-/*
-  Store integer value into permanent storage at EEPROM.
-  NOTE: There are a limited number of times this can be called, 
-    try to store to addresses as few times as possible.
-  
-  @param address integer value denoting where to store the data to
-  @param value integer value you desire to store into EEPROM.
-*/
+/**
+ * Store integer value into permanent storage at EEPROM.
+ * NOTE: There are a limited number of times this can be called, 
+ * try to store to addresses as few times as possible.
+ * 
+ * @param address integer value denoting where to store the data to
+ * @param value integer value you desire to store into EEPROM
+ */
 void StorageManager::storeData(int address, int value) {
   float floatVal  = value;
   EEPROM.put(address,floatVal);
@@ -112,14 +112,14 @@ void StorageManager::storeData(int address, int value) {
   debugPrintln(address);
 }
 
-/*
-  Store float value into permanent storage at EEPROM.
-  NOTE: There are a limited number of times this can be called, 
-    try to store to addresses as few times as possible.
-  
-  @param address integer value denoting where to store the data to
-  @param value float value you desire to store into EEPROM.
-*/
+/**
+ * Store float value into permanent storage at EEPROM.
+ * NOTE: There are a limited number of times this can be called, 
+ * try to store to addresses as few times as possible.
+ * 
+ * @param address integer value denoting where to store the data to
+ * @param value float value you desire to store into EEPROM.
+ */
 void StorageManager::storeData(int address, float value) {
   EEPROM.put(address,value);
   debugPrint(value);
@@ -127,17 +127,17 @@ void StorageManager::storeData(int address, float value) {
   debugPrintln(address);
 }
 
-/*
-  Reset all of the permanent storage in the Arduino. There's no going back once you do this.
-*/ 
+/**
+ * Reset all of the permanent storage in the Arduino. There's no going back once you do this.
+ */ 
 void StorageManager::reset() {
   clearEEPROM();
 }
 
-/*
-  Only call this when resetting the device to factory settings!
-  Permanently erases all persistent data stored on the arduino or board.
-*/
+/**
+ * Only call this when resetting the device to factory settings!
+ * Permanently erases all persistent data stored on the arduino or board.
+ */
 private void clearEEPROM() {
   for (int i = 0 ; i < EEPROM.length() ; i++) {
     if(EEPROM.read(i) != 0) {                   //skip already "empty" addresses

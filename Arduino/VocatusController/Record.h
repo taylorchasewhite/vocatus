@@ -23,6 +23,8 @@ class Record
   	int endTime();
   	void endTime(int endTime);
 
+	bool Record::evalAndUpdateFastestBeer();
+
 	float fastestTime(); 			// return the completion duration of the fastest beer
 	Beer fastestBeer(); 			// Same as fastest time but returns the Beer record.
 	  

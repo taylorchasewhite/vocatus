@@ -25,18 +25,49 @@ Beer::Beer(int pin)
   _pin = pin;
 }
 
+/**
+ * Get the last instant beer consumption was recorded
+ * @TODO should this be a datetime?
+ * @return int The last instant beer was consumed
+ */
 int Beer::endTime() { return _endTime; }
-void Beer::endTime(int endTime) { _endTime = endTime; }
-	
-int Beer::startTime() { return _startTime; }
-void Beer::startTime(startTime) { _startTime = startTime; }
 
+/**
+ * Set the last instant this beer's volume was consumed. 
+ * Setting this can happen repeatedly as the hall effect sensor measures input and outputs to the microcontroller.
+ * If the last instant was significantly long in the past, the caller can determine this beer completed.
+ * @TODO Should this be a datetime?
+ */
+void Beer::endTime(int endTime) { _endTime = endTime; }
+
+/**
+ * Get the first instant beer consumption was recorded.
+ * @TODO should this be a datetime?
+ * @return int The first instant beer was consumed
+ */
+int Beer::startTime() { return _startTime; }
+
+/**
+ * Set the first instant this beer's volume was consumed. This should be set in the constructor only.
+ *
+ * @TODO Should this be a datetime?
+ */
+void Beer::startTime(int startTime) { _startTime = startTime; }
+
+/**
+ * Get the rate at which this beer was consumed by the drinker.
+ * @return int the measurement of how much beer (mL) was drank per second (s).
+ */
 int Beer::flowRate() {
 	int flowRate=-1;
 	flowRate=_totalVolume/timeToFinish();
 
 	return flowRate;
 }
+/**
+ * How much time did this beer take to be finished?
+ * @return int The amount of time from the first drop to the last drop of beer consumption
+ */
 int Beer::timeToFinish() {
-
+	return _endTime-_startTime;
 }
