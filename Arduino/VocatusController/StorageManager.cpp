@@ -40,6 +40,13 @@ int StorageManager::lifetimeFastestTime() {
 void StorageManager::lifetimeFastestTime(float beerTime) { 
   storeData(ADDR_FASTEST_BEER,time); 
 }
+/**
+ * Return the lifetime Record object that is stored in storage
+ * @return Record the lifetime record object containing information on volume, speed, etc.
+ */
+Record StorageManager::lifetimeRecord() {
+  return new Record(lifetimeCount(),lifetimeVolume(),lifetimeFastestTime())
+}
 
 float StorageManager::lifetimeVolume() { 
   return readFloatData(ADDR_LIFETIME_VOLUME); 
@@ -138,7 +145,7 @@ void StorageManager::reset() {
  * Only call this when resetting the device to factory settings!
  * Permanently erases all persistent data stored on the arduino or board.
  */
-private void clearEEPROM() {
+void StorageManager::clearEEPROM() {
   for (int i = 0 ; i < EEPROM.length() ; i++) {
     if(EEPROM.read(i) != 0) {                   //skip already "empty" addresses
     

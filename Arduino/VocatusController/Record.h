@@ -14,6 +14,7 @@ class Record
 {
   public:
   	Record(RecordType type);
+	Record(int count, float volume, int fastestTime,int startTime);
 
 	void addBeer(int startTime, int endTime, float volume);
 

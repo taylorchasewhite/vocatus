@@ -8,21 +8,23 @@
  * 
  */
 #include "Arduino.h"
-#include "StorageManager.h"
-
-// Addresses
-const int ADDR_BEER_COUNT             = 0;
-const int ADDR_LIFETIME_VOLUME        = 1*sizeof(float);
-const int ADDR_FASTEST_BEER           = 2*sizeof(float);
-
-const int ADDR_TONIGHT_FASTEST_BEER   = 10*sizeof(float);
-const int ADDR_TONIGHT_BEER_COUNT     = 11*sizeof(float);
-const int ADDR_TONIGHT_VOLUME         = 12*sizeof(float);
 
 enum Type {
 	LifeTime,
 	Tonight
 } recordType;
+
+/**
+ * Initialize a new record with just count,volume and fastestTime.
+ * @param count int the number of beers this record should have
+ */
+Record::Record(int count, float volume, int fastestTime) {
+	count(count);
+	addVolume(volume);
+	_fastestTime=fastestTime;
+	//startTime(startTime);
+}
+
 
 Record::Record(enum type) {
 
