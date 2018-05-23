@@ -45,7 +45,7 @@ void StorageManager::lifetimeFastestTime(float beerTime) {
  * @return Record the lifetime record object containing information on volume, speed, etc.
  */
 Record StorageManager::lifetimeRecord() {
-  return new Record(lifetimeCount(),lifetimeVolume(),lifetimeFastestTime())
+  return new Record(lifetimeCount(),lifetimeVolume(),lifetimeFastestTime());
 }
 
 float StorageManager::lifetimeVolume() { 
