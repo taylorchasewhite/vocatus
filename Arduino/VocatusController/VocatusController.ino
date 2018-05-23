@@ -182,7 +182,7 @@ void loop() {
   
 }
 
-/*
+/**
  * The method to run each time we recieve input from the device
  */
 void Flow() {
@@ -198,7 +198,7 @@ void Flow() {
 /****************************************************************/
 /********************      Initialize       *********************/
 /****************************************************************/
-/*
+/**
  * Set starting values for globals
  */
 void initGlobals() {
@@ -247,34 +247,33 @@ void initializeDisplay() {
 /****************************************************************/
 /********************        Timing         *********************/
 /****************************************************************/
-/*
-  Called the first time the hall effect sensor has been triggered since the last beer session completed.
-*/
-
+/**
+ * Called the first time the hall effect sensor has been triggered since the last beer session completed.
+ */
 void beerStart() {
   startTime=millis();
 }
 
-/*
-  Called every time the hall effect sensor fires. Represents another ~2.65 ml have been drank.
-*/
+/**
+ * Called every time the hall effect sensor fires. Represents another ~2.65 ml have been drank.
+ */
 void beerPulse() {
   endTime=millis();
 }
 
-/*
-  Reset the start and end time for a beer that will be drank and judged.
-*/
+/**
+ * Reset the start and end time for a beer that will be drank and judged.
+ */
 void resetTiming() {
   startTime=0;
   endTime=0;
 }
 
-/*
-  Get the time it took to complete the most recent beer.
- 
-  @return How long it took to complete the last beer.
-*/
+/**
+ * Get the time it took to complete the most recent beer.
+ * 
+ * @return How long it took to complete the last beer.
+ */
 int getBeerCompletionDuration() {
   return mostRecentBeerTime;
 }
@@ -288,18 +287,18 @@ void setBeerCompletionDuration(int startTime, int endTime) {
   }
 }
 
-/*
-  Denote the completion of a new beer at the current instant.
-*/
+/**
+ * Denote the completion of a new beer at the current instant.
+ */
 void setBeerCompletionDateTime() {
   //currentBeerCompletionInstant=now(); @TODO: Now isn't working/validating
 }
 
-/*
-  Determines whether or not the completion of the last beer represents a new day.
-  
-  @return Is the first beer of new day
-*/
+/**
+ * Determines whether or not the completion of the last beer represents a new day.
+ * 
+ * @return Is the first beer of new day
+ */
 boolean isNewDay() {
   return (lastBeerCompletionInstant < (currentBeerCompletionInstant-SECONDS_IN_DAY));
 }
@@ -307,9 +306,11 @@ boolean isNewDay() {
 /****************************************************************/
 /***************** Statistics and State Change ******************/
 /****************************************************************/
+/**
+ * Record that a beer has been completed, update any current records, storage and display to the LCD
+ */
 void recordBeerEnd() {
   mostRecentVolume=count*multiplier;
-
 
   lifetime.addBeer(startTime,endTime,mostRecentVolume);
   tonight.addBeer(startTime,endTime,mostRecentVolume);
@@ -325,17 +326,17 @@ void recordBeerEnd() {
   }
 }
 
-/*
-  Call if more than 12 hours have passed since the last time a beer was drank. 
-  This function will reset all of the relevant variables scoring beer statistics for a given night.
-*/
+/**
+ * Call if more than 12 hours have passed since the last time a beer was drank. 
+ * This function will reset all of the relevant variables scoring beer statistics for a given night.
+ */
 void resetTonightCounts() {
   tonight = new Record();
 }
 
-/*
-  Resets all of the variables tied to a beer session.
-*/
+/**
+ * Resets all of the variables tied to a beer session.
+ */
 void resetBeerSession() {
   count=0;
   currCount=0;
@@ -344,7 +345,7 @@ void resetBeerSession() {
   firstDropOfBeer=true; // print it out
 }
 
-/*
+/**
  * Completely reset all tracked values, including tonight and lifetime
  */
 void totalReset() {
@@ -366,18 +367,18 @@ void totalReset() {
 /********************        Printing       *********************/
 /****************************************************************/
 
-/*
-  Determines whether or not to print out the beer completion data. 
-*/
+/**
+ * Determines whether or not to print out the beer completion data. 
+ */
 boolean shouldPrintBeerTime() {
   return ((currCount>0) && (firstDropOfBeer) && (currCount==prevCount));
 }
 
-/*
-  Print out status of the device given the last beer that was completed.
-  
-  @param storage boolean indicating where to read the data from
-*/
+/**
+ * Print out status of the device given the last beer that was completed.
+ * 
+ * @param storage boolean indicating where to read the data from
+ */
 void printStatusReport(bool readFromStorage) {
   if (readFromStorage) {
     debugPrintln(STR_LIFETIME_COUNT + storage.lifetimeCount());
@@ -397,11 +398,11 @@ void printStatusReport(bool readFromStorage) {
 /****************************************************************/
 /********************        Storage        *********************/
 /****************************************************************/
-/*
-  Get all of the values we want at startup held in permanent storage from EEPROM data.
-  
-  @return the integer value stored in the desired address.
-*/
+/**
+ * Get all of the values we want at startup held in permanent storage from EEPROM data.
+ * 
+ * @return the integer value stored in the desired address.
+ */
 void readFromStorage() {
   lifetime = new Record();
   lifetime.count(storage.lifetimeCount());
@@ -409,6 +410,10 @@ void readFromStorage() {
   lifetime.time(storage.lifetimeFastestTime());
 }
 
+/**
+ * Store all values we want to persist post power cut to EEPROM. 
+ * This should happen ANYTIME data that needs to persist is created and/or updated.
+ */
 void storeAllValues() {
   storage.lifetimeCount(lifetimeTotalBeerCount);
   storage.lifetimeFastestTime(lifetimeFastestBeerTime);
@@ -418,14 +423,14 @@ void storeAllValues() {
 /****************************************************************/
 /********************   Serial Management   *********************/
 /****************************************************************/
-/*
+/**
  * Only print to the serial monitor if debug mode is turned on and if not using a status board
  */
 boolean shouldPrint() {
   return(debugModeOn && !statusBoardEnabled); 
 }
 
-/*
+/**
  * Methods used to print debug messages
  * First checks whether it is appropriate to send text to the serial monitor
  */
@@ -442,7 +447,7 @@ void debugPrintln(float debugText) { if(shouldPrint()){ Serial.println(debugText
 void debugPrint(double debugText) { if(shouldPrint()){ Serial.print(debugText); }}
 void debugPrintln(double debugText) { if(shouldPrint()){ Serial.println(debugText); }}
 
-/*
+/**
  * Serial String to send to processing as output (e.g. to statusboard)
  * 
  * @return a semicolon delimited string containing the information to send as output
@@ -472,7 +477,7 @@ String buildComString(Record lifetimeRecord, Record tonightRecord,int mostRecent
   return (toSend);
 }
 
-/*
+/**
  * Send info to the status board
  */
 void sendToStatusBoard()
@@ -486,7 +491,7 @@ void sendToStatusBoard()
 /****************************************************************/
 /********************     LCD Management    *********************/
 /****************************************************************/
-/*
+/**
  * Only print to the lcd display if lcd mode is turned on
  */
 bool shouldSendToLcd() {
@@ -494,7 +499,7 @@ bool shouldSendToLcd() {
 }
 
 
-/*
+/**
  * Cycle through to the next display mode according to the order in the enum
  */
 void cycleMode() {
@@ -507,7 +512,7 @@ void cycleMode() {
 }
 
 
-/*
+/**
  * Send the relevant info for display on the LCD, based on the current lcdDisplayMode
  */
 void sendToLcd()
