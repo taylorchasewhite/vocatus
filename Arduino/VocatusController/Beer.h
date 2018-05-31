@@ -12,15 +12,21 @@
 class Beer
 {
   public:
-  	Beer(int pin);
+	Beer();
+	Beer(int startTime, int endTime, float volume);
 	
   	int endTime();
   	void endTime(int endTime);
 	  
 	int startTime();
-	void startTime(startTime);
+	void startTime(int startTime);
+
+	float volume();
+	void volume(float volume);
+	void addVolume();
 	
 	int flowRate();
+	bool isFinished();
 	int timeToFinish();
 
   private:
@@ -28,6 +34,6 @@ class Beer
 	int _beerHour;
 	int _endTime;
 	int _startTime;
-	int _totalVolume;
+	int _volume;
 };
 #endif
