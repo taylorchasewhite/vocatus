@@ -51,8 +51,6 @@ int modeCycleButtonInPin;
 int currCount;
 int prevCount;
 
-int mostRecentBeerTime;  // The time it took in ms to finish the last beer
-
 float mostRecentVolume;
 float multiplier;
 
@@ -224,7 +222,8 @@ void initGlobals() {
   tonight = new Record();
   lifetime = new Record();
   
-  mostRecentBeerTime = 0;
+  lastBeer = new Beer();
+
   mostRecentVolume = 0.0;
 
   //set flags for initial desired state
@@ -275,14 +274,16 @@ void resetTiming() {
  * @return How long it took to complete the last beer.
  */
 int getBeerCompletionDuration() {
-  return mostRecentBeerTime;
+  return lastBeer.timeToFinish();
 }
 
 void setBeerCompletionDuration(int startTime, int endTime) {
-  mostRecentBeerTime = endTime-startTime;
+  lastBeer.startTime(startTime);
+  lastBeer.endTime(endTime);
+
   //TODO:: we should be using globals unless there's a reason to read from memory
-  if ((mostRecentBeerTime < storage.getLifetimeFastestBeerTime()) || (storage.getLifetimeFastestBeerTime()<=0)) {
-    lifetimeFastestBeerTime = mostRecentBeerTime;
+  if ((lastBeer.timeToFinish() < storage.getLifetimeFastestBeerTime()) || (storage.getLifetimeFastestBeerTime()<=0)) {
+    lifetimeFastestBeerTime = lastBeer.timeToFinish();
     storage.setLifetimeFastestTime();
   }
 }
@@ -312,10 +313,11 @@ boolean isNewDay() {
 void recordBeerEnd() {
   mostRecentVolume=count*multiplier;
 
+  lastBeer = new Beer(startTime,endTime,mostRecentVolume);
+
+
   lifetime.addBeer(startTime,endTime,mostRecentVolume);
   tonight.addBeer(startTime,endTime,mostRecentVolume);
-  
-  storeAllValues();
   
   setBeerCompletionDuration(startTime,endTime);
   
@@ -324,6 +326,8 @@ void recordBeerEnd() {
   if (isNewDay()) {
     resetTonightCounts();
   }
+
+  storeAllValues();
 }
 
 /**
@@ -357,7 +361,8 @@ void totalReset() {
   lifetime = new Record();
   tonight = new Record();
   
-  mostRecentBeerTime = 0;
+  lastBeer = new Beer();
+
   mostRecentVolume = 0.0;
 
   storeAllValues();
@@ -483,7 +488,7 @@ String buildComString(Record lifetimeRecord, Record tonightRecord,int mostRecent
 void sendToStatusBoard()
 {
   if(statusBoardEnabled) { 
-    String comString = buildComString(lifetime,tonight,mostRecentBeerTime,mostRecentVolume); 
+    String comString = buildComString(lifetime,tonight,lastBeer.timeToFinish(),mostRecentVolume); 
     Serial.println(comString);  
   }
 }
@@ -543,7 +548,7 @@ void sendToLcd()
       toDisplayUnit = "ms";
     case LASTSPEED:
       toDisplayLabel = "Last Drink";
-      toDisplayValue = mostRecentBeerTime;
+      toDisplayValue = lastBeer.timeToFinish();
       toDisplayUnit = "ms";
     default:  //might as well have a saftey case //TODO:: do we want to remove this in the final product for less noisy errors?
       toDisplayLabel = "ERROR:";
