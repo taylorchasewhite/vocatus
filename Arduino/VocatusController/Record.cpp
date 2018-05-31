@@ -51,7 +51,7 @@ void Record::addBeer(int startTime, int endTime, float volume) {
 void Record::addBeer(Beer beer) {
 	addCount();
 	addVolume(beer.volume()):
-	evalAndUpdateFastestBeer();
+	evalAndUpdateFastestBeer(beer);
 }
 
 /**
