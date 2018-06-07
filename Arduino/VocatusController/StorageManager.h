@@ -17,16 +17,16 @@ class StorageManager
 	float readFloatData(int address);
 	int readIntegerData(int address);
 
-	float getLifetimeCount();
-	void setLifetimeCount(float count);
+	float lifetimeCount();
+	void lifetimeCount(float count);
 
-	int getLifetimeFastestTime();
-	void setLifetimeFastestTime(float beerTime);
+	int lifetimeFastestTime();
+	void lifetimeFastestTime(float beerTime);
 
 	Record getLifetimeRecord();
 
-	float getLifetimeVolume();
-	void storeLifetimeTotalVolume(float volume);
+	float lifetimeVolume();
+	void lifetimeTotalVolume(float volume);
 
 	void storeAllValues(float beerCount,float beerTime, float beerVolume);
 	void storeData(int address, float value);

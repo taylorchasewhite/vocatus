@@ -16,6 +16,7 @@ DisplayManager::DisplayManager(int pin)
   _pin = pin;
 }
 
+<<<<<<< HEAD
 void DisplayManager::dot()
 {
   digitalWrite(_pin, HIGH);
@@ -31,3 +32,5 @@ void DisplayManager::dash()
   digitalWrite(_pin, LOW);
   delay(250);
 }
+=======
+>>>>>>> e28d70f6202c7c24b0c9e52d576125f1e3ba846c

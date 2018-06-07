@@ -12,8 +12,6 @@ class DisplayManager
 {
   public:
     DisplayManager(int pin);
-    void dot();
-    void dash();
   private:
     int _pin;
 };
