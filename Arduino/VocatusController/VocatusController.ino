@@ -151,7 +151,7 @@ void loop() {
   }
 
   if (modeCycleButtonVal == LOW) {
-    cycleMode();
+    display.CycleCurrentValueToDisplay();
     printStatusReport(true);
   } 
   

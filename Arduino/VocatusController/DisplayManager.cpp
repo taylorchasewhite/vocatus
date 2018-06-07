@@ -71,6 +71,8 @@ void DisplayManager::DebugPrintln(float debugText) { if(_shouldDebug()){ Serial.
 void DisplayManager::DebugPrint(double debugText) { if(_shouldDebug()){ Serial.print(debugText); }}
 void DisplayManager::DebugPrintln(double debugText) { if(_shouldDebug()){ Serial.println(debugText); }}
 
+//@TODO:: implement standard debug output
+
 /****************************************************************/
 /*****************   Status Board Management   ******************/
 /****************************************************************/
@@ -135,7 +137,7 @@ void DisplayManager::CycleCurrentValueToDisplay() {
   _currentValueToDisplay = (CurrentValueToDisplay) intValue;
 }
 
-
+//@TODO:: implement constants 
 /**
  * Send the relevant info for display on the LCD, based on the current lcdDisplayMode
  */

@@ -59,6 +59,17 @@ class DisplayManager
     void _sendToStatusBoard(Record, Record, int, float);
     void _initLcd();
     void _sendToLcd(Record, Record, int);
+
+    //@Note:: Do these need to be constants? we should either make our debug/LCD strings consistent or get rid of these
+    const String STR_BEER_TIMING          = "Time: ";
+    const String STR_BEER_TIMING_UNIT     = "ms";
+    const String STR_PREV_COUNT           = "Prev: ";
+    const String STR_CURR_COUNT           = "Curr: ";
+    const String STR_FASTEST_TIME         = "Fastest time: ";
+    const String STR_LIFETIME_COUNT       = "Total drinks: ";
+    const String STR_LIFETIME_VOLUME      = "Total volume: ";
+    const String STR_LIFETIME_VOLUME_UNIT = " ml";
+    const String STR_TONIGHT              = " tonight";
 };
 
 #endif
