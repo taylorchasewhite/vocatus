@@ -19,10 +19,15 @@ const int ADDR_TONIGHT_FASTEST_BEER   = 10*sizeof(float);
 const int ADDR_TONIGHT_BEER_COUNT     = 11*sizeof(float);
 const int ADDR_TONIGHT_VOLUME         = 12*sizeof(float);
 
-Beer::Beer(int pin)
-{
-  pinMode(pin, OUTPUT);
-  _pin = pin;
+Beer::Beer() {
+	_startTime=0;
+	_endTime=0;
+	_volume = 0;
+}
+
+Beer::Beer(int startTime,int endTime, int volume) {
+	_endTime=endTime;
+	_startTime=startTime;
 }
 
 /**
@@ -60,7 +65,7 @@ void Beer::startTime(int startTime) { _startTime = startTime; }
  */
 int Beer::flowRate() {
 	int flowRate=-1;
-	flowRate=_totalVolume/timeToFinish();
+	flowRate=_volume/timeToFinish();
 
 	return flowRate;
 }
