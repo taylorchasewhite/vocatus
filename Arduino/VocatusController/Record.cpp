@@ -9,6 +9,9 @@
  */
 #include "Arduino.h"
 
+//@NOTE:: Not sold on variable naming convention; makes it confusing to parse the code
+//examples: count(), startTime(), endTime()
+
 enum Type {
 	LifeTime,
 	Tonight
@@ -25,6 +28,10 @@ Record::Record(int count, float volume, int fastestTime) {
 	//startTime(startTime);
 }
 
+//Notes:
+//change "beer" to "drink"
+//change "Record" to "DrinkList" or "Session" 
+//move calculation logic from controller to ^^
 
 Record::Record(enum type) {
 
