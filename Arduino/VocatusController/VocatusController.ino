@@ -30,11 +30,11 @@
     
   --------------------------
 */
-#include <Drink.h>
-#include <DisplayManager.h>
+#include "Drink.h"
+#include "DisplayManager.h"
+#include "StorageManager.h"
 #include <EEPROM.h>
 #include <LiquidCrystal.h>
-#include <StorageManager.h>
 
 /****************************************************************/
 /********************        Globals        *********************/
@@ -168,8 +168,8 @@ void loop() {
     resetDrinkSession();
   } 
   else if (prevCount!=currCount) {
-    //debugPrintln(STR_PREV_COUNT + prevCount);
-    //debugPrintln(STR_CURR_COUNT + currCount);
+    //display.DebugPrintln(STR_PREV_COUNT + prevCount);
+    //display.DebugPrintln(STR_CURR_COUNT + currCount);
   }
 
   if (modeCycleButtonVal == LOW) {
@@ -194,7 +194,7 @@ void Flow() {
   }
   count++;
   drinkPulse();
-  if(shouldPrint()){ debugPrintln(count); }
+  if(shouldPrint()){ display.DebugPrintln(count); }
 }
 
 /****************************************************************/
@@ -238,8 +238,8 @@ void initGlobals() {
 
 void initializeDisplay() {
   if (!startingUp) {
-    debugPrintln("Welcome to the Red Solo Cup Saver!");
-    debugPrintln("----------------------------------");
+    display.DebugPrintln("Welcome to the Red Solo Cup Saver!");
+    display.DebugPrintln("----------------------------------");
     printStatusReport(true);
     startingUp=true;
   }
@@ -384,14 +384,14 @@ boolean shouldPrintDrinkTime() {
  */
 void printStatusReport(bool readFromStorage) {
   if (readFromStorage) {
-    debugPrintln(STR_LIFETIME_COUNT + storage.lifetimeCount());
-    debugPrintln(STR_LIFETIME_VOLUME + storage.lifetimeVolume() + STR_LIFETIME_VOLUME_UNIT);
-    debugPrintln(STR_FASTEST_TIME + storage.lifetimeFastestTime() + STR_BEER_TIMING_UNIT);
+    display.DebugPrintln(STR_LIFETIME_COUNT + storage.lifetimeCount());
+    display.DebugPrintln(STR_LIFETIME_VOLUME + storage.lifetimeVolume() + STR_LIFETIME_VOLUME_UNIT);
+    display.DebugPrintln(STR_FASTEST_TIME + storage.lifetimeFastestTime() + STR_BEER_TIMING_UNIT);
   }
   else {
-    debugPrintln(STR_BEER_TIMING + getDrinkCompletionDuration() + STR_BEER_TIMING_UNIT);
-    debugPrintln(STR_LIFETIME_COUNT + lifetimeTotalDrinkCount);
-    debugPrintln(STR_LIFETIME_VOLUME + lifetimeTotalVolume + STR_LIFETIME_VOLUME_UNIT);
+    display.DebugPrintln(STR_BEER_TIMING + getDrinkCompletionDuration() + STR_BEER_TIMING_UNIT);
+    display.DebugPrintln(STR_LIFETIME_COUNT + lifetimeTotalDrinkCount);
+    display.DebugPrintln(STR_LIFETIME_VOLUME + lifetimeTotalVolume + STR_LIFETIME_VOLUME_UNIT);
   }
   
   sendToStatusBoard();
@@ -426,29 +426,6 @@ void storeAllValues() {
 /****************************************************************/
 /********************   Serial Management   *********************/
 /****************************************************************/
-/**
- * Only print to the serial monitor if debug mode is turned on and if not using a status board
- */
-boolean shouldPrint() {
-  return(debugModeOn && !statusBoardEnabled); 
-}
-
-/**
- * Methods used to print debug messages
- * First checks whether it is appropriate to send text to the serial monitor
- */
-void debugPrint(String debugText) { if(shouldPrint()){ Serial.print(debugText); }}
-void debugPrintln(String debugText) { if(shouldPrint()){ Serial.println(debugText); }}
-void debugPrint(int debugText) { if(shouldPrint()){ Serial.print(debugText); }}
-void debugPrintln(int debugText) { if(shouldPrint()){ Serial.println(debugText); }}
-void debugPrint(long debugText) { if(shouldPrint()){ Serial.print(debugText); }}
-void debugPrintln(long debugText) { if(shouldPrint()){ Serial.println(debugText); }}
-void debugPrint(unsigned long debugText) { if(shouldPrint()){ Serial.print(debugText); }}
-void debugPrintln(unsigned long debugText) { if(shouldPrint()){ Serial.println(debugText); }}
-void debugPrint(float debugText) { if(shouldPrint()){ Serial.print(debugText); }}
-void debugPrintln(float debugText) { if(shouldPrint()){ Serial.println(debugText); }}
-void debugPrint(double debugText) { if(shouldPrint()){ Serial.print(debugText); }}
-void debugPrintln(double debugText) { if(shouldPrint()){ Serial.println(debugText); }}
 
 /**
  * Serial String to send to processing as output (e.g. to statusboard)

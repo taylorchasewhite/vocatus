@@ -11,21 +11,29 @@
 
 DisplayManager::DisplayManager(int pin)
 {
-  _outputMode
+  
 }
 
-void DisplayManager::dot()
-{
-  digitalWrite(_pin, HIGH);
-  delay(250);
-  digitalWrite(_pin, LOW);
-  delay(250);  
+/**
+ * Only print to the serial monitor if debug mode is turned on and if not using a status board
+ */
+boolean DisplayManager::_shouldDebug() {
+  return(_isDebugEnabled && !_isStatusBoardEnabled);
 }
 
-void DisplayManager::dash()
-{
-  digitalWrite(_pin, HIGH);
-  delay(1000);
-  digitalWrite(_pin, LOW);
-  delay(250);
-}
+/**
+ * Methods used to print debug messages
+ * First checks whether it is appropriate to send text to the serial monitor
+ */
+void DisplayManager::DebugPrint(String debugText) { if(_shouldDebug()){ Serial.print(debugText); }}
+void DisplayManager::DebugPrintln(String debugText) { if(_shouldDebug()){ Serial.println(debugText); }}
+void DisplayManager::DebugPrint(int debugText) { if(_shouldDebug()){ Serial.print(debugText); }}
+void DisplayManager::DebugPrintln(int debugText) { if(_shouldDebug()){ Serial.println(debugText); }}
+void DisplayManager::DebugPrint(long debugText) { if(_shouldDebug()){ Serial.print(debugText); }}
+void DisplayManager::DebugPrintln(long debugText) { if(_shouldDebug()){ Serial.println(debugText); }}
+void DisplayManager::DebugPrint(unsigned long debugText) { if(_shouldDebug()){ Serial.print(debugText); }}
+void DisplayManager::DebugPrintln(unsigned long debugText) { if(_shouldDebug()){ Serial.println(debugText); }}
+void DisplayManager::DebugPrint(float debugText) { if(_shouldDebug()){ Serial.print(debugText); }}
+void DisplayManager::DebugPrintln(float debugText) { if(_shouldDebug()){ Serial.println(debugText); }}
+void DisplayManager::DebugPrint(double debugText) { if(_shouldDebug()){ Serial.print(debugText); }}
+void DisplayManager::DebugPrintln(double debugText) { if(_shouldDebug()){ Serial.println(debugText); }}
