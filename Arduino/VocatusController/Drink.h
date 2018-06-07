@@ -1,19 +1,19 @@
 /**
- * Beer.h - Represents a single beer drank by a Solo Cup Saver customer.
+ * Drink.h - Represents a single drink drank by a Solo Cup Saver customer.
  * Intended to reduce duplication of variables in the controller as there are multiple instances of 
- * beers in the controller's runtime environment.
+ * drinks in the controller's runtime environment.
  * Created by Taylor White, Stephen Lago, May 15, 2018
  * See https://www.arduino.cc/en/Hacking/LibraryTutorial for information on class conventions here.
  */
-#ifndef Beer_h
-#define Beer_h
+#ifndef Drink_h
+#define Drink_h
 #include "Arduino.h"
 
-class Beer
+class Drink
 {
   public:
-  	Beer();
-	Beer(int startTime, int endTime, int volume);
+  	Drink();
+	Drink(int startTime, int endTime, int volume);
 	
   	int endTime();
   	void endTime(int endTime);
@@ -25,8 +25,8 @@ class Beer
 	int timeToFinish();
 
   private:
-    int _beerDay;
-	int _beerHour;
+    int _drinkDay;
+	int _drinkHour;
 	int _endTime;
 	int _startTime;
 	int _volume;
