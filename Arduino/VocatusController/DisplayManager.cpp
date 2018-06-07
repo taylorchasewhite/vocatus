@@ -8,11 +8,24 @@
 #include "DisplayManager.h"
 
 // Constants
-//@TODO: all of this
 
 DisplayManager::DisplayManager(int pin)
 {
-  pinMode(pin, OUTPUT);
-  _pin = pin;
+  _outputMode
 }
 
+void DisplayManager::dot()
+{
+  digitalWrite(_pin, HIGH);
+  delay(250);
+  digitalWrite(_pin, LOW);
+  delay(250);  
+}
+
+void DisplayManager::dash()
+{
+  digitalWrite(_pin, HIGH);
+  delay(1000);
+  digitalWrite(_pin, LOW);
+  delay(250);
+}
