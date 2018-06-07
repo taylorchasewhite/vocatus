@@ -13,7 +13,6 @@
 class Record
 {
   public:
-  	Record(RecordType type);
 	Record(int count, float volume, int fastestTime,int startTime);
 
 	void addDrink(int startTime, int endTime, float volume);
@@ -30,7 +29,7 @@ class Record
 	Drink fastestDrink(); 			// Same as fastest time but returns the Drink record.
 	  
 	int startTime();
-	void startTime(startTime);
+	void startTime(int startTime);
 	
 	int flowRate();
 

@@ -27,6 +27,9 @@ void DisplayManager::_changeOutputMode(OutputMode newOutputMode) {
   _isLcdEnabled = ((newOutputMode&LCD) == LCD);
 }
 
+/****************************************************************/
+/*********************   Debug Management   *********************/
+/****************************************************************/
 /**
  * Only print to the serial monitor if debug mode is turned on and if not using a status board
  */
@@ -50,3 +53,53 @@ void DisplayManager::DebugPrint(float debugText) { if(_shouldDebug()){ Serial.pr
 void DisplayManager::DebugPrintln(float debugText) { if(_shouldDebug()){ Serial.println(debugText); }}
 void DisplayManager::DebugPrint(double debugText) { if(_shouldDebug()){ Serial.print(debugText); }}
 void DisplayManager::DebugPrintln(double debugText) { if(_shouldDebug()){ Serial.println(debugText); }}
+
+/****************************************************************/
+/*****************   Status Board Management   ******************/
+/****************************************************************/
+
+/**
+ * Serial String to send to processing as output (e.g. to statusboard)
+ * 
+ * @return a semicolon delimited string containing the information to send as output
+ */
+String DisplayManager::_buildComString(Record lifetimeRecord, Record tonightRecord,int mostRecentDrinkTimeVar, float mostRecentVolumeVar)
+{
+  String toSend = "";
+  String delim = ";";
+  
+  toSend += lifetimeRecord.count();
+  toSend += delim;
+  toSend += tonightRecord.count();
+  toSend += delim;
+  toSend += lifetimeRecord.fastestTime();
+  toSend += delim;
+  toSend += tonightRecord.fastestTime();
+  toSend += delim;
+  toSend += mostRecentDrinkTimeVar;
+  toSend += delim;
+  toSend += lifetimeRecord.volume();
+  toSend += delim;
+  toSend += lifetimeRecord.volume();
+  toSend += delim;
+  toSend += mostRecentVolumeVar;
+  toSend += delim;  
+  
+  return (toSend);
+}
+
+/**
+ * Send info to the status board
+ */
+void DisplayManager::OutputData(Record lifetimeRecord, Record tonightRecord,int mostRecentDrinkTimeVar, float mostRecentVolumeVar)
+{
+  if(_isStatusBoardEnabled) { 
+    String comString = _buildComString(lifetimeRecord,tonightRecord,mostRecentDrinkTimeVar,mostRecentVolumeVar); 
+    Serial.println(comString);  
+  }
+
+  if(_isLcdEnabled) {
+    
+  }
+}
+

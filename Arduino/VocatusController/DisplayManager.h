@@ -7,14 +7,15 @@
 #ifndef DisplayManager_h
 #define DisplayManager_h
 #include "Arduino.h"
+#include "Record.h"
 
-typedef enum OutputMode {
+enum OutputMode {
   DEBUG       = 0x0001,  //noisy debug info output to the console
   STATUSBOARD = 0x0002,  //pretty output to a Processing-based status board (via Serial Monitor)
   LCD         = 0x0004  //prototype LCD output (single line)
 };
 
-typedef enum CurrentValueToDisplay {
+enum CurrentValueToDisplay {
   LIFECOUNT = 0, //explicitly set this guy to 0 to support cycling
   TONIGHTCOUNT,
   LIFESPEED,
@@ -41,6 +42,8 @@ class DisplayManager
     void DebugPrintln(float);
     void DebugPrint(double);
     void DebugPrintln(double);
+
+    void OutputData(Record, Record, int, float);
   private:
     OutputMode _outputMode;
     CurrentValueToDisplay _currentValueToDisplay;
@@ -51,6 +54,9 @@ class DisplayManager
 
     bool _shouldDebug();
     void _changeOutputMode(OutputMode);
+
+    String _buildComString(Record, Record, int, float);
+    void _sendToStatusBoard();
 };
 
 #endif

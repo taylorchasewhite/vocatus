@@ -31,6 +31,7 @@
   --------------------------
 */
 #include "Drink.h"
+#include "Record.h"
 #include "DisplayManager.h"
 #include "StorageManager.h"
 #include <EEPROM.h>
@@ -390,8 +391,7 @@ void printStatusReport(bool readFromStorage) {
     display.DebugPrintln(STR_LIFETIME_VOLUME + lifetimeTotalVolume + STR_LIFETIME_VOLUME_UNIT);
   }
   
-  sendToStatusBoard();
-  sendToLcd();
+  display.OutputData(lifetime,tonight,mostRecentDrinkTime,mostRecentVolume);
 }
 
 /****************************************************************/
@@ -417,51 +417,6 @@ void storeAllValues() {
   storage.lifetimeCount(lifetimeTotalDrinkCount);
   storage.lifetimeFastestTime(lifetimeFastestDrinkTime);
   storage.lifetimeVolume(lifetimeTotalVolume);
-}
-
-/****************************************************************/
-/********************   Serial Management   *********************/
-/****************************************************************/
-
-/**
- * Serial String to send to processing as output (e.g. to statusboard)
- * 
- * @return a semicolon delimited string containing the information to send as output
- */
-String buildComString(Record lifetimeRecord, Record tonightRecord,int mostRecentDrinkTimeVar, float mostRecentVolumeVar)
-{
-  String toSend = "";
-  String delim = ";";
-  
-  toSend += lifetimeRecord.count();
-  toSend += delim;
-  toSend += tonightRecord.count();
-  toSend += delim;
-  toSend += lifetimeRecord.fastestTime();
-  toSend += delim;
-  toSend += tonightRecord.fastestTime();
-  toSend += delim;
-  toSend += mostRecentDrinkTimeVar;
-  toSend += delim;
-  toSend += lifetimeRecord.volume();
-  toSend += delim;
-  toSend += lifetimeRecord.volume();
-  toSend += delim;
-  toSend += mostRecentVolumeVar;
-  toSend += delim;  
-  
-  return (toSend);
-}
-
-/**
- * Send info to the status board
- */
-void sendToStatusBoard()
-{
-  if(statusBoardEnabled) { 
-    String comString = buildComString(lifetime,tonight,mostRecentDrinkTime,mostRecentVolume); 
-    Serial.println(comString);  
-  }
 }
 
 /****************************************************************/
