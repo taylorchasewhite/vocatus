@@ -30,7 +30,7 @@
     
   --------------------------
 */
-#include <Beer.h>
+#include <Drink.h>
 #include <DisplayManager.h>
 #include <EEPROM.h>
 #include <LiquidCrystal.h>
@@ -51,9 +51,9 @@ int modeCycleButtonInPin;
 int currCount;
 int prevCount;
 
-int mostRecentBeerTime;  // The time it took in ms to finish the last beer
+int mostRecentDrinkTime;  // The time it took in ms to finish the last drink
 
-float mostRecentVolume; //@NOTE:: why have this if we have a beer for it?
+float mostRecentVolume;
 float multiplier;
 
 double flowRate;
@@ -61,26 +61,26 @@ volatile int count;
 
 // Timing
 //@NOTE:: we aren't using these anywhere
-Beer lifetimeBestBeer;
-Beer tonightBestBeer; 
-Beer lastBeer;
+Drink lifetimeBestDrink;
+Drink tonightBestDrink; 
+Drink lastDrink;
 
 Record lifetime;
 Record tonight;
 
 unsigned long endTime;
 unsigned long startTime;
-int lastBeerDay;
-int lastBeerHour;
-int currentBeerDay;
-int currentBeerHour;
+int lastDrinkDay;
+int lastDrinkHour;
+int currentDrinkDay;
+int currentDrinkHour;
 
 const unsigned long SECONDS_IN_DAY = 86400;
-unsigned long lastBeerCompletionInstant; //@NOTE:: why are all of these globals?
-unsigned long currentBeerCompletionInstant;
+unsigned long lastDrinkCompletionInstant; //@NOTE:: why are all of these globals?
+unsigned long currentDrinkCompletionInstant;
 
 // States
-bool firstDropOfBeer; //@NOTE:: this does nothing; remove all references
+bool firstDropOfDrink; //@NOTE:: this does nothing; remove all references
 bool startingUp;
 
 //Flags
@@ -105,11 +105,11 @@ DisplayManager display;
 
 //@Note:: Do these need to be constants? we should either make our debug/LCD strings consistent or get rid of these
 const String STR_BEER_TIMING          = "Time: ";
-const String STR_BEER_TIMING_UNIT     = " ms!";
+const String STR_BEER_TIMING_UNIT     = "ms";
 const String STR_PREV_COUNT           = "Prev: ";
 const String STR_CURR_COUNT           = "Curr: ";
 const String STR_FASTEST_TIME         = "Fastest time: ";
-const String STR_LIFETIME_COUNT       = "Total beers: ";
+const String STR_LIFETIME_COUNT       = "Total drinks: ";
 const String STR_LIFETIME_VOLUME      = "Total volume: ";
 const String STR_LIFETIME_VOLUME_UNIT = " ml";
 const String STR_TONIGHT              = " tonight";
@@ -162,10 +162,10 @@ void loop() {
   delay (1000);   //Wait 1 second 
   noInterrupts(); //Disable the interrupts on the Arduino
   
-  if (shouldPrintBeerTime()) {
-    recordBeerEnd();
+  if (shouldPrintDrinkTime()) {
+    recordDrinkEnd();
     printStatusReport(false);
-    resetBeerSession();
+    resetDrinkSession();
   } 
   else if (prevCount!=currCount) {
     //debugPrintln(STR_PREV_COUNT + prevCount);
@@ -189,11 +189,11 @@ void loop() {
  */
 void Flow() {
   if (count==0) {
-      beerStart();
-      firstDropOfBeer=true;
+      drinkStart();
+      firstDropOfDrink=true;
   }
   count++;
-  beerPulse();
+  drinkPulse();
   if(shouldPrint()){ debugPrintln(count); }
 }
 
@@ -217,7 +217,7 @@ void initGlobals() {
   currCount=0;
   prevCount=-1;
   
-  firstDropOfBeer=false;
+  firstDropOfDrink=false;
   startingUp = false;
   lcdDisplayMode = LIFECOUNT;
 
@@ -226,8 +226,7 @@ void initGlobals() {
   tonight = new Record();
   lifetime = new Record();
   
-  mostRecentBeerTime = 0;
-  mostRecentVolume = 0.0;
+  lastDrink = new Drink();
 
   //set flags for initial desired state
   statusBoardEnabled = true; //set to true to have output sent via serial message to a statusboard (e.g. processing)
@@ -250,21 +249,21 @@ void initializeDisplay() {
 /********************        Timing         *********************/
 /****************************************************************/
 /**
- * Called the first time the hall effect sensor has been triggered since the last beer session completed.
+ * Called the first time the hall effect sensor has been triggered since the last drink session completed.
  */
-void beerStart() {
+void drinkStart() {
   startTime=millis();
 }
 
 /**
  * Called every time the hall effect sensor fires. Represents another ~2.65 ml have been drank.
  */
-void beerPulse() {
+void drinkPulse() {
   endTime=millis();
 }
 
 /**
- * Reset the start and end time for a beer that will be drank and judged.
+ * Reset the start and end time for a drink that will be drank and judged.
  */
 void resetTiming() {
   startTime=0;
@@ -272,57 +271,57 @@ void resetTiming() {
 }
 
 /**
- * Get the time it took to complete the most recent beer.
+ * Get the time it took to complete the most recent drink.
  * 
- * @return How long it took to complete the last beer.
+ * @return How long it took to complete the last drink.
  */
-int getBeerCompletionDuration() {
-  return mostRecentBeerTime;
+int getDrinkCompletionDuration() {
+  return mostRecentDrinkTime;
 }
 
-void setBeerCompletionDuration(int startTime, int endTime) {
-  mostRecentBeerTime = endTime-startTime;
+void setDrinkCompletionDuration(int startTime, int endTime) {
+  mostRecentDrinkTime = endTime-startTime;
   //@NOTE:: we should be using globals unless there's a reason to read from memory (globals can exist in the storage class, that's fine; but it looks like the plan is to have them read from memory every time)
   //@NOTE:: this method does not exist
-  if ((mostRecentBeerTime < storage.getLifetimeFastestBeerTime()) || (storage.getLifetimeFastestBeerTime()<=0)) {
-    lifetimeFastestBeerTime = mostRecentBeerTime;
+  if ((mostRecentDrinkTime < storage.getLifetimeFastestDrinkTime()) || (storage.getLifetimeFastestDrinkTime()<=0)) {
+    lifetimeFastestDrinkTime = mostRecentDrinkTime;
     storage.setLifetimeFastestTime();
   }
 }
 
 /**
- * Denote the completion of a new beer at the current instant.
+ * Denote the completion of a new drink at the current instant.
  */
-void setBeerCompletionDateTime() {
-  //currentBeerCompletionInstant=now(); @TODO: Now isn't working/validating
+void setDrinkCompletionDateTime() {
+  //currentDrinkCompletionInstant=now(); @TODO: Now isn't working/validating
 }
 
 /**
- * Determines whether or not the completion of the last beer represents a new day.
+ * Determines whether or not the completion of the last drink represents a new day.
  * 
- * @return Is the first beer of new day
+ * @return Is the first drink of new day
  */
 boolean isNewDay() {
-  return (lastBeerCompletionInstant < (currentBeerCompletionInstant-SECONDS_IN_DAY));
+  return (lastDrinkCompletionInstant < (currentDrinkCompletionInstant-SECONDS_IN_DAY));
 }
 
 /****************************************************************/
 /***************** Statistics and State Change ******************/
 /****************************************************************/
 /**
- * Record that a beer has been completed, update any current records, storage and display to the LCD
+ * Record that a drink has been completed, update any current records, storage and display to the LCD
  */
-void recordBeerEnd() {
+void recordDrinkEnd() {
   mostRecentVolume=count*multiplier;
 
-  lifetime.addBeer(startTime,endTime,mostRecentVolume);
-  tonight.addBeer(startTime,endTime,mostRecentVolume);
+  lifetime.addDrink(startTime,endTime,mostRecentVolume);
+  tonight.addDrink(startTime,endTime,mostRecentVolume);
   
   storeAllValues();
   
-  setBeerCompletionDuration(startTime,endTime);
+  setDrinkCompletionDuration(startTime,endTime);
   
-  setBeerCompletionDateTime(); // @NOTE:: This function does nothing
+  setDrinkCompletionDateTime(); // @NOTE:: This function does nothing
 
   //@NOTE:: we'll want to tear this out once we properly define a session
   if (isNewDay()) {
@@ -331,22 +330,22 @@ void recordBeerEnd() {
 }
 
 /**
- * Call if more than 12 hours have passed since the last time a beer was drank. 
- * This function will reset all of the relevant variables scoring beer statistics for a given night.
+ * Call if more than 12 hours have passed since the last time a drink was drank. 
+ * This function will reset all of the relevant variables scoring drink statistics for a given night.
  */
 void resetTonightCounts() {
   tonight = new Record();
 }
 
 /**
- * Resets all of the variables tied to a beer session.
+ * Resets all of the variables tied to a drink session.
  */
-void resetBeerSession() {
+void resetDrinkSession() {
   count=0;
   currCount=0;
   prevCount=0;
   resetTiming();
-  firstDropOfBeer=true; // print it out
+  firstDropOfDrink=true; // print it out
 }
 
 /**
@@ -361,7 +360,7 @@ void totalReset() {
   lifetime = new Record();
   tonight = new Record();
   
-  mostRecentBeerTime = 0;
+  mostRecentDrinkTime = 0;
   mostRecentVolume = 0.0;
 
   storeAllValues();
@@ -372,14 +371,14 @@ void totalReset() {
 /****************************************************************/
 
 /**
- * Determines whether or not to print out the beer completion data. 
+ * Determines whether or not to print out the drink completion data. 
  */
-boolean shouldPrintBeerTime() {
-  return ((currCount>0) && (firstDropOfBeer) && (currCount==prevCount));
+boolean shouldPrintDrinkTime() {
+  return ((currCount>0) && (firstDropOfDrink) && (currCount==prevCount));
 }
 
 /**
- * Print out status of the device given the last beer that was completed.
+ * Print out status of the device given the last drink that was completed.
  * 
  * @param storage boolean indicating where to read the data from
  */
@@ -390,8 +389,8 @@ void printStatusReport(bool readFromStorage) {
     debugPrintln(STR_FASTEST_TIME + storage.lifetimeFastestTime() + STR_BEER_TIMING_UNIT);
   }
   else {
-    debugPrintln(STR_BEER_TIMING + getBeerCompletionDuration() + STR_BEER_TIMING_UNIT);
-    debugPrintln(STR_LIFETIME_COUNT + lifetimeTotalBeerCount);
+    debugPrintln(STR_BEER_TIMING + getDrinkCompletionDuration() + STR_BEER_TIMING_UNIT);
+    debugPrintln(STR_LIFETIME_COUNT + lifetimeTotalDrinkCount);
     debugPrintln(STR_LIFETIME_VOLUME + lifetimeTotalVolume + STR_LIFETIME_VOLUME_UNIT);
   }
   
@@ -419,8 +418,8 @@ void readFromStorage() {
  * This should happen ANYTIME data that needs to persist is created and/or updated.
  */
 void storeAllValues() {
-  storage.lifetimeCount(lifetimeTotalBeerCount);
-  storage.lifetimeFastestTime(lifetimeFastestBeerTime);
+  storage.lifetimeCount(lifetimeTotalDrinkCount);
+  storage.lifetimeFastestTime(lifetimeFastestDrinkTime);
   storage.lifetimeVolume(lifetimeTotalVolume);
 }
 
@@ -456,7 +455,7 @@ void debugPrintln(double debugText) { if(shouldPrint()){ Serial.println(debugTex
  * 
  * @return a semicolon delimited string containing the information to send as output
  */
-String buildComString(Record lifetimeRecord, Record tonightRecord,int mostRecentBeerTimeVar, float mostRecentVolumeVar)
+String buildComString(Record lifetimeRecord, Record tonightRecord,int mostRecentDrinkTimeVar, float mostRecentVolumeVar)
 {
   String toSend = "";
   String delim = ";";
@@ -469,7 +468,7 @@ String buildComString(Record lifetimeRecord, Record tonightRecord,int mostRecent
   toSend += delim;
   toSend += tonightRecord.fastestTime();
   toSend += delim;
-  toSend += mostRecentBeerTimeVar;
+  toSend += mostRecentDrinkTimeVar;
   toSend += delim;
   toSend += lifetimeRecord.volume();
   toSend += delim;
@@ -487,7 +486,7 @@ String buildComString(Record lifetimeRecord, Record tonightRecord,int mostRecent
 void sendToStatusBoard()
 {
   if(statusBoardEnabled) { 
-    String comString = buildComString(lifetime,tonight,mostRecentBeerTime,mostRecentVolume); 
+    String comString = buildComString(lifetime,tonight,mostRecentDrinkTime,mostRecentVolume); 
     Serial.println(comString);  
   }
 }
@@ -532,23 +531,23 @@ void sendToLcd()
     case LIFECOUNT:
       toDisplayLabel = "Lifetime:";
       toDisplayValue = lifetime.count();
-      toDisplayUnit = "beers"; //TODO:: handle 1 drink
+      toDisplayUnit = "drinks"; //TODO:: handle 1 drink
     case TONIGHTCOUNT:
       toDisplayLabel = "Tonight:";
       toDisplayValue = tonight.count();
-      toDisplayUnit = "beers"; //TODO:: handle 1 drink
+      toDisplayUnit = "drinks"; //TODO:: handle 1 drink
     case LIFESPEED:
       toDisplayLabel = "All-Time Record:";
       toDisplayValue = lifetime.fastestTime();
-      toDisplayUnit = "ms";
+      toDisplayUnit = STR_BEER_TIMING_UNIT;
     case TONIGHTSPEED:
       toDisplayLabel = "Tonight's Record";
       toDisplayValue = tonight.fastestTime();
-      toDisplayUnit = "ms";
+      toDisplayUnit = STR_BEER_TIMING_UNIT;
     case LASTSPEED:
       toDisplayLabel = "Last Drink";
-      toDisplayValue = mostRecentBeerTime;
-      toDisplayUnit = "ms";
+      toDisplayValue = mostRecentDrinkTime;
+      toDisplayUnit = STR_BEER_TIMING_UNIT;
     default:  //might as well have a saftey case //TODO:: do we want to remove this in the final product for less noisy errors?
       toDisplayLabel = "ERROR:";
       toDisplayValue = "BAD ENUM VALUE"; 
