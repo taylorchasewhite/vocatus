@@ -1,7 +1,7 @@
 /**
  * Record.cpp - Represents the metrics kept and saved in the Arduino
  * Intended to reduce duplication of variables in the controller as there are multiple instances of 
- * beers in the controller's runtime environment.
+ * drinks in the controller's runtime environment.
  * Created by Taylor White, Stephen Lago, May 15, 2018
  * See https://www.arduino.cc/en/Hacking/LibraryTutorial for information on class conventions here.
  * http://www.cplusplus.com/doc/tutorial/templates/
@@ -19,7 +19,7 @@ enum Type {
 
 /**
  * Initialize a new record with just count,volume and fastestTime.
- * @param count int the number of beers this record should have
+ * @param count int the number of drinks this record should have
  */
 Record::Record(int count, float volume, int fastestTime) {
 	count(count);
@@ -29,7 +29,7 @@ Record::Record(int count, float volume, int fastestTime) {
 }
 
 //Notes:
-//change "beer" to "drink"
+//change "drink" to "drink"
 //change "Record" to "DrinkList" or "Session" 
 //move calculation logic from controller to ^^
 
@@ -38,38 +38,38 @@ Record::Record(enum type) {
 }
 
 /**
- * Record the successful completion of another beer. Update the count indicating number of beers drank,
- * the volume drank in this record's lifetime, and the evaluate if the new beer was the fastest
+ * Record the successful completion of another drink. Update the count indicating number of drinks drank,
+ * the volume drank in this record's lifetime, and the evaluate if the new drink was the fastest
  * 
- * @param startTime int the first instant of beer consumption recorded
- * @param endTime int the last instant of beer consumption recorded
- * @param volume float the amount of recorded liquid in this beer
+ * @param startTime int the first instant of drink consumption recorded
+ * @param endTime int the last instant of drink consumption recorded
+ * @param volume float the amount of recorded liquid in this drink
  */
-void Record::addBeer(int startTime, int endTime, float volume) {
-	this.addBeer(new Beer(startTime,endTime,volume));
+void Record::addDrink(int startTime, int endTime, float volume) {
+	this.addDrink(new Drink(startTime,endTime,volume));
 }
 
 /**
- * Record the successful completion of another beer. Update the count indicating number of beers drank,
- * the volume drank in this record's lifetime, and the evaluate if the new beer was the fastest.
+ * Record the successful completion of another drink. Update the count indicating number of drinks drank,
+ * the volume drank in this record's lifetime, and the evaluate if the new drink was the fastest.
  * 
- * @param beer Beer The beer that was just drank.
+ * @param drink Drink The drink that was just drank.
  */
-void Record::addBeer(Beer beer) {
+void Record::addDrink(Drink drink) {
 	addCount();
-	addVolume(beer.volume()):
-	evalAndUpdateFastestBeer();
+	addVolume(drink.volume()):
+	evalAndUpdateFastestDrink();
 }
 
 /**
- * Increase the number of beers drank for this record by one
+ * Increase the number of drinks drank for this record by one
  */
 void Record::addCount() {
 	_count++;
 }
 
 /**
- * Return the number of beers drank during this record's lifetime.
+ * Return the number of drinks drank during this record's lifetime.
  */
 int Record::count() {
 	return _count;
@@ -101,39 +101,39 @@ void Record::endTime(int endTime) {
 }
 
 /**
- * Given a beer, evaluate if it is the fastest beer for this record and return back to the caller if so.
- * Also, save this beer as the new fastest time.
+ * Given a drink, evaluate if it is the fastest drink for this record and return back to the caller if so.
+ * Also, save this drink as the new fastest time.
  * 
- * @param newBeer Beer the newly drank beer to be evaluated against the fastest beer.
- * @return bool if the new beer is the fastest beer, return true, else, return false.
+ * @param newDrink Drink the newly drank drink to be evaluated against the fastest drink.
+ * @return bool if the new drink is the fastest drink, return true, else, return false.
  */
-bool Record::evalAndUpdateFastestBeer(Beer newBeer) {
-	if (newBeer.startTime()-newBeer.endTime() < _fastestBeer.timeToFinish()) {
-		_fastestBeer=newBeer;
+bool Record::evalAndUpdateFastestDrink(Drink newDrink) {
+	if (newDrink.startTime()-newDrink.endTime() < _fastestDrink.timeToFinish()) {
+		_fastestDrink=newDrink;
 		return true;	
 	}
 	return false;
 }
 
 /**
- * Return the completion duration of the fastest beer drank during this record's lifetime.
- * @return float The amount of time needed to completely finish the beer.
+ * Return the completion duration of the fastest drink drank during this record's lifetime.
+ * @return float The amount of time needed to completely finish the drink.
  * 
  */
-float Record::fastestTime() { // return the completion duration of the fastest beer
-	return _fastestBeer.timeToFinish();
+float Record::fastestTime() { // return the completion duration of the fastest drink
+	return _fastestDrink.timeToFinish();
 } 			
 
 /**
- * Return the fastest Beer drank during the course of this record.
- * @return Beer return the Beer that has the fastest time recorded
+ * Return the fastest Drink drank during the course of this record.
+ * @return Drink return the Drink that has the fastest time recorded
  */
-Beer Record::fastestBeer() { // Same as fastest time but returns the Beer record.
-	return _fastestBeer;
+Drink Record::fastestDrink() { // Same as fastest time but returns the Drink record.
+	return _fastestDrink;
 } 		
 
 /**
- * Get the start time that this record began tracking beer consumption. 
+ * Get the start time that this record began tracking drink consumption. 
  * @TODO: Should this be a datetime?
  * @return int the integer value representing the start instant
  */
@@ -142,7 +142,7 @@ int Record::startTime() {
 }
 
 /**
- * Set the Record's start time to represent when it was initialized and began tracking beer consumption.
+ * Set the Record's start time to represent when it was initialized and began tracking drink consumption.
  * @TODO: Should this be a datetime?
  */
 void Record::startTime(startTime) {
