@@ -6,7 +6,10 @@
  */
 #include "Arduino.h"
 #include "DisplayManager.h"
+#include <LiquidCrystal.h>
 
+const int rs = 7, en = 8, d4 = 9, d5 = 10, d6 = 11, d7 = 12;
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
 DisplayManager::DisplayManager(OutputMode myOutputMode) {
   _changeOutputMode(myOutputMode);
@@ -25,6 +28,20 @@ void DisplayManager::_changeOutputMode(OutputMode newOutputMode) {
   _isDebugEnabled = ((newOutputMode&DEBUG) == DEBUG);
   _isStatusBoardEnabled = ((newOutputMode&STATUSBOARD) == STATUSBOARD);
   _isLcdEnabled = ((newOutputMode&LCD) == LCD);
+}
+
+/**
+ * Send info to the appropriate output
+ */
+void DisplayManager::OutputData(Record lifetimeRecord, Record tonightRecord,int mostRecentDrinkTimeVar, float mostRecentVolumeVar)
+{
+  if(_isStatusBoardEnabled) { 
+    _sendToStatusBoard(lifetimeRecord,tonightRecord,mostRecentDrinkTimeVar,mostRecentVolumeVar);
+  }
+
+  if(_isLcdEnabled) {
+    _sendToLcd(lifetimeRecord,tonightRecord,mostRecentDrinkTimeVar);
+  }
 }
 
 /****************************************************************/
@@ -63,24 +80,24 @@ void DisplayManager::DebugPrintln(double debugText) { if(_shouldDebug()){ Serial
  * 
  * @return a semicolon delimited string containing the information to send as output
  */
-String DisplayManager::_buildComString(Record lifetimeRecord, Record tonightRecord,int mostRecentDrinkTimeVar, float mostRecentVolumeVar)
+String DisplayManager::_buildComString(Record lifetimeRecordVar, Record tonightRecordVar,int mostRecentDrinkTimeVar, float mostRecentVolumeVar)
 {
   String toSend = "";
   String delim = ";";
   
-  toSend += lifetimeRecord.count();
+  toSend += lifetimeRecordVar.count();
   toSend += delim;
-  toSend += tonightRecord.count();
+  toSend += tonightRecordVar.count();
   toSend += delim;
-  toSend += lifetimeRecord.fastestTime();
+  toSend += lifetimeRecordVar.fastestTime();
   toSend += delim;
-  toSend += tonightRecord.fastestTime();
+  toSend += tonightRecordVar.fastestTime();
   toSend += delim;
   toSend += mostRecentDrinkTimeVar;
   toSend += delim;
-  toSend += lifetimeRecord.volume();
+  toSend += lifetimeRecordVar.volume();
   toSend += delim;
-  toSend += lifetimeRecord.volume();
+  toSend += tonightRecordVar.volume();
   toSend += delim;
   toSend += mostRecentVolumeVar;
   toSend += delim;  
@@ -88,18 +105,79 @@ String DisplayManager::_buildComString(Record lifetimeRecord, Record tonightReco
   return (toSend);
 }
 
+void DisplayManager::_sendToStatusBoard(Record lifetimeRecordVar, Record tonightRecordVar,int mostRecentDrinkTimeVar, float mostRecentVolumeVar) {
+  String comString = _buildComString(lifetimeRecordVar,tonightRecordVar,mostRecentDrinkTimeVar,mostRecentVolumeVar); 
+  Serial.println(comString);  
+}
+
+/****************************************************************/
+/********************     LCD Management    *********************/
+/****************************************************************/
 /**
- * Send info to the status board
+ * Initialize the lcd components
  */
-void DisplayManager::OutputData(Record lifetimeRecord, Record tonightRecord,int mostRecentDrinkTimeVar, float mostRecentVolumeVar)
+void DisplayManager::_initLcd() {
+  lcd.begin(16,2);
+  lcd.print("Running...");
+
+  _currentValueToDisplay = LIFECOUNT;
+}
+
+/**
+ * Cycle through to the next display mode according to the order in the enum
+ */
+void DisplayManager::CycleCurrentValueToDisplay() {
+  int intValue = (int) _currentValueToDisplay;
+  intValue++; //increment by one
+  if(intValue == ENDVALUE) {
+    intValue = 0; //close the cycle
+  }
+  _currentValueToDisplay = (CurrentValueToDisplay) intValue;
+}
+
+
+/**
+ * Send the relevant info for display on the LCD, based on the current lcdDisplayMode
+ */
+void DisplayManager::_sendToLcd(Record lifetimeRecordVar, Record tonightRecordVar,int mostRecentDrinkTimeVar)
 {
-  if(_isStatusBoardEnabled) { 
-    String comString = _buildComString(lifetimeRecord,tonightRecord,mostRecentDrinkTimeVar,mostRecentVolumeVar); 
-    Serial.println(comString);  
+  String toDisplayLabel = "";
+  String toDisplayValue = "";
+  String toDisplayUnit = "";
+
+  //use the current mode to determine what to show on the LCD
+  switch(_currentValueToDisplay) {
+    case LIFECOUNT:
+      toDisplayLabel = "Lifetime:";
+      toDisplayValue = lifetimeRecordVar.count();
+      toDisplayUnit = "drinks"; //TODO:: handle 1 drink
+    case TONIGHTCOUNT:
+      toDisplayLabel = "Tonight:";
+      toDisplayValue = tonightRecordVar.count();
+      toDisplayUnit = "drinks"; //TODO:: handle 1 drink
+    case LIFESPEED:
+      toDisplayLabel = "All-Time Record:";
+      toDisplayValue = lifetimeRecordVar.fastestTime();
+      toDisplayUnit = "ms";
+    case TONIGHTSPEED:
+      toDisplayLabel = "Tonight's Record";
+      toDisplayValue = tonightRecordVar.fastestTime();
+      toDisplayUnit = "ms";
+    case LASTSPEED:
+      toDisplayLabel = "Last Drink";
+      toDisplayValue = mostRecentDrinkTimeVar;
+      toDisplayUnit = "ms";
+    default:  //might as well have a saftey case //TODO:: do we want to remove this in the final product for less noisy errors?
+      toDisplayLabel = "ERROR:";
+      toDisplayValue = "BAD ENUM VALUE"; 
   }
 
-  if(_isLcdEnabled) {
-    
-  }
+  //print the first line
+  lcd.setCursor(0,0); 
+  lcd.print(toDisplayLabel);
+
+  //print the second line
+  lcd.setCursor(0,1); 
+  lcd.print(toDisplayValue + " " + toDisplayUnit);
 }
 

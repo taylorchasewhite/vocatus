@@ -35,7 +35,6 @@
 #include "DisplayManager.h"
 #include "StorageManager.h"
 #include <EEPROM.h>
-#include <LiquidCrystal.h>
 
 /****************************************************************/
 /********************        Globals        *********************/
@@ -84,23 +83,6 @@ unsigned long currentDrinkCompletionInstant;
 bool firstDropOfDrink; //@NOTE:: this does nothing; remove all references
 bool startingUp;
 
-//Flags
-bool statusBoardEnabled; 
-bool lcdModeEnabled;
-bool debugModeOn; 
-
-//LCD values
-const int rs = 7, en = 8, d4 = 9, d5 = 10, d6 = 11, d7 = 12;
-LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
-enum DisplayMode {
-  LIFECOUNT = 0, //explicitly set this guy to 0 to support cycling
-  TONIGHTCOUNT,
-  LIFESPEED,
-  TONIGHTSPEED,
-  LASTSPEED,
-  ENDVALUE //this value should always be last to support cycling; add new values before this guy
-} lcdDisplayMode;
-
 // Display strings
 DisplayManager display;
 
@@ -141,11 +123,6 @@ void setup() {
   pinMode(resetButtonInPin, INPUT_PULLUP);
   pinMode(resetButtonOutPin, OUTPUT);
   pinMode(modeCycleButtonInPin, INPUT_PULLUP);
-
-  if(lcdModeEnabled) {
-    lcd.begin(16,2);
-    lcd.print("Running...");
-  }
   
   attachInterrupt(0, Flow, RISING);  //Configures interrupt 0 (pin 2 on the Arduino Uno) to run the function "Flow" 
 
@@ -220,8 +197,7 @@ void initGlobals() {
   
   firstDropOfDrink=false;
   startingUp = false;
-  lcdDisplayMode = LIFECOUNT;
-
+  
   //initialize all tracking variables to 0 in case they are not read from storage
   tonight = new Record();
   lifetime = new Record();
@@ -417,76 +393,5 @@ void storeAllValues() {
   storage.lifetimeCount(lifetimeTotalDrinkCount);
   storage.lifetimeFastestTime(lifetimeFastestDrinkTime);
   storage.lifetimeVolume(lifetimeTotalVolume);
-}
-
-/****************************************************************/
-/********************     LCD Management    *********************/
-/****************************************************************/
-/**
- * Only print to the lcd display if lcd mode is turned on
- */
-bool shouldSendToLcd() {
-  return(lcdModeEnabled);
-}
-
-
-/**
- * Cycle through to the next display mode according to the order in the enum
- */
-void cycleMode() {
-  int intValue = (int) lcdDisplayMode;
-  intValue++; //increment by one
-  if(intValue == ENDVALUE) {
-    intValue = 0; //close the cycle
-  }
-  lcdDisplayMode = (DisplayMode) intValue;
-}
-
-
-/**
- * Send the relevant info for display on the LCD, based on the current lcdDisplayMode
- */
-void sendToLcd()
-{
-  if(!shouldSendToLcd()) { return; } //short circuit this if we shouldn't be doing anything
-
-  String toDisplayLabel = "";
-  String toDisplayValue = "";
-  String toDisplayUnit = "";
-
-  //use the current mode to determine what to show on the LCD
-  switch(lcdDisplayMode) {
-    case LIFECOUNT:
-      toDisplayLabel = "Lifetime:";
-      toDisplayValue = lifetime.count();
-      toDisplayUnit = "drinks"; //TODO:: handle 1 drink
-    case TONIGHTCOUNT:
-      toDisplayLabel = "Tonight:";
-      toDisplayValue = tonight.count();
-      toDisplayUnit = "drinks"; //TODO:: handle 1 drink
-    case LIFESPEED:
-      toDisplayLabel = "All-Time Record:";
-      toDisplayValue = lifetime.fastestTime();
-      toDisplayUnit = STR_BEER_TIMING_UNIT;
-    case TONIGHTSPEED:
-      toDisplayLabel = "Tonight's Record";
-      toDisplayValue = tonight.fastestTime();
-      toDisplayUnit = STR_BEER_TIMING_UNIT;
-    case LASTSPEED:
-      toDisplayLabel = "Last Drink";
-      toDisplayValue = mostRecentDrinkTime;
-      toDisplayUnit = STR_BEER_TIMING_UNIT;
-    default:  //might as well have a saftey case //TODO:: do we want to remove this in the final product for less noisy errors?
-      toDisplayLabel = "ERROR:";
-      toDisplayValue = "BAD ENUM VALUE"; 
-  }
-
-  //print the first line
-  lcd.setCursor(0,0); 
-  lcd.print(toDisplayLabel);
-
-  //print the second line
-  lcd.setCursor(0,1); 
-  lcd.print(toDisplayValue + " " + toDisplayUnit);
 }
 

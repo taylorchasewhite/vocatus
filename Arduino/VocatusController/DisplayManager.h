@@ -44,6 +44,7 @@ class DisplayManager
     void DebugPrintln(double);
 
     void OutputData(Record, Record, int, float);
+    void CycleCurrentValueToDisplay();
   private:
     OutputMode _outputMode;
     CurrentValueToDisplay _currentValueToDisplay;
@@ -54,9 +55,10 @@ class DisplayManager
 
     bool _shouldDebug();
     void _changeOutputMode(OutputMode);
-
     String _buildComString(Record, Record, int, float);
-    void _sendToStatusBoard();
+    void _sendToStatusBoard(Record, Record, int, float);
+    void _initLcd();
+    void _sendToLcd(Record, Record, int);
 };
 
 #endif
