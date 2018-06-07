@@ -53,15 +53,16 @@ int prevCount;
 
 int mostRecentBeerTime;  // The time it took in ms to finish the last beer
 
-float mostRecentVolume;
+float mostRecentVolume; //@NOTE:: why have this if we have a beer for it?
 float multiplier;
 
 double flowRate;
 volatile int count;
 
 // Timing
+//@NOTE:: we aren't using these anywhere
 Beer lifetimeBestBeer;
-Beer tonightBestBeer;
+Beer tonightBestBeer; 
 Beer lastBeer;
 
 Record lifetime;
@@ -75,11 +76,11 @@ int currentBeerDay;
 int currentBeerHour;
 
 const unsigned long SECONDS_IN_DAY = 86400;
-unsigned long lastBeerCompletionInstant;
+unsigned long lastBeerCompletionInstant; //@NOTE:: why are all of these globals?
 unsigned long currentBeerCompletionInstant;
 
 // States
-bool firstDropOfBeer;
+bool firstDropOfBeer; //@NOTE:: this does nothing; remove all references
 bool startingUp;
 
 //Flags
@@ -96,12 +97,13 @@ enum DisplayMode {
   LIFESPEED,
   TONIGHTSPEED,
   LASTSPEED,
-  ENDVALUE //this calue should always be last to support cycling; add new values before this guy
+  ENDVALUE //this value should always be last to support cycling; add new values before this guy
 } lcdDisplayMode;
 
 // Display strings
 DisplayManager display;
 
+//@Note:: Do these need to be constants? we should either make our debug/LCD strings consistent or get rid of these
 const String STR_BEER_TIMING          = "Time: ";
 const String STR_BEER_TIMING_UNIT     = " ms!";
 const String STR_PREV_COUNT           = "Prev: ";
@@ -280,7 +282,8 @@ int getBeerCompletionDuration() {
 
 void setBeerCompletionDuration(int startTime, int endTime) {
   mostRecentBeerTime = endTime-startTime;
-  //TODO:: we should be using globals unless there's a reason to read from memory
+  //@NOTE:: we should be using globals unless there's a reason to read from memory (globals can exist in the storage class, that's fine; but it looks like the plan is to have them read from memory every time)
+  //@NOTE:: this method does not exist
   if ((mostRecentBeerTime < storage.getLifetimeFastestBeerTime()) || (storage.getLifetimeFastestBeerTime()<=0)) {
     lifetimeFastestBeerTime = mostRecentBeerTime;
     storage.setLifetimeFastestTime();
@@ -319,8 +322,9 @@ void recordBeerEnd() {
   
   setBeerCompletionDuration(startTime,endTime);
   
-  setBeerCompletionDateTime(); // @TODO: This function does nothing
-  
+  setBeerCompletionDateTime(); // @NOTE:: This function does nothing
+
+  //@NOTE:: we'll want to tear this out once we properly define a session
   if (isNewDay()) {
     resetTonightCounts();
   }
