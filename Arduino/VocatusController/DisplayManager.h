@@ -26,20 +26,21 @@ typedef enum CurrentValueToDisplay {
 class DisplayManager
 {
   public:
-    DisplayManager(int pin);
+    DisplayManager();
+    DisplayManager(OutputMode);
     
-    void DebugPrint(String debugText);
-    void DebugPrintln(String debugText);
-    void DebugPrint(int debugText);
-    void DebugPrintln(int debugText);
-    void DebugPrint(long debugText);
-    void DebugPrintln(long debugText);
-    void DebugPrint(unsigned long debugText);
-    void DebugPrintln(unsigned long debugText);
-    void DebugPrint(float debugText);
-    void DebugPrintln(float debugText);
-    void DebugPrint(double debugText);
-    void DebugPrintln(double debugText);
+    void DebugPrint(String);
+    void DebugPrintln(String);
+    void DebugPrint(int);
+    void DebugPrintln(int);
+    void DebugPrint(long);
+    void DebugPrintln(long);
+    void DebugPrint(unsigned long);
+    void DebugPrintln(unsigned long);
+    void DebugPrint(float);
+    void DebugPrintln(float);
+    void DebugPrint(double);
+    void DebugPrintln(double);
   private:
     OutputMode _outputMode;
     CurrentValueToDisplay _currentValueToDisplay;
@@ -49,7 +50,7 @@ class DisplayManager
     bool _isStatusBoardEnabled;
 
     bool _shouldDebug();
-    bool _changeOutputMode(OutputMode);
+    void _changeOutputMode(OutputMode);
 };
 
 #endif

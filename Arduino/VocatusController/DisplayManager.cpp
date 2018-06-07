@@ -7,17 +7,30 @@
 #include "Arduino.h"
 #include "DisplayManager.h"
 
-// Constants
 
-DisplayManager::DisplayManager(int pin)
-{
-  
+DisplayManager::DisplayManager(OutputMode myOutputMode) {
+  _changeOutputMode(myOutputMode);
+}
+
+DisplayManager::DisplayManager() {
+  DisplayManager(DEBUG);
+}
+
+/**
+ * centralized place for changing the output mode
+ * updates the boolean state values to make sure they are always correct
+ */
+void DisplayManager::_changeOutputMode(OutputMode newOutputMode) {
+  _outputMode = newOutputMode;
+  _isDebugEnabled = ((newOutputMode&DEBUG) == DEBUG);
+  _isStatusBoardEnabled = ((newOutputMode&STATUSBOARD) == STATUSBOARD);
+  _isLcdEnabled = ((newOutputMode&LCD) == LCD);
 }
 
 /**
  * Only print to the serial monitor if debug mode is turned on and if not using a status board
  */
-boolean DisplayManager::_shouldDebug() {
+bool DisplayManager::_shouldDebug() {
   return(_isDebugEnabled && !_isStatusBoardEnabled);
 }
 

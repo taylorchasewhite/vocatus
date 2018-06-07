@@ -222,16 +222,12 @@ void initGlobals() {
   lcdDisplayMode = LIFECOUNT;
 
   //initialize all tracking variables to 0 in case they are not read from storage
-
   tonight = new Record();
   lifetime = new Record();
   
   lastDrink = new Drink();
 
-  //set flags for initial desired state
-  statusBoardEnabled = true; //set to true to have output sent via serial message to a statusboard (e.g. processing)
-  debugModeOn = false; //set to true to enable noisy output (e.g. messages sent to Serial Monitor)
-  lcdModeEnabled = false; //set to true to enable output to an LCD
+  display = new DisplayManager(DEBUG); //set it to whatever mode(s) you want: DEBUG|STATUSBOARD|LCD
 
   readFromStorage();
 }
