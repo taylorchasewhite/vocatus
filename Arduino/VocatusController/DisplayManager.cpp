@@ -5,14 +5,32 @@
  * See https://www.arduino.cc/en/Hacking/LibraryTutorial for information on class conventions here.
  */
 #include "Arduino.h"
-#include "StorageManager.h"
+#include "DisplayManager.h"
 
 // Constants
+//@TODO: all of this
 
-
-StorageManager::StorageManager(int pin)
+DisplayManager::DisplayManager(int pin)
 {
   pinMode(pin, OUTPUT);
   _pin = pin;
 }
 
+<<<<<<< HEAD
+void DisplayManager::dot()
+{
+  digitalWrite(_pin, HIGH);
+  delay(250);
+  digitalWrite(_pin, LOW);
+  delay(250);  
+}
+
+void DisplayManager::dash()
+{
+  digitalWrite(_pin, HIGH);
+  delay(1000);
+  digitalWrite(_pin, LOW);
+  delay(250);
+}
+=======
+>>>>>>> e28d70f6202c7c24b0c9e52d576125f1e3ba846c
