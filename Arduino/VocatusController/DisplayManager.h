@@ -15,4 +15,14 @@ class DisplayManager
   private:
     int _pin;
 };
+
+enum DisplayMode {
+  LIFECOUNT = 0, //explicitly set this guy to 0 to support cycling
+  TONIGHTCOUNT,
+  LIFESPEED,
+  TONIGHTSPEED,
+  LASTSPEED,
+  ENDVALUE //this value should always be last to support cycling; add new values before this guy
+}
+
 #endif
