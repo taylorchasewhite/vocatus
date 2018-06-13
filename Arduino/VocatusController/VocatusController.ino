@@ -2,7 +2,7 @@
   @title:   Vocatus: Flow Meter - Making the world a better place
   @author:  Stephen Lago & Taylor White  
   @date:    May 2, 2018
-  @purpose: Store and calculate flow meter data for a beer bong.
+  @purpose: Store and calculate flow meter data for a drink bong.
   --------------------------
 */
 
@@ -67,8 +67,8 @@ Drink lifetimeBestDrink;
 Drink tonightBestDrink; 
 Drink lastDrink;
 
-Record lifetime;
-Record tonight;
+Record& lifetime;
+Record& tonight;
 
 unsigned long endTime;
 unsigned long startTime;
@@ -106,8 +106,8 @@ enum DisplayMode {
 DisplayManager display;
 
 //@Note:: Do these need to be constants? we should either make our debug/LCD strings consistent or get rid of these
-const String STR_BEER_TIMING          = "Time: ";
-const String STR_BEER_TIMING_UNIT     = "ms";
+const String STR_DRINK_TIMING          = "Time: ";
+const String STR_DRINK_TIMING_UNIT     = "ms";
 const String STR_PREV_COUNT           = "Prev: ";
 const String STR_CURR_COUNT           = "Curr: ";
 const String STR_FASTEST_TIME         = "Fastest time: ";
@@ -285,8 +285,7 @@ void setDrinkCompletionDuration(int startTime, int endTime) {
   mostRecentDrinkTime = endTime-startTime;
   //@NOTE:: we should be using globals unless there's a reason to read from memory (globals can exist in the storage class, that's fine; but it looks like the plan is to have them read from memory every time)
   //@NOTE:: this method does not exist
-  if ((mostRecentDrinkTime < storage.lifetimeFastestDrinkTime()) || (storage.lifetimeFastestDrinkTime()<=0)) {
-    lifetimeFastestDrinkTime = mostRecentDrinkTime;
+  if ((mostRecentDrinkTime < storage.lifetimeFastestTime()) || (storage.lifetimeFastestTime()<=0)) {
     storage.lifetimeFastestTime(mostRecentDrinkTime);
   }
 }
@@ -336,7 +335,7 @@ void recordDrinkEnd() {
  * This function will reset all of the relevant variables scoring drink statistics for a given night.
  */
 void resetTonightCounts() {
-  tonight = new Record();
+  tonight = *new Record();
 }
 
 /**
@@ -359,8 +358,8 @@ void totalReset() {
   prevCount=0;
   resetTiming();
   
-  lifetime = new Record();
-  tonight = new Record();
+  lifetime = *new Record();
+  tonight = *new Record();
   
   mostRecentDrinkTime = 0;
   mostRecentVolume = 0.0;
@@ -388,10 +387,10 @@ void printStatusReport(bool readFromStorage) {
   if (readFromStorage) {
     debugPrintln(STR_LIFETIME_COUNT + storage.lifetimeCount());
     debugPrintln(STR_LIFETIME_VOLUME + storage.lifetimeVolume() + STR_LIFETIME_VOLUME_UNIT);
-    debugPrintln(STR_FASTEST_TIME + storage.lifetimeFastestTime() + STR_BEER_TIMING_UNIT);
+    debugPrintln(STR_FASTEST_TIME + storage.lifetimeFastestTime() + STR_DRINK_TIMING_UNIT);
   }
   else {
-    debugPrintln(STR_BEER_TIMING + lifetime.fastestDrink() + STR_BEER_TIMING_UNIT);
+    debugPrintln(STR_DRINK_TIMING + lifetime.fastestTime() + STR_DRINK_TIMING_UNIT);
     debugPrintln(STR_LIFETIME_COUNT + lifetime.count());
     debugPrintln(STR_LIFETIME_VOLUME + lifetime.volume() + STR_LIFETIME_VOLUME_UNIT);
   }
@@ -418,7 +417,7 @@ void readFromStorage() {
  */
 void storeAllValues() {
   storage.lifetimeCount(lifetime.count());
-  storage.lifetimeFastestTime(lifetime.fastestTime();
+  storage.lifetimeFastestTime(lifetime.fastestTime()));
   storage.lifetimeVolume(lifetime.volume());
 }
 
@@ -538,15 +537,15 @@ void sendToLcd()
     case LIFESPEED:
       toDisplayLabel = "All-Time Record:";
       toDisplayValue = lifetime.fastestTime();
-      toDisplayUnit = STR_BEER_TIMING_UNIT;
+      toDisplayUnit = STR_DRINK_TIMING_UNIT;
     case TONIGHTSPEED:
       toDisplayLabel = "Tonight's Record";
       toDisplayValue = tonight.fastestTime();
-      toDisplayUnit = STR_BEER_TIMING_UNIT;
+      toDisplayUnit = STR_DRINK_TIMING_UNIT;
     case LASTSPEED:
       toDisplayLabel = "Last Drink";
       toDisplayValue = mostRecentDrinkTime;
-      toDisplayUnit = STR_BEER_TIMING_UNIT;
+      toDisplayUnit = STR_DRINK_TIMING_UNIT;
     default:  //might as well have a saftey case //TODO:: do we want to remove this in the final product for less noisy errors?
       toDisplayLabel = "ERROR:";
       toDisplayValue = "BAD ENUM VALUE"; 

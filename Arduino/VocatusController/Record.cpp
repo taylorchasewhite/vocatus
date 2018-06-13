@@ -152,7 +152,7 @@ float Record::fastestTime() { // return the completion duration of the fastest d
  * @return Drink return the Drink that has the fastest time recorded
  */
 Drink Record::fastestDrink() { // Same as fastest time but returns the Drink record.
-	return _fastestDrink;
+	return *_fastestDrink;
 } 		
 
 /**
