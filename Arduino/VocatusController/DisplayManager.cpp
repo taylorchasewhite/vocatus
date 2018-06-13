@@ -16,3 +16,11 @@ DisplayManager::DisplayManager(int pin)
   _pin = pin;
 }
 
+/**
+ * Default constructor, used to allocate space when defining members. 
+ * Sets all values to null, 0, or other non-meaningful data.
+ */
+DisplayManager::DisplayManager() {
+	
+}
+

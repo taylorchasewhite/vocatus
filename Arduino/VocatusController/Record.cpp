@@ -8,6 +8,8 @@
  * 
  */
 #include "Arduino.h"
+#include "Record.h"
+#include "Drink.h"
 
 //@NOTE:: Not sold on variable naming convention; makes it confusing to parse the code
 //examples: count(), startTime(), endTime()
@@ -21,21 +23,42 @@ enum Type {
  * Initialize a new record with just count,volume and fastestTime.
  * @param count int the number of drinks this record should have
  */
-Record::Record(int count, float volume, int fastestTime) {
-	count(count);
-	addVolume(volume);
-	_fastestTime=fastestTime;
+Record::Record(int count, float volume, int fastestTime,int startTime) {
+	this->count(count);
+	this->addVolume(volume);
+	_fastestDrink=new Drink(fastestTime);
 	//startTime(startTime);
 }
 
+/**
+ * Initialize a new record that is a copy of the values in Record
+ * @param copy this is the Record that we will copy from
+ */
+Record::Record(Record &copy) {
+	this->addVolume(copy.volume());
+	_fastestDrink=new Drink(copy.fastestTime());
+	this->count(copy.count());
+}
+
+/**
+ * Default constructor, used to allocate space when defining members. 
+ * Sets all values to null, 0, or other non-meaningful data.
+ */
+Record::Record() {
+	_count=0;
+	//Drink* _fastestDrink; // TODO, what to do?
+    _endTime=0;
+	_startTime=0;
+	int _volume=0;
+}
+
 //Notes:
-//change "drink" to "drink"
 //change "Record" to "DrinkList" or "Session" 
 //move calculation logic from controller to ^^
 
-Record::Record(enum type) {
+//Record::Record(enum type) {
 
-}
+//}
 
 /**
  * Record the successful completion of another drink. Update the count indicating number of drinks drank,
@@ -46,7 +69,7 @@ Record::Record(enum type) {
  * @param volume float the amount of recorded liquid in this drink
  */
 void Record::addDrink(int startTime, int endTime, float volume) {
-	this.addDrink(new Drink(startTime,endTime,volume));
+	this->addDrink(new Drink(startTime,endTime,volume));
 }
 
 /**
@@ -55,10 +78,10 @@ void Record::addDrink(int startTime, int endTime, float volume) {
  * 
  * @param drink Drink The drink that was just drank.
  */
-void Record::addDrink(Drink drink) {
-	addCount();
-	addVolume(drink.volume()):
-	evalAndUpdateFastestDrink();
+void Record::addDrink(Drink* drink) {
+	this->addCount();
+	this->addVolume(drink->volume());
+	this->evalAndUpdateFastestDrink(drink);
 }
 
 /**
@@ -80,7 +103,7 @@ int Record::count() {
  * using addCount()
  */
 void Record::count(int count) {
-	_coount=count;
+	_count=count;
 }
 
 /**
@@ -107,8 +130,8 @@ void Record::endTime(int endTime) {
  * @param newDrink Drink the newly drank drink to be evaluated against the fastest drink.
  * @return bool if the new drink is the fastest drink, return true, else, return false.
  */
-bool Record::evalAndUpdateFastestDrink(Drink newDrink) {
-	if (newDrink.startTime()-newDrink.endTime() < _fastestDrink.timeToFinish()) {
+bool Record::evalAndUpdateFastestDrink(Drink* newDrink) {
+	if (newDrink->startTime()-newDrink->endTime() < _fastestDrink->timeToFinish()) {
 		_fastestDrink=newDrink;
 		return true;	
 	}
@@ -121,7 +144,7 @@ bool Record::evalAndUpdateFastestDrink(Drink newDrink) {
  * 
  */
 float Record::fastestTime() { // return the completion duration of the fastest drink
-	return _fastestDrink.timeToFinish();
+	return _fastestDrink->timeToFinish();
 } 			
 
 /**
@@ -145,7 +168,7 @@ int Record::startTime() {
  * Set the Record's start time to represent when it was initialized and began tracking drink consumption.
  * @TODO: Should this be a datetime?
  */
-void Record::startTime(startTime) {
+void Record::startTime(int startTime) {
 	_startTime=startTime;
 }
 	

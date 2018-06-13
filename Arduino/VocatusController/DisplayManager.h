@@ -12,6 +12,7 @@ class DisplayManager
 {
   public:
     DisplayManager(int pin);
+    DisplayManager();
   private:
     int _pin;
 };

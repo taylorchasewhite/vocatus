@@ -30,11 +30,13 @@
     
   --------------------------
 */
-#include <Drink.h>
-#include <DisplayManager.h>
-#include <EEPROM.h>
-#include <LiquidCrystal.h>
-#include <StorageManager.h>
+#include "Record.h"
+#include "Drink.h"
+#include "DisplayManager.h"
+#include "EEPROM.h"
+#include "LiquidCrystal.h"
+#include "StorageManager.h"
+
 
 /****************************************************************/
 /********************        Globals        *********************/
@@ -223,10 +225,10 @@ void initGlobals() {
 
   //initialize all tracking variables to 0 in case they are not read from storage
 
-  tonight = new Record();
-  lifetime = new Record();
+  tonight = *new Record();
+  lifetime = *new Record();
   
-  lastDrink = new Drink();
+  lastDrink = *new Drink();
 
   //set flags for initial desired state
   statusBoardEnabled = true; //set to true to have output sent via serial message to a statusboard (e.g. processing)
@@ -283,9 +285,9 @@ void setDrinkCompletionDuration(int startTime, int endTime) {
   mostRecentDrinkTime = endTime-startTime;
   //@NOTE:: we should be using globals unless there's a reason to read from memory (globals can exist in the storage class, that's fine; but it looks like the plan is to have them read from memory every time)
   //@NOTE:: this method does not exist
-  if ((mostRecentDrinkTime < storage.getLifetimeFastestDrinkTime()) || (storage.getLifetimeFastestDrinkTime()<=0)) {
+  if ((mostRecentDrinkTime < storage.lifetimeFastestDrinkTime()) || (storage.lifetimeFastestDrinkTime()<=0)) {
     lifetimeFastestDrinkTime = mostRecentDrinkTime;
-    storage.setLifetimeFastestTime();
+    storage.lifetimeFastestTime(mostRecentDrinkTime);
   }
 }
 
@@ -389,9 +391,9 @@ void printStatusReport(bool readFromStorage) {
     debugPrintln(STR_FASTEST_TIME + storage.lifetimeFastestTime() + STR_BEER_TIMING_UNIT);
   }
   else {
-    debugPrintln(STR_BEER_TIMING + getDrinkCompletionDuration() + STR_BEER_TIMING_UNIT);
-    debugPrintln(STR_LIFETIME_COUNT + lifetimeTotalDrinkCount);
-    debugPrintln(STR_LIFETIME_VOLUME + lifetimeTotalVolume + STR_LIFETIME_VOLUME_UNIT);
+    debugPrintln(STR_BEER_TIMING + lifetime.fastestDrink() + STR_BEER_TIMING_UNIT);
+    debugPrintln(STR_LIFETIME_COUNT + lifetime.count());
+    debugPrintln(STR_LIFETIME_VOLUME + lifetime.volume() + STR_LIFETIME_VOLUME_UNIT);
   }
   
   sendToStatusBoard();
@@ -407,10 +409,7 @@ void printStatusReport(bool readFromStorage) {
  * @return the integer value stored in the desired address.
  */
 void readFromStorage() {
-  lifetime = new Record();
-  lifetime.count(storage.lifetimeCount());
-  lifetime.volume(storage.lifetimeVolume());
-  lifetime.time(storage.lifetimeFastestTime());
+  lifetime = storage.lifetimeRecord();
 }
 
 /**
@@ -418,9 +417,9 @@ void readFromStorage() {
  * This should happen ANYTIME data that needs to persist is created and/or updated.
  */
 void storeAllValues() {
-  storage.lifetimeCount(lifetimeTotalDrinkCount);
-  storage.lifetimeFastestTime(lifetimeFastestDrinkTime);
-  storage.lifetimeVolume(lifetimeTotalVolume);
+  storage.lifetimeCount(lifetime.count());
+  storage.lifetimeFastestTime(lifetime.fastestTime();
+  storage.lifetimeVolume(lifetime.volume());
 }
 
 /****************************************************************/
@@ -561,4 +560,3 @@ void sendToLcd()
   lcd.setCursor(0,1); 
   lcd.print(toDisplayValue + " " + toDisplayUnit);
 }
-

@@ -13,6 +13,8 @@ class Drink
 {
   public:
   	Drink();
+	Drink(Drink &copy);
+	Drink(int duration);
 	Drink(int startTime, int endTime, int volume);
 	
   	int endTime();
@@ -23,6 +25,9 @@ class Drink
 	
 	int flowRate();
 	int timeToFinish();
+
+	int volume();
+	void volume(int volume);
 
   private:
     int _drinkDay;
