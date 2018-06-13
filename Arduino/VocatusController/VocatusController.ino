@@ -80,7 +80,6 @@ unsigned long lastDrinkCompletionInstant; //@NOTE:: why are all of these globals
 unsigned long currentDrinkCompletionInstant;
 
 // States
-bool firstDropOfDrink; //@NOTE:: this does nothing; remove all references
 bool startingUp;
 
 // Display strings
@@ -169,7 +168,6 @@ void loop() {
 void Flow() {
   if (count==0) {
       drinkStart();
-      firstDropOfDrink=true;
   }
   count++;
   drinkPulse();
@@ -195,7 +193,6 @@ void initGlobals() {
   currCount=0;
   prevCount=-1;
   
-  firstDropOfDrink=false;
   startingUp = false;
   
   //initialize all tracking variables to 0 in case they are not read from storage
@@ -318,7 +315,6 @@ void resetDrinkSession() {
   currCount=0;
   prevCount=0;
   resetTiming();
-  firstDropOfDrink=true; // print it out
 }
 
 /**
@@ -347,7 +343,7 @@ void totalReset() {
  * Determines whether or not to print out the drink completion data. 
  */
 boolean shouldPrintDrinkTime() {
-  return ((currCount>0) && (firstDropOfDrink) && (currCount==prevCount));
+  return ((currCount>0) && (currCount==prevCount));
 }
 
 /**
