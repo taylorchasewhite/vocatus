@@ -30,9 +30,13 @@
     
   --------------------------
 */
+#include "Record.h"
+#include "Drink.h"
+#include "DisplayManager.h"
+#include "EEPROM.h"
+#include "LiquidCrystal.h"
+#include "StorageManager.h"
 
-#include <EEPROM.h>
-#include <LiquidCrystal.h>
 
 /****************************************************************/
 /********************        Globals        *********************/
@@ -48,15 +52,8 @@ int modeCycleButtonInPin;
 int currCount;
 int prevCount;
 
-int lifetimeTotalBeerCount;
-int tonightTotalBeerCount;
+int mostRecentDrinkTime;  // The time it took in ms to finish the last drink
 
-int lifetimeFastestBeerTime;
-int tonightFastestBeerTime;
-int mostRecentBeerTime;  // The time it took in ms to finish the last beer
-
-float lifetimeTotalVolume;
-float tonightTotalVolume;
 float mostRecentVolume;
 float multiplier;
 
@@ -64,18 +61,27 @@ double flowRate;
 volatile int count;
 
 // Timing
+//@NOTE:: we aren't using these anywhere
+Drink lifetimeBestDrink;
+Drink tonightBestDrink; 
+Drink lastDrink;
+
+Record lifetime;
+Record tonight;
+
 unsigned long endTime;
 unsigned long startTime;
-int lastBeerDay;
-int lastBeerHour;
-int currentBeerDay;
-int currentBeerHour;
+int lastDrinkDay;
+int lastDrinkHour;
+int currentDrinkDay;
+int currentDrinkHour;
 
 const unsigned long SECONDS_IN_DAY = 86400;
-unsigned long lastBeerCompletionInstant;
-unsigned long currentBeerCompletionInstant;
+unsigned long lastDrinkCompletionInstant; //@NOTE:: why are all of these globals?
+unsigned long currentDrinkCompletionInstant;
 
 // States
+bool firstDropOfDrink; //@NOTE:: this does nothing; remove all references
 bool startingUp;
 
 //Flags
@@ -92,21 +98,26 @@ enum DisplayMode {
   LIFESPEED,
   TONIGHTSPEED,
   LASTSPEED,
-  ENDVALUE //this calue should always be last to support cycling; add new values before this guy
+  ENDVALUE //this value should always be last to support cycling; add new values before this guy
 } lcdDisplayMode;
 
 // Display strings
+DisplayManager display;
+
+//@Note:: Do these need to be constants? we should either make our debug/LCD strings consistent or get rid of these
 const String STR_BEER_TIMING          = "Time: ";
-const String STR_BEER_TIMING_UNIT     = " ms!";
+const String STR_BEER_TIMING_UNIT     = "ms";
 const String STR_PREV_COUNT           = "Prev: ";
 const String STR_CURR_COUNT           = "Curr: ";
 const String STR_FASTEST_TIME         = "Fastest time: ";
-const String STR_LIFETIME_COUNT       = "Total beers: ";
+const String STR_LIFETIME_COUNT       = "Total drinks: ";
 const String STR_LIFETIME_VOLUME      = "Total volume: ";
 const String STR_LIFETIME_VOLUME_UNIT = " ml";
 const String STR_TONIGHT              = " tonight";
 
 // Addresses
+StorageManager storage;
+
 const int ADDR_BEER_COUNT             = 0;
 const int ADDR_LIFETIME_VOLUME        = 1*sizeof(float);
 const int ADDR_FASTEST_BEER           = 2*sizeof(float);
@@ -152,10 +163,14 @@ void loop() {
   delay (1000);   //Wait 1 second 
   noInterrupts(); //Disable the interrupts on the Arduino
   
-  if (shouldPrintBeerTime()) {
-    recordBeerEnd();
+  if (shouldPrintDrinkTime()) {
+    recordDrinkEnd();
     printStatusReport(false);
-    resetBeerSession();
+    resetDrinkSession();
+  } 
+  else if (prevCount!=currCount) {
+    //debugPrintln(STR_PREV_COUNT + prevCount);
+    //debugPrintln(STR_CURR_COUNT + currCount);
   }
 
   //if the mode cycle button is pressed
@@ -173,22 +188,23 @@ void loop() {
   } 
 }
 
-/*
+/**
  * The method to run each time we recieve input from the device
  */
 void Flow() {
   if (count==0) {
-      beerStart();
+      drinkStart();
+      firstDropOfDrink=true;
   }
   count++;
-  beerPulse();
-  debugPrintln(count);
+  drinkPulse();
+  if(shouldPrint()){ debugPrintln(count); }
 }
 
 /****************************************************************/
 /********************      Initialize       *********************/
 /****************************************************************/
-/*
+/**
  * Set starting values for globals
  */
 void initGlobals() {
@@ -204,20 +220,16 @@ void initGlobals() {
   currCount=0;
   prevCount=-1;
   
+  firstDropOfDrink=false;
   startingUp = false;
   lcdDisplayMode = LIFECOUNT;
 
   //initialize all tracking variables to 0 in case they are not read from storage
-  lifetimeTotalBeerCount = 0;
-  tonightTotalBeerCount = 0;
 
-  lifetimeFastestBeerTime = 0;
-  tonightFastestBeerTime = 0;
-  mostRecentBeerTime = 0;
-
-  lifetimeTotalVolume = 0.0;
-  tonightTotalVolume = 0.0;
-  mostRecentVolume = 0.0;
+  tonight = *new Record();
+  lifetime = *new Record();
+  
+  lastDrink = *new Drink();
 
   //set flags for initial desired state
   statusBoardEnabled = false; //set to true to have output sent via serial message to a statusboard (e.g. processing)
@@ -239,120 +251,119 @@ void initializeDisplay() {
 /****************************************************************/
 /********************        Timing         *********************/
 /****************************************************************/
-/*
-  Called the first time the hall effect sensor has been triggered since the last beer session completed.
-*/
-
-void beerStart() {
+/**
+ * Called the first time the hall effect sensor has been triggered since the last drink session completed.
+ */
+void drinkStart() {
   startTime=millis();
 }
 
-/*
-  Called every time the hall effect sensor fires. Represents another ~2.65 ml have been drank.
-*/
-void beerPulse() {
+/**
+ * Called every time the hall effect sensor fires. Represents another ~2.65 ml have been drank.
+ */
+void drinkPulse() {
   endTime=millis();
 }
 
-/*
-  Reset the start and end time for a beer that will be drank and judged.
-*/
+/**
+ * Reset the start and end time for a drink that will be drank and judged.
+ */
 void resetTiming() {
   startTime=0;
   endTime=0;
 }
 
-/*
-  Get the time it took to complete the most recent beer.
- 
-  @return How long it took to complete the last beer.
-*/
-int getBeerCompletionDuration() {
-  return mostRecentBeerTime;
+/**
+ * Get the time it took to complete the most recent drink.
+ * 
+ * @return How long it took to complete the last drink.
+ */
+int getDrinkCompletionDuration() {
+  return mostRecentDrinkTime;
 }
 
-void setBeerCompletionDuration(int startTime, int endTime) {
-  mostRecentBeerTime = endTime-startTime;
-  //TODO:: we should be using globals unless there's a reason to read from memory
-  if ((mostRecentBeerTime < readLifetimeFastestBeerTime()) || (readLifetimeFastestBeerTime()<=0)) {
-    lifetimeFastestBeerTime = mostRecentBeerTime;
-    storeLifetimeFastestBeerTime();
+void setDrinkCompletionDuration(int startTime, int endTime) {
+  mostRecentDrinkTime = endTime-startTime;
+  //@NOTE:: we should be using globals unless there's a reason to read from memory (globals can exist in the storage class, that's fine; but it looks like the plan is to have them read from memory every time)
+  //@NOTE:: this method does not exist
+  if ((mostRecentDrinkTime < storage.lifetimeFastestDrinkTime()) || (storage.lifetimeFastestDrinkTime()<=0)) {
+    lifetimeFastestDrinkTime = mostRecentDrinkTime;
+    storage.lifetimeFastestTime(mostRecentDrinkTime);
   }
 }
 
-/*
-  Denote the completion of a new beer at the current instant.
-*/
-void setBeerCompletionDateTime() {
-  //currentBeerCompletionInstant=now(); @TODO: Now isn't working/validating
+/**
+ * Denote the completion of a new drink at the current instant.
+ */
+void setDrinkCompletionDateTime() {
+  //currentDrinkCompletionInstant=now(); @TODO: Now isn't working/validating
 }
 
-/*
-  Determines whether or not the completion of the last beer represents a new day.
-  
-  @return Is the first beer of new day
-*/
+/**
+ * Determines whether or not the completion of the last drink represents a new day.
+ * 
+ * @return Is the first drink of new day
+ */
 boolean isNewDay() {
-  return (lastBeerCompletionInstant < (currentBeerCompletionInstant-SECONDS_IN_DAY));
+  return (lastDrinkCompletionInstant < (currentDrinkCompletionInstant-SECONDS_IN_DAY));
 }
 
 /****************************************************************/
 /***************** Statistics and State Change ******************/
 /****************************************************************/
-void recordBeerEnd() {
-  lifetimeTotalBeerCount++;
-  tonightTotalBeerCount++;
-
+/**
+ * Record that a drink has been completed, update any current records, storage and display to the LCD
+ */
+void recordDrinkEnd() {
   mostRecentVolume=count*multiplier;
-  tonightTotalVolume+=mostRecentVolume;
-  lifetimeTotalVolume+=mostRecentVolume;
+
+  lifetime.addDrink(startTime,endTime,mostRecentVolume);
+  tonight.addDrink(startTime,endTime,mostRecentVolume);
   
   storeAllValues();
   
-  setBeerCompletionDuration(startTime,endTime);
+  setDrinkCompletionDuration(startTime,endTime);
   
-  setBeerCompletionDateTime(); // @TODO: This function does nothing
-  
+  setDrinkCompletionDateTime(); // @NOTE:: This function does nothing
+
+  //@NOTE:: we'll want to tear this out once we properly define a session
   if (isNewDay()) {
     resetTonightCounts();
   }
 }
 
-/*
-  Call if more than 12 hours have passed since the last time a beer was drank. 
-  This function will reset all of the relevant variables scoring beer statistics for a given night.
-*/
+/**
+ * Call if more than 12 hours have passed since the last time a drink was drank. 
+ * This function will reset all of the relevant variables scoring drink statistics for a given night.
+ */
 void resetTonightCounts() {
-  tonightTotalBeerCount=0;
-  tonightTotalVolume=0;
-  tonightFastestBeerTime=0;
+  tonight = new Record();
 }
 
-/*
-  Resets all of the variables tied to a beer session.
-*/
-void resetBeerSession() {
+/**
+ * Resets all of the variables tied to a drink session.
+ */
+void resetDrinkSession() {
   count=0;
   currCount=0;
   prevCount=0;
   resetTiming();
+  firstDropOfDrink=true; // print it out
 }
 
-/*
+/**
  * Completely reset all tracked values, including tonight and lifetime
  */
 void totalReset() {
-  resetBeerSession();
-
-  lifetimeTotalBeerCount = 0;
-  tonightTotalBeerCount = 0;
-
-  lifetimeFastestBeerTime = 0;
-  tonightFastestBeerTime = 0;
-  mostRecentBeerTime = 0;
-
-  lifetimeTotalVolume = 0.0;
-  tonightTotalVolume = 0.0;
+  count=0;
+  currCount=0;
+  prevCount=0;
+  resetTiming();
+  
+  lifetime = new Record();
+  tonight = new Record();
+  
+  mostRecentDrinkTime = 0;
   mostRecentVolume = 0.0;
 
   storeAllValues();
@@ -362,28 +373,28 @@ void totalReset() {
 /********************        Printing       *********************/
 /****************************************************************/
 
-/*
-  Determines whether or not to print out the beer completion data. 
-*/
-boolean shouldPrintBeerTime() {
-  return ((currCount>0) && (currCount==prevCount));
+/**
+ * Determines whether or not to print out the drink completion data. 
+ */
+boolean shouldPrintDrinkTime() {
+  return ((currCount>0) && (firstDropOfDrink) && (currCount==prevCount));
 }
 
-/*
-  Print out status of the device given the last beer that was completed.
-  
-  @param storage boolean indicating where to read the data from
-*/
+/**
+ * Print out status of the device given the last drink that was completed.
+ * 
+ * @param storage boolean indicating where to read the data from
+ */
 void printStatusReport(bool readFromStorage) {
   if (readFromStorage) {
-    debugPrintln(STR_LIFETIME_COUNT + readLifetimeTotalBeerCount());
-    debugPrintln(STR_LIFETIME_VOLUME + readLifetimeTotalVolume() + STR_LIFETIME_VOLUME_UNIT);
-    debugPrintln(STR_FASTEST_TIME + readLifetimeFastestBeerTime() + STR_BEER_TIMING_UNIT);
+    debugPrintln(STR_LIFETIME_COUNT + storage.lifetimeCount());
+    debugPrintln(STR_LIFETIME_VOLUME + storage.lifetimeVolume() + STR_LIFETIME_VOLUME_UNIT);
+    debugPrintln(STR_FASTEST_TIME + storage.lifetimeFastestTime() + STR_BEER_TIMING_UNIT);
   }
   else {
-    debugPrintln(STR_BEER_TIMING + getBeerCompletionDuration() + STR_BEER_TIMING_UNIT);
-    debugPrintln(STR_LIFETIME_COUNT + lifetimeTotalBeerCount);
-    debugPrintln(STR_LIFETIME_VOLUME + lifetimeTotalVolume + STR_LIFETIME_VOLUME_UNIT);
+    debugPrintln(STR_BEER_TIMING + lifetime.fastestDrink() + STR_BEER_TIMING_UNIT);
+    debugPrintln(STR_LIFETIME_COUNT + lifetime.count());
+    debugPrintln(STR_LIFETIME_VOLUME + lifetime.volume() + STR_LIFETIME_VOLUME_UNIT);
   }
   
   sendToStatusBoard();
@@ -393,126 +404,36 @@ void printStatusReport(bool readFromStorage) {
 /****************************************************************/
 /********************        Storage        *********************/
 /****************************************************************/
-/*
-  Get integer value held in permanent storage from EEPROM data.
-  
-  @param address integer value denoting where to read from
-  @return the integer value stored in the desired address.
-*/
-int readIntegerData(int address) {
-  int value;
-  EEPROM.get(address, value);
-  return value;
-}
-
-/*
-  Get float value held in permanent storage from EEPROM data.
-  
-  @param address integer value denoting where to read from
-  @return the float value stored in the desired address.
-*/
-float readFloatData(int address) {
-  float value;
-  EEPROM.get(address,value);
-  /*Serial.print("Read ");
-  Serial.print(value);
-  Serial.print(" from ");
-  Serial.println(address);*/
-  return value;
-}
-
-/*
-  Store integer value into permanent storage at EEPROM.
-  NOTE: There are a limited number of times this can be called, 
-    try to store to addresses as few times as possible.
-  
-  @param address integer value denoting where to store the data to
-  @param value integer value you desire to store into EEPROM.
-*/
-void storeData(int address, int value) {
-  float floatVal  = value;
-  EEPROM.put(address,floatVal);
-  debugPrint(floatVal);
-  debugPrint(" stored at address ");
-  debugPrintln(address);
-}
-
-/*
-  Store float value into permanent storage at EEPROM.
-  NOTE: There are a limited number of times this can be called, 
-    try to store to addresses as few times as possible.
-  
-  @param address integer value denoting where to store the data to
-  @param value float value you desire to store into EEPROM.
-*/
-void storeData(int address, float value) {
-  EEPROM.put(address,value);
-  debugPrint(value);
-  debugPrint(" stored at address ");
-  debugPrintln(address);
-}
-
-//Getters and setters
-float readLifetimeTotalBeerCount() { 
-  return readFloatData(ADDR_BEER_COUNT); 
-}
-void storeLifetimeTotalBeerCount() { 
-  storeData(ADDR_BEER_COUNT,lifetimeTotalBeerCount); 
-}
-
-int readLifetimeFastestBeerTime() { 
-  return readFloatData(ADDR_FASTEST_BEER); 
-}
-void storeLifetimeFastestBeerTime() { 
-  storeData(ADDR_FASTEST_BEER,lifetimeFastestBeerTime); 
-}
-
-float readLifetimeTotalVolume() { 
-  return readFloatData(ADDR_LIFETIME_VOLUME); 
-}
-
-void storeLifetimeTotalVolume() { 
-  storeData(ADDR_LIFETIME_VOLUME,lifetimeTotalVolume); 
-}
-
-
+/**
+ * Get all of the values we want at startup held in permanent storage from EEPROM data.
+ * 
+ * @return the integer value stored in the desired address.
+ */
 void readFromStorage() {
-  lifetimeTotalBeerCount = readLifetimeTotalBeerCount();
-  lifetimeFastestBeerTime = readLifetimeFastestBeerTime();
-  lifetimeTotalVolume=readLifetimeTotalVolume();
+  lifetime = storage.lifetimeRecord();
 }
 
+/**
+ * Store all values we want to persist post power cut to EEPROM. 
+ * This should happen ANYTIME data that needs to persist is created and/or updated.
+ */
 void storeAllValues() {
-  storeLifetimeTotalBeerCount();
-  storeLifetimeFastestBeerTime();
-  storeLifetimeTotalVolume();
-}
-
-/*
-  Only call this when resetting the device to factory settings!
-  Permanently erases all persistent data stored on the arduino or board.
-*/
-void clearEEPROM() {
-  for (int i = 0 ; i < EEPROM.length() ; i++) {
-    if(EEPROM.read(i) != 0) {                   //skip already "empty" addresses
-    
-      EEPROM.write(i, 0);                       //write 0 to address i
-    }
-  }
-  debugPrintln("EEPROM erased");
+  storage.lifetimeCount(lifetime.count());
+  storage.lifetimeFastestTime(lifetime.fastestTime();
+  storage.lifetimeVolume(lifetime.volume());
 }
 
 /****************************************************************/
 /********************   Serial Management   *********************/
 /****************************************************************/
-/*
+/**
  * Only print to the serial monitor if debug mode is turned on and if not using a status board
  */
 boolean shouldPrint() {
   return(debugModeOn && !statusBoardEnabled); 
 }
 
-/*
+/**
  * Methods used to print debug messages
  * First checks whether it is appropriate to send text to the serial monitor
  */
@@ -529,29 +450,29 @@ void debugPrintln(float debugText) { if(shouldPrint()){ Serial.println(debugText
 void debugPrint(double debugText) { if(shouldPrint()){ Serial.print(debugText); }}
 void debugPrintln(double debugText) { if(shouldPrint()){ Serial.println(debugText); }}
 
-/*
+/**
  * Serial String to send to processing as output (e.g. to statusboard)
  * 
  * @return a semicolon delimited string containing the information to send as output
  */
-String buildComString(int lifetimeTotalBeerCountVar,int tonightTotalBeerCountVar,int lifetimeFastestBeerTimeVar,int tonightFastestBeerTimeVar,int mostRecentBeerTimeVar, float lifetimeTotalVolumeVar, float tonightTotalVolumVar, float mostRecentVolumeVar)
+String buildComString(Record lifetimeRecord, Record tonightRecord,int mostRecentDrinkTimeVar, float mostRecentVolumeVar)
 {
   String toSend = "";
   String delim = ";";
   
-  toSend += lifetimeTotalBeerCountVar;
+  toSend += lifetimeRecord.count();
   toSend += delim;
-  toSend += tonightTotalBeerCountVar;
+  toSend += tonightRecord.count();
   toSend += delim;
-  toSend += lifetimeFastestBeerTimeVar;
+  toSend += lifetimeRecord.fastestTime();
   toSend += delim;
-  toSend += tonightFastestBeerTimeVar;
+  toSend += tonightRecord.fastestTime();
   toSend += delim;
-  toSend += mostRecentBeerTimeVar;
+  toSend += mostRecentDrinkTimeVar;
   toSend += delim;
-  toSend += lifetimeTotalVolumeVar;
+  toSend += lifetimeRecord.volume();
   toSend += delim;
-  toSend += tonightTotalVolumVar;
+  toSend += lifetimeRecord.volume();
   toSend += delim;
   toSend += mostRecentVolumeVar;
   toSend += delim;  
@@ -559,14 +480,13 @@ String buildComString(int lifetimeTotalBeerCountVar,int tonightTotalBeerCountVar
   return (toSend);
 }
 
-/*
+/**
  * Send info to the status board
  */
 void sendToStatusBoard()
 {
   if(statusBoardEnabled) { 
-    String comString = buildComString(lifetimeTotalBeerCount,tonightTotalBeerCount,lifetimeFastestBeerTime,tonightFastestBeerTime,mostRecentBeerTime,lifetimeTotalVolume,tonightTotalVolume,mostRecentVolume); 
-    //TODO modify this new string builder based on TCW's variables
+    String comString = buildComString(lifetime,tonight,mostRecentDrinkTime,mostRecentVolume); 
     Serial.println(comString);  
   }
 }
@@ -574,7 +494,7 @@ void sendToStatusBoard()
 /****************************************************************/
 /********************     LCD Management    *********************/
 /****************************************************************/
-/*
+/**
  * Only print to the lcd display if lcd mode is turned on
  */
 bool shouldSendToLcd() {
@@ -582,7 +502,7 @@ bool shouldSendToLcd() {
 }
 
 
-/*
+/**
  * Cycle through to the next display mode according to the order in the enum
  */
 void cycleMode() {
@@ -595,7 +515,7 @@ void cycleMode() {
 }
 
 
-/*
+/**
  * Send the relevant info for display on the LCD, based on the current lcdDisplayMode
  */
 void sendToLcd()
@@ -613,29 +533,24 @@ void sendToLcd()
   switch(lcdDisplayMode) {
     case LIFECOUNT:
       toDisplayLabel = "Lifetime:";
-      toDisplayValue = lifetimeTotalBeerCount;
-      toDisplayUnit = "beers"; //TODO:: handle 1 drink
-      break;
+      toDisplayValue = lifetime.count();
+      toDisplayUnit = "drinks"; //TODO:: handle 1 drink
     case TONIGHTCOUNT:
       toDisplayLabel = "Tonight:";
-      toDisplayValue = tonightTotalBeerCount;
-      toDisplayUnit = "beers"; //TODO:: handle 1 drink
-      break;
+      toDisplayValue = tonight.count();
+      toDisplayUnit = "drinks"; //TODO:: handle 1 drink
     case LIFESPEED:
       toDisplayLabel = "All-Time Record:";
-      toDisplayValue = lifetimeFastestBeerTime;
-      toDisplayUnit = "ms";
-      break;
+      toDisplayValue = lifetime.fastestTime();
+      toDisplayUnit = STR_BEER_TIMING_UNIT;
     case TONIGHTSPEED:
       toDisplayLabel = "Tonight's Record";
-      toDisplayValue = tonightFastestBeerTime;
-      toDisplayUnit = "ms";
-      break;
+      toDisplayValue = tonight.fastestTime();
+      toDisplayUnit = STR_BEER_TIMING_UNIT;
     case LASTSPEED:
       toDisplayLabel = "Last Drink";
-      toDisplayValue = mostRecentBeerTime;
-      toDisplayUnit = "ms";
-      break;
+      toDisplayValue = mostRecentDrinkTime;
+      toDisplayUnit = STR_BEER_TIMING_UNIT;
     default:  //might as well have a saftey case //TODO:: do we want to remove this in the final product for less noisy errors?
       toDisplayLabel = "ERROR:";
       toDisplayValue = "BAD ENUM VALUE"; 
@@ -656,4 +571,3 @@ void sendToLcd()
   lcd.setCursor(0,1); 
   lcd.print(toDisplayValue + " " + toDisplayUnit);
 }
-
