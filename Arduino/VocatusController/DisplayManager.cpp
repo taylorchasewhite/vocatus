@@ -8,14 +8,13 @@
 #include "DisplayManager.h"
 
 // Constants
-//@TODO: all of this
 
 DisplayManager::DisplayManager(int pin)
 {
-  pinMode(pin, OUTPUT);
-  _pin = pin;
+  _outputMode
 }
 
+<<<<<<< HEAD
 /**
  * Default constructor, used to allocate space when defining members. 
  * Sets all values to null, 0, or other non-meaningful data.
@@ -24,3 +23,20 @@ DisplayManager::DisplayManager() {
 	
 }
 
+=======
+void DisplayManager::dot()
+{
+  digitalWrite(_pin, HIGH);
+  delay(250);
+  digitalWrite(_pin, LOW);
+  delay(250);  
+}
+
+void DisplayManager::dash()
+{
+  digitalWrite(_pin, HIGH);
+  delay(1000);
+  digitalWrite(_pin, LOW);
+  delay(250);
+}
+>>>>>>> abf1569348b82bcf62b14234c744f7dc36a96d6d
