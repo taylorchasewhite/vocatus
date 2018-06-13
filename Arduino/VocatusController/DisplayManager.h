@@ -24,6 +24,24 @@ enum CurrentValueToDisplay {
   ENDVALUE //this value should always be last to support cycling; add new values before this guy
 };
 
+const String LIFECOUNT_LABEL    = "Lifetime";
+const String LIFECOUNT_UNIT     = "drinks";
+const String TONIGHTCOUNT_LABEL = "Tonight";
+const String TONIGHTCOUNT_UNIT  = "drinks";
+const String LIFESPEED_LABEL    = "All-Time Record";
+const String LIFESPEED_UNIT     = "ms";
+const String TONIGHTSPEED_LABEL = "Tonight's Record";
+const String TONIGHTSPEED_UNIT  = "ms";
+const String LASTSPEED_LABEL    = "Last Drink";
+const String LASTSPEED_UNIT     = "ms";
+const String LIFEVOLUME_LABEL    = "All-Time Volume";
+const String LIFEVOLUME_UNIT     = "mL";
+const String TONIGHTVOLUME_LABEL    = "Tonight's Volume";
+const String TONIGHTVOLUME_UNIT     = "mL";
+const String LASTVOLUME_LABEL    = "Last Volume";
+const String LASTVOLUME_UNIT     = "mL";
+
+
 class DisplayManager
 {
   public:
@@ -54,6 +72,9 @@ class DisplayManager
     bool _isStatusBoardEnabled;
 
     bool _shouldDebug();
+    String _createDebugString(String, int, String);
+    String _createDebugString(String, float, String);
+    void _sendDebugReport(Record, Record, int, float);
     void _changeOutputMode(OutputMode);
     String _buildComString(Record, Record, int, float);
     void _sendToStatusBoard(Record, Record, int, float);

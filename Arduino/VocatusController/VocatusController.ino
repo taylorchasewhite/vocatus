@@ -26,7 +26,8 @@
     2. C++ Style Guide - https://google.github.io/styleguide/cppguide.html
   
   Exceptions to PQA resources linked:
-    Use tabs, not spaces. Use the arduino web IDE to determine what the tab keystroke translates to.
+    Use tabs, not spaces. Use the arduino web IDE to determine what the tab keystroke translates to. 
+      I'm using the Arduino application, not the web IDE, which turns tabs into spaces -SEL
     
   --------------------------
 */
@@ -84,17 +85,6 @@ bool startingUp;
 
 // Display strings
 DisplayManager display;
-
-//@Note:: Do these need to be constants? we should either make our debug/LCD strings consistent or get rid of these
-const String STR_BEER_TIMING          = "Time: ";
-const String STR_BEER_TIMING_UNIT     = "ms";
-const String STR_PREV_COUNT           = "Prev: ";
-const String STR_CURR_COUNT           = "Curr: ";
-const String STR_FASTEST_TIME         = "Fastest time: ";
-const String STR_LIFETIME_COUNT       = "Total drinks: ";
-const String STR_LIFETIME_VOLUME      = "Total volume: ";
-const String STR_LIFETIME_VOLUME_UNIT = " ml";
-const String STR_TONIGHT              = " tonight";
 
 // Addresses
 StorageManager storage;
@@ -352,17 +342,7 @@ boolean shouldPrintDrinkTime() {
  * @param storage boolean indicating where to read the data from
  */
 void printStatusReport(bool readFromStorage) {
-  if (readFromStorage) {
-    display.DebugPrintln(STR_LIFETIME_COUNT + storage.lifetimeCount());
-    display.DebugPrintln(STR_LIFETIME_VOLUME + storage.lifetimeVolume() + STR_LIFETIME_VOLUME_UNIT);
-    display.DebugPrintln(STR_FASTEST_TIME + storage.lifetimeFastestTime() + STR_BEER_TIMING_UNIT);
-  }
-  else {
-    display.DebugPrintln(STR_BEER_TIMING + getDrinkCompletionDuration() + STR_BEER_TIMING_UNIT);
-    display.DebugPrintln(STR_LIFETIME_COUNT + lifetimeTotalDrinkCount);
-    display.DebugPrintln(STR_LIFETIME_VOLUME + lifetimeTotalVolume + STR_LIFETIME_VOLUME_UNIT);
-  }
-  
+  //@TODO:: either have this respect the "readFromStorage" variable, or remove it as a parameter
   display.OutputData(lifetime,tonight,mostRecentDrinkTime,mostRecentVolume);
 }
 
