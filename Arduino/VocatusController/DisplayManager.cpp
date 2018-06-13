@@ -6,10 +6,12 @@
  */
 #include "Arduino.h"
 #include "DisplayManager.h"
+#include <LiquidCrystal.h>
 
-// Constants
+const int rs = 7, en = 8, d4 = 9, d5 = 10, d6 = 11, d7 = 12;
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
-DisplayManager::DisplayManager(int pin)
+DisplayManager::DisplayManager(OutputMode myOutputMode) {
   _changeOutputMode(myOutputMode);
 }
 
