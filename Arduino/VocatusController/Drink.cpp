@@ -8,26 +8,42 @@
  * 
  */
 #include "Arduino.h"
-#include "StorageManager.h"
+#include "Drink.h"
 
-// Addresses
-const int ADDR_BEER_COUNT             = 0;
-const int ADDR_LIFETIME_VOLUME        = 1*sizeof(float);
-const int ADDR_FASTEST_BEER           = 2*sizeof(float);
 
-const int ADDR_TONIGHT_FASTEST_BEER   = 10*sizeof(float);
-const int ADDR_TONIGHT_BEER_COUNT     = 11*sizeof(float);
-const int ADDR_TONIGHT_VOLUME         = 12*sizeof(float);
-
+/**
+ * Default constructor, used to allocate space when defining members. 
+ * Sets all values to null, 0, or other non-meaningful data.
+ */
 Drink::Drink() {
-	_startTime=0;
-	_endTime=0;
-	_volume = 0;
+	this->startTime(0);
+	this->endTime(0);
+	this->volume(0);
 }
 
+/**
+ * Copy constructor copies all data in the copy object to 
+ * @param copy the object to by copied.
+ */
+Drink::Drink(Drink &copy) {
+
+}
+
+
 Drink::Drink(int startTime,int endTime, int volume) {
-	_endTime=endTime;
-	_startTime=startTime;
+	this->startTime(startTime);
+	this->endTime(endTime);
+	this->volume(volume);
+}
+
+/**
+ * This constructor should only be used if creating a drink object from storage where 
+ * we only store the time it took to finish the drink.
+ */
+Drink::Drink(int duration) {
+	this->startTime(0);
+	this->endTime(duration);
+	this->volume(0);
 }
 
 /**
@@ -75,4 +91,12 @@ int Drink::flowRate() {
  */
 int Drink::timeToFinish() {
 	return _endTime-_startTime;
+}
+
+int Drink::volume() {
+	return _volume;
+}
+
+void Drink::volume(int volume) {
+	_volume=volume;
 }

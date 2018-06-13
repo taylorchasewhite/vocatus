@@ -30,11 +30,12 @@
     
   --------------------------
 */
-#include "Drink.h"
+
 #include "Record.h"
+#include "Drink.h"
 #include "DisplayManager.h"
-#include "StorageManager.h"
 #include <EEPROM.h>
+#include "StorageManager.h"
 
 /****************************************************************/
 /********************        Globals        *********************/
@@ -44,7 +45,6 @@ int bitsPerSecond;
 int changeDisplayPin;
 int flowPin;
 int resetButtonInPin;
-int resetButtonOutPin;
 int modeCycleButtonInPin;
 
 // Counts
@@ -121,7 +121,6 @@ void setup() {
   //Setup pins
   pinMode(flowPin, INPUT);           
   pinMode(resetButtonInPin, INPUT_PULLUP);
-  pinMode(resetButtonOutPin, OUTPUT);
   pinMode(modeCycleButtonInPin, INPUT_PULLUP);
   
   attachInterrupt(0, Flow, RISING);  //Configures interrupt 0 (pin 2 on the Arduino Uno) to run the function "Flow" 
@@ -150,16 +149,18 @@ void loop() {
     //display.DebugPrintln(STR_CURR_COUNT + currCount);
   }
 
+  //if the mode cycle button is pressed
   if (modeCycleButtonVal == LOW) {
     display.CycleCurrentValueToDisplay();
     printStatusReport(true);
   } 
-  
+
+  //if the reset button is pressed
   if (resetButtonVal == LOW) {
+    debugPrintln("Reset button pushed");
     totalReset();
     printStatusReport(true);
   } 
-  
 }
 
 /**
@@ -184,8 +185,7 @@ void Flow() {
 void initGlobals() {
   flowPin = 2;
   resetButtonInPin = 3;
-  resetButtonOutPin = 13;
-  modeCycleButtonInPin = 4;
+  modeCycleButtonInPin = 5;
   bitsPerSecond = 9600;   // initialize serial communication at 9600 bits per second:
   multiplier = 3.05; //TCW: 2.647  Chode: 3.05
 
@@ -199,10 +199,10 @@ void initGlobals() {
   startingUp = false;
   
   //initialize all tracking variables to 0 in case they are not read from storage
-  tonight = new Record();
-  lifetime = new Record();
+  tonight = *new Record();
+  lifetime = *new Record();
   
-  lastDrink = new Drink();
+  lastDrink = *new Drink();
 
   display = new DisplayManager(DEBUG); //set it to whatever mode(s) you want: DEBUG|STATUSBOARD|LCD
 
@@ -256,9 +256,9 @@ void setDrinkCompletionDuration(int startTime, int endTime) {
   mostRecentDrinkTime = endTime-startTime;
   //@NOTE:: we should be using globals unless there's a reason to read from memory (globals can exist in the storage class, that's fine; but it looks like the plan is to have them read from memory every time)
   //@NOTE:: this method does not exist
-  if ((mostRecentDrinkTime < storage.getLifetimeFastestDrinkTime()) || (storage.getLifetimeFastestDrinkTime()<=0)) {
+  if ((mostRecentDrinkTime < storage.lifetimeFastestDrinkTime()) || (storage.lifetimeFastestDrinkTime()<=0)) {
     lifetimeFastestDrinkTime = mostRecentDrinkTime;
-    storage.setLifetimeFastestTime();
+    storage.lifetimeFastestTime(mostRecentDrinkTime);
   }
 }
 
@@ -379,10 +379,7 @@ void printStatusReport(bool readFromStorage) {
  * @return the integer value stored in the desired address.
  */
 void readFromStorage() {
-  lifetime = new Record();
-  lifetime.count(storage.lifetimeCount());
-  lifetime.volume(storage.lifetimeVolume());
-  lifetime.time(storage.lifetimeFastestTime());
+  lifetime = storage.lifetimeRecord();
 }
 
 /**
@@ -390,8 +387,7 @@ void readFromStorage() {
  * This should happen ANYTIME data that needs to persist is created and/or updated.
  */
 void storeAllValues() {
-  storage.lifetimeCount(lifetimeTotalDrinkCount);
-  storage.lifetimeFastestTime(lifetimeFastestDrinkTime);
-  storage.lifetimeVolume(lifetimeTotalVolume);
+  storage.lifetimeCount(lifetime.count());
+  storage.lifetimeFastestTime(lifetime.fastestTime();
+  storage.lifetimeVolume(lifetime.volume());
 }
-

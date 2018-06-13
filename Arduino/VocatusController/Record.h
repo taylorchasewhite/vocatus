@@ -13,9 +13,14 @@
 class Record
 {
   public:
+  	//Record(Type type);
 	Record(int count, float volume, int fastestTime,int startTime);
+	Record(Record &copy);
+	Record();
 
 	void addDrink(int startTime, int endTime, float volume);
+	void addDrink(Drink* drink);
+	void addCount();
 
 	int count();
 	void count(int count);
@@ -23,7 +28,7 @@ class Record
   	int endTime();
   	void endTime(int endTime);
 
-	bool Record::evalAndUpdateFastestDrink();
+	bool Record::evalAndUpdateFastestDrink(Drink* drink);
 
 	float fastestTime(); 			// return the completion duration of the fastest drink
 	Drink fastestDrink(); 			// Same as fastest time but returns the Drink record.
@@ -33,7 +38,7 @@ class Record
 	
 	int flowRate();
 
-	float volume();			// what's the total volume consumed for this record's lifetime
+	float volume();					// what's the total volume consumed for this record's lifetime
 	void addVolume(float volume);
 
   private:

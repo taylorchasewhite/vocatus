@@ -8,11 +8,14 @@
 #ifndef StorageManager_h
 #define StorageManager_h
 #include "Arduino.h"
+#include "Record.h"
 
 class StorageManager
 {
   public:
     StorageManager(int pin);
+		StorageManager(StorageManager & copy);
+		StorageManager();
 
 	float readFloatData(int address);
 	int readIntegerData(int address);
@@ -21,14 +24,14 @@ class StorageManager
 	void lifetimeCount(float count);
 
 	int lifetimeFastestTime();
-	void lifetimeFastestTime(float beerTime);
+	void lifetimeFastestTime(float drinkTime);
 
-	Record getLifetimeRecord();
+	Record lifetimeRecord();
 
 	float lifetimeVolume();
-	void lifetimeTotalVolume(float volume);
+	void lifetimeVolume(float volume);
 
-	void storeAllValues(float beerCount,float beerTime, float beerVolume);
+	void storeAllValues(float drinkCount,float drinkTime, float drinkVolume);
 	void storeData(int address, float value);
 	void storeData(int address, int value);
 	void reset();
