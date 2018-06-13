@@ -30,13 +30,12 @@
     
   --------------------------
 */
+
 #include "Record.h"
 #include "Drink.h"
 #include "DisplayManager.h"
-#include "EEPROM.h"
-#include "LiquidCrystal.h"
+#include <EEPROM.h>
 #include "StorageManager.h"
-
 
 /****************************************************************/
 /********************        Globals        *********************/
@@ -84,23 +83,6 @@ unsigned long currentDrinkCompletionInstant;
 bool firstDropOfDrink; //@NOTE:: this does nothing; remove all references
 bool startingUp;
 
-//Flags
-bool statusBoardEnabled; 
-bool lcdModeEnabled;
-bool debugModeOn; 
-
-//LCD values
-const int rs = 7, en = 8, d4 = 9, d5 = 10, d6 = 11, d7 = 12;
-LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
-enum DisplayMode {
-  LIFECOUNT = 0, //explicitly set this guy to 0 to support cycling
-  TONIGHTCOUNT,
-  LIFESPEED,
-  TONIGHTSPEED,
-  LASTSPEED,
-  ENDVALUE //this value should always be last to support cycling; add new values before this guy
-} lcdDisplayMode;
-
 // Display strings
 DisplayManager display;
 
@@ -140,12 +122,6 @@ void setup() {
   pinMode(flowPin, INPUT);           
   pinMode(resetButtonInPin, INPUT_PULLUP);
   pinMode(modeCycleButtonInPin, INPUT_PULLUP);
-
-  if(lcdModeEnabled) {
-    lcd.begin(16,2);
-    lcd.clear();
-    lcd.print("Running...");
-  }
   
   attachInterrupt(0, Flow, RISING);  //Configures interrupt 0 (pin 2 on the Arduino Uno) to run the function "Flow" 
 
@@ -169,14 +145,13 @@ void loop() {
     resetDrinkSession();
   } 
   else if (prevCount!=currCount) {
-    //debugPrintln(STR_PREV_COUNT + prevCount);
-    //debugPrintln(STR_CURR_COUNT + currCount);
+    //display.DebugPrintln(STR_PREV_COUNT + prevCount);
+    //display.DebugPrintln(STR_CURR_COUNT + currCount);
   }
 
   //if the mode cycle button is pressed
   if (modeCycleButtonVal == LOW) {
-    debugPrintln("Mode cycle button pushed");
-    cycleMode();
+    display.CycleCurrentValueToDisplay();
     printStatusReport(true);
   } 
 
@@ -198,7 +173,7 @@ void Flow() {
   }
   count++;
   drinkPulse();
-  if(shouldPrint()){ debugPrintln(count); }
+  if(shouldPrint()){ display.DebugPrintln(count); }
 }
 
 /****************************************************************/
@@ -222,27 +197,22 @@ void initGlobals() {
   
   firstDropOfDrink=false;
   startingUp = false;
-  lcdDisplayMode = LIFECOUNT;
-
+  
   //initialize all tracking variables to 0 in case they are not read from storage
-
   tonight = *new Record();
   lifetime = *new Record();
   
   lastDrink = *new Drink();
 
-  //set flags for initial desired state
-  statusBoardEnabled = false; //set to true to have output sent via serial message to a statusboard (e.g. processing)
-  debugModeOn = true; //set to true to enable noisy output (e.g. messages sent to Serial Monitor)
-  lcdModeEnabled = true; //set to true to enable output to an LCD
+  display = new DisplayManager(DEBUG); //set it to whatever mode(s) you want: DEBUG|STATUSBOARD|LCD
 
   readFromStorage();
 }
 
 void initializeDisplay() {
   if (!startingUp) {
-    debugPrintln("Welcome to the Red Solo Cup Saver!");
-    debugPrintln("----------------------------------");
+    display.DebugPrintln("Welcome to the Red Solo Cup Saver!");
+    display.DebugPrintln("----------------------------------");
     printStatusReport(true);
     startingUp=true;
   }
@@ -387,18 +357,17 @@ boolean shouldPrintDrinkTime() {
  */
 void printStatusReport(bool readFromStorage) {
   if (readFromStorage) {
-    debugPrintln(STR_LIFETIME_COUNT + storage.lifetimeCount());
-    debugPrintln(STR_LIFETIME_VOLUME + storage.lifetimeVolume() + STR_LIFETIME_VOLUME_UNIT);
-    debugPrintln(STR_FASTEST_TIME + storage.lifetimeFastestTime() + STR_BEER_TIMING_UNIT);
+    display.DebugPrintln(STR_LIFETIME_COUNT + storage.lifetimeCount());
+    display.DebugPrintln(STR_LIFETIME_VOLUME + storage.lifetimeVolume() + STR_LIFETIME_VOLUME_UNIT);
+    display.DebugPrintln(STR_FASTEST_TIME + storage.lifetimeFastestTime() + STR_BEER_TIMING_UNIT);
   }
   else {
-    debugPrintln(STR_BEER_TIMING + lifetime.fastestDrink() + STR_BEER_TIMING_UNIT);
-    debugPrintln(STR_LIFETIME_COUNT + lifetime.count());
-    debugPrintln(STR_LIFETIME_VOLUME + lifetime.volume() + STR_LIFETIME_VOLUME_UNIT);
+    display.DebugPrintln(STR_BEER_TIMING + getDrinkCompletionDuration() + STR_BEER_TIMING_UNIT);
+    display.DebugPrintln(STR_LIFETIME_COUNT + lifetimeTotalDrinkCount);
+    display.DebugPrintln(STR_LIFETIME_VOLUME + lifetimeTotalVolume + STR_LIFETIME_VOLUME_UNIT);
   }
   
-  sendToStatusBoard();
-  sendToLcd();
+  display.OutputData(lifetime,tonight,mostRecentDrinkTime,mostRecentVolume);
 }
 
 /****************************************************************/
@@ -421,153 +390,4 @@ void storeAllValues() {
   storage.lifetimeCount(lifetime.count());
   storage.lifetimeFastestTime(lifetime.fastestTime();
   storage.lifetimeVolume(lifetime.volume());
-}
-
-/****************************************************************/
-/********************   Serial Management   *********************/
-/****************************************************************/
-/**
- * Only print to the serial monitor if debug mode is turned on and if not using a status board
- */
-boolean shouldPrint() {
-  return(debugModeOn && !statusBoardEnabled); 
-}
-
-/**
- * Methods used to print debug messages
- * First checks whether it is appropriate to send text to the serial monitor
- */
-void debugPrint(String debugText) { if(shouldPrint()){ Serial.print(debugText); }}
-void debugPrintln(String debugText) { if(shouldPrint()){ Serial.println(debugText); }}
-void debugPrint(int debugText) { if(shouldPrint()){ Serial.print(debugText); }}
-void debugPrintln(int debugText) { if(shouldPrint()){ Serial.println(debugText); }}
-void debugPrint(long debugText) { if(shouldPrint()){ Serial.print(debugText); }}
-void debugPrintln(long debugText) { if(shouldPrint()){ Serial.println(debugText); }}
-void debugPrint(unsigned long debugText) { if(shouldPrint()){ Serial.print(debugText); }}
-void debugPrintln(unsigned long debugText) { if(shouldPrint()){ Serial.println(debugText); }}
-void debugPrint(float debugText) { if(shouldPrint()){ Serial.print(debugText); }}
-void debugPrintln(float debugText) { if(shouldPrint()){ Serial.println(debugText); }}
-void debugPrint(double debugText) { if(shouldPrint()){ Serial.print(debugText); }}
-void debugPrintln(double debugText) { if(shouldPrint()){ Serial.println(debugText); }}
-
-/**
- * Serial String to send to processing as output (e.g. to statusboard)
- * 
- * @return a semicolon delimited string containing the information to send as output
- */
-String buildComString(Record lifetimeRecord, Record tonightRecord,int mostRecentDrinkTimeVar, float mostRecentVolumeVar)
-{
-  String toSend = "";
-  String delim = ";";
-  
-  toSend += lifetimeRecord.count();
-  toSend += delim;
-  toSend += tonightRecord.count();
-  toSend += delim;
-  toSend += lifetimeRecord.fastestTime();
-  toSend += delim;
-  toSend += tonightRecord.fastestTime();
-  toSend += delim;
-  toSend += mostRecentDrinkTimeVar;
-  toSend += delim;
-  toSend += lifetimeRecord.volume();
-  toSend += delim;
-  toSend += lifetimeRecord.volume();
-  toSend += delim;
-  toSend += mostRecentVolumeVar;
-  toSend += delim;  
-  
-  return (toSend);
-}
-
-/**
- * Send info to the status board
- */
-void sendToStatusBoard()
-{
-  if(statusBoardEnabled) { 
-    String comString = buildComString(lifetime,tonight,mostRecentDrinkTime,mostRecentVolume); 
-    Serial.println(comString);  
-  }
-}
-
-/****************************************************************/
-/********************     LCD Management    *********************/
-/****************************************************************/
-/**
- * Only print to the lcd display if lcd mode is turned on
- */
-bool shouldSendToLcd() {
-  return(lcdModeEnabled);
-}
-
-
-/**
- * Cycle through to the next display mode according to the order in the enum
- */
-void cycleMode() {
-  int intValue = (int) lcdDisplayMode;
-  intValue++; //increment by one
-  if(intValue == ENDVALUE) {
-    intValue = 0; //close the cycle
-  }
-  lcdDisplayMode = (DisplayMode) intValue;
-}
-
-
-/**
- * Send the relevant info for display on the LCD, based on the current lcdDisplayMode
- */
-void sendToLcd()
-{
-  //TODO:: Figure out LEDs
-  //TODO:: fix delay for more responsive button
-  //TODO:: fix gating for less sensitive button presses
-  if(!shouldSendToLcd()) { return; } //short circuit this if we shouldn't be doing anything
-
-  String toDisplayLabel = "";
-  String toDisplayValue = "";
-  String toDisplayUnit = "";
-
-  //use the current mode to determine what to show on the LCD
-  switch(lcdDisplayMode) {
-    case LIFECOUNT:
-      toDisplayLabel = "Lifetime:";
-      toDisplayValue = lifetime.count();
-      toDisplayUnit = "drinks"; //TODO:: handle 1 drink
-    case TONIGHTCOUNT:
-      toDisplayLabel = "Tonight:";
-      toDisplayValue = tonight.count();
-      toDisplayUnit = "drinks"; //TODO:: handle 1 drink
-    case LIFESPEED:
-      toDisplayLabel = "All-Time Record:";
-      toDisplayValue = lifetime.fastestTime();
-      toDisplayUnit = STR_BEER_TIMING_UNIT;
-    case TONIGHTSPEED:
-      toDisplayLabel = "Tonight's Record";
-      toDisplayValue = tonight.fastestTime();
-      toDisplayUnit = STR_BEER_TIMING_UNIT;
-    case LASTSPEED:
-      toDisplayLabel = "Last Drink";
-      toDisplayValue = mostRecentDrinkTime;
-      toDisplayUnit = STR_BEER_TIMING_UNIT;
-    default:  //might as well have a saftey case //TODO:: do we want to remove this in the final product for less noisy errors?
-      toDisplayLabel = "ERROR:";
-      toDisplayValue = "BAD ENUM VALUE"; 
-      break;
-  }
-
-  debugPrint("LCD Mode: ");
-  debugPrintln(lcdDisplayMode);
-
-  //clear the screen to a blank state
-  lcd.clear();
-
-  //print the first line
-  lcd.setCursor(0,0); 
-  lcd.print(toDisplayLabel);
-
-  //print the second line
-  lcd.setCursor(0,1); 
-  lcd.print(toDisplayValue + " " + toDisplayUnit);
 }
