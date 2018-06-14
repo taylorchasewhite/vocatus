@@ -22,17 +22,12 @@ const int ADDR_TONIGHT_FASTEST_DRINK   = 10*sizeof(float);
 const int ADDR_TONIGHT_DRINK_COUNT     = 11*sizeof(float);
 const int ADDR_TONIGHT_VOLUME         = 12*sizeof(float);
 
-StorageManager::StorageManager(int pin)
-{
-  pinMode(pin, OUTPUT);
-  _pin = pin;
-}
-
 /**
  * Copy constructor, makes an exact copy in newly allocated memory
  */
 StorageManager::StorageManager(StorageManager & copy) {
-  // TOOD: Write
+  // TODO: Write
+
 }
 
 /**
@@ -40,7 +35,7 @@ StorageManager::StorageManager(StorageManager & copy) {
  * Sets all values to null, 0, or other non-meaningful data.
  */
 StorageManager::StorageManager() {
-  _pin=-1;
+ 
 }
 
 

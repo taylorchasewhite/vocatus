@@ -61,20 +61,12 @@ double flowRate;
 volatile int count;
 
 // Timing
-//@NOTE:: we aren't using these anywhere
-Drink lifetimeBestDrink;
-Drink tonightBestDrink; 
-Drink lastDrink;
-
 Record lifetime;
 Record tonight;
 
 unsigned long endTime;
 unsigned long startTime;
-int lastDrinkDay;
-int lastDrinkHour;
-int currentDrinkDay;
-int currentDrinkHour;
+
 
 const unsigned long SECONDS_IN_DAY = 86400;
 unsigned long lastDrinkCompletionInstant; //@NOTE:: why are all of these globals?
@@ -88,16 +80,6 @@ DisplayManager display;
 
 // Addresses
 StorageManager storage;
-
-const int ADDR_BEER_COUNT             = 0;
-const int ADDR_LIFETIME_VOLUME        = 1*sizeof(float);
-const int ADDR_FASTEST_BEER           = 2*sizeof(float);
-
-const int ADDR_TONIGHT_FASTEST_BEER   = 10*sizeof(float);
-const int ADDR_TONIGHT_BEER_COUNT     = 11*sizeof(float);
-const int ADDR_TONIGHT_VOLUME         = 12*sizeof(float);
-
-
 
 /****************************************************************/
 /********************         Core          *********************/
@@ -132,10 +114,6 @@ void loop() {
     recordDrinkEnd();
     printStatusReport(false);
     resetDrinkSession();
-  } 
-  else if (prevCount!=currCount) {
-    //display.DebugPrintln(STR_PREV_COUNT + prevCount);
-    //display.DebugPrintln(STR_CURR_COUNT + currCount);
   }
 
   //if the mode cycle button is pressed
