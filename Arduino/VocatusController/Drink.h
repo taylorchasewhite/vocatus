@@ -12,28 +12,16 @@
 class Drink
 {
   public:
-<<<<<<< HEAD:Arduino/VocatusController/Beer.h
-	Beer();
-	Beer(int startTime, int endTime, float volume);
-=======
   	Drink();
 	Drink(Drink &copy);
 	Drink(int duration);
 	Drink(int startTime, int endTime, int volume);
->>>>>>> taylor-web-admin:Arduino/VocatusController/Drink.h
 	
   	int endTime();
   	void endTime(int endTime);
 	  
 	int startTime();
 	void startTime(int startTime);
-<<<<<<< HEAD:Arduino/VocatusController/Beer.h
-
-	float volume();
-	void volume(float volume);
-	void addVolume();
-=======
->>>>>>> taylor-web-admin:Arduino/VocatusController/Drink.h
 	
 	int flowRate();
 	bool isFinished();
