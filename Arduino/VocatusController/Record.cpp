@@ -78,17 +78,10 @@ void Record::addDrink(int startTime, int endTime, float volume) {
  * 
  * @param drink Drink The drink that was just drank.
  */
-<<<<<<< HEAD
-void Record::addBeer(Beer beer) {
-	addCount();
-	addVolume(beer.volume()):
-	evalAndUpdateFastestBeer(beer);
-=======
 void Record::addDrink(Drink& drink) {
 	this->addCount();
 	this->addVolume(drink.volume());
 	this->evalAndUpdateFastestDrink(drink);
->>>>>>> taylor-web-admin
 }
 
 /**
