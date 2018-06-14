@@ -2,7 +2,7 @@
   @title:   Vocatus: Flow Meter - Making the world a better place
   @author:  Stephen Lago & Taylor White  
   @date:    May 2, 2018
-  @purpose: Store and calculate flow meter data for a beer bong.
+  @purpose: Store and calculate flow meter data for a drink bong.
   --------------------------
 */
 
@@ -26,15 +26,17 @@
     2. C++ Style Guide - https://google.github.io/styleguide/cppguide.html
   
   Exceptions to PQA resources linked:
-    Use tabs, not spaces. Use the arduino web IDE to determine what the tab keystroke translates to.
+    Use tabs, not spaces. Use the arduino web IDE to determine what the tab keystroke translates to. 
+      I'm using the Arduino application, not the web IDE, which turns tabs into spaces -SEL
     
   --------------------------
 */
-#include <Beer.h>
-#include <DisplayManager.h>
+
+#include "Record.h"
+#include "Drink.h"
+#include "DisplayManager.h"
 #include <EEPROM.h>
-#include <LiquidCrystal.h>
-#include <StorageManager.h>
+#include "StorageManager.h"
 
 /****************************************************************/
 /********************        Globals        *********************/
@@ -44,13 +46,17 @@ int bitsPerSecond;
 int changeDisplayPin;
 int flowPin;
 int resetButtonInPin;
-int resetButtonOutPin;
 int modeCycleButtonInPin;
 
 // Counts
 int currCount;
 int prevCount;
 
+<<<<<<< HEAD
+=======
+int mostRecentDrinkTime;  // The time it took in ms to finish the last drink
+
+>>>>>>> taylor-web-admin
 float mostRecentVolume;
 float multiplier;
 
@@ -58,70 +64,25 @@ double flowRate;
 volatile int count;
 
 // Timing
-Beer lifetimeBestBeer;
-Beer tonightBestBeer;
-Beer lastBeer;
-
 Record lifetime;
 Record tonight;
 
 unsigned long endTime;
 unsigned long startTime;
-int lastBeerDay;
-int lastBeerHour;
-int currentBeerDay;
-int currentBeerHour;
+
 
 const unsigned long SECONDS_IN_DAY = 86400;
-unsigned long lastBeerCompletionInstant;
-unsigned long currentBeerCompletionInstant;
+unsigned long lastDrinkCompletionInstant; //@NOTE:: why are all of these globals?
+unsigned long currentDrinkCompletionInstant;
 
 // States
-bool firstDropOfBeer;
 bool startingUp;
-
-//Flags
-bool statusBoardEnabled; 
-bool lcdModeEnabled;
-bool debugModeOn; 
-
-//LCD values
-const int rs = 7, en = 8, d4 = 9, d5 = 10, d6 = 11, d7 = 12;
-LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
-enum DisplayMode {
-  LIFECOUNT = 0, //explicitly set this guy to 0 to support cycling
-  TONIGHTCOUNT,
-  LIFESPEED,
-  TONIGHTSPEED,
-  LASTSPEED,
-  ENDVALUE //this calue should always be last to support cycling; add new values before this guy
-} lcdDisplayMode;
 
 // Display strings
 DisplayManager display;
 
-const String STR_BEER_TIMING          = "Time: ";
-const String STR_BEER_TIMING_UNIT     = " ms!";
-const String STR_PREV_COUNT           = "Prev: ";
-const String STR_CURR_COUNT           = "Curr: ";
-const String STR_FASTEST_TIME         = "Fastest time: ";
-const String STR_LIFETIME_COUNT       = "Total beers: ";
-const String STR_LIFETIME_VOLUME      = "Total volume: ";
-const String STR_LIFETIME_VOLUME_UNIT = " ml";
-const String STR_TONIGHT              = " tonight";
-
 // Addresses
 StorageManager storage;
-
-const int ADDR_BEER_COUNT             = 0;
-const int ADDR_LIFETIME_VOLUME        = 1*sizeof(float);
-const int ADDR_FASTEST_BEER           = 2*sizeof(float);
-
-const int ADDR_TONIGHT_FASTEST_BEER   = 10*sizeof(float);
-const int ADDR_TONIGHT_BEER_COUNT     = 11*sizeof(float);
-const int ADDR_TONIGHT_VOLUME         = 12*sizeof(float);
-
-
 
 /****************************************************************/
 /********************         Core          *********************/
@@ -134,13 +95,7 @@ void setup() {
   //Setup pins
   pinMode(flowPin, INPUT);           
   pinMode(resetButtonInPin, INPUT_PULLUP);
-  pinMode(resetButtonOutPin, OUTPUT);
   pinMode(modeCycleButtonInPin, INPUT_PULLUP);
-
-  if(lcdModeEnabled) {
-    lcd.begin(16,2);
-    lcd.print("Running...");
-  }
   
   attachInterrupt(0, Flow, RISING);  //Configures interrupt 0 (pin 2 on the Arduino Uno) to run the function "Flow" 
 
@@ -158,26 +113,24 @@ void loop() {
   delay (1000);   //Wait 1 second 
   noInterrupts(); //Disable the interrupts on the Arduino
   
-  if (shouldPrintBeerTime()) {
-    recordBeerEnd();
+  if (shouldPrintDrinkTime()) {
+    recordDrinkEnd();
     printStatusReport(false);
-    resetBeerSession();
-  } 
-  else if (prevCount!=currCount) {
-    //debugPrintln(STR_PREV_COUNT + prevCount);
-    //debugPrintln(STR_CURR_COUNT + currCount);
+    resetDrinkSession();
   }
 
+  //if the mode cycle button is pressed
   if (modeCycleButtonVal == LOW) {
-    cycleMode();
+    display.CycleCurrentValueToDisplay();
     printStatusReport(true);
   } 
-  
+
+  //if the reset button is pressed
   if (resetButtonVal == LOW) {
+    display.DebugPrintln("Reset button pushed");
     totalReset();
     printStatusReport(true);
   } 
-  
 }
 
 /**
@@ -185,12 +138,11 @@ void loop() {
  */
 void Flow() {
   if (count==0) {
-      beerStart();
-      firstDropOfBeer=true;
+      drinkStart();
   }
   count++;
-  beerPulse();
-  if(shouldPrint()){ debugPrintln(count); }
+  drinkPulse();
+  display.DebugPrintln(count);
 }
 
 /****************************************************************/
@@ -202,8 +154,7 @@ void Flow() {
 void initGlobals() {
   flowPin = 2;
   resetButtonInPin = 3;
-  resetButtonOutPin = 13;
-  modeCycleButtonInPin = 4;
+  modeCycleButtonInPin = 5;
   bitsPerSecond = 9600;   // initialize serial communication at 9600 bits per second:
   multiplier = 3.05; //TCW: 2.647  Chode: 3.05
 
@@ -213,31 +164,29 @@ void initGlobals() {
   currCount=0;
   prevCount=-1;
   
-  firstDropOfBeer=false;
   startingUp = false;
-  lcdDisplayMode = LIFECOUNT;
-
-  //initialize all tracking variables to 0 in case they are not read from storage
-
-  tonight = new Record();
-  lifetime = new Record();
   
+  //initialize all tracking variables to 0 in case they are not read from storage
+  tonight = *new Record();
+  lifetime = *new Record();
+  
+<<<<<<< HEAD
   lastBeer = new Beer();
 
   mostRecentVolume = 0.0;
+=======
+  lastDrink = *new Drink();
+>>>>>>> taylor-web-admin
 
-  //set flags for initial desired state
-  statusBoardEnabled = true; //set to true to have output sent via serial message to a statusboard (e.g. processing)
-  debugModeOn = false; //set to true to enable noisy output (e.g. messages sent to Serial Monitor)
-  lcdModeEnabled = false; //set to true to enable output to an LCD
+  display = *new DisplayManager(); //set it to whatever mode(s) you want: DEBUG|STATUSBOARD|LCD
 
   readFromStorage();
 }
 
 void initializeDisplay() {
   if (!startingUp) {
-    debugPrintln("Welcome to the Red Solo Cup Saver!");
-    debugPrintln("----------------------------------");
+    display.DebugPrintln("Welcome to the Red Solo Cup Saver!");
+    display.DebugPrintln("----------------------------------");
     printStatusReport(true);
     startingUp=true;
   }
@@ -247,21 +196,21 @@ void initializeDisplay() {
 /********************        Timing         *********************/
 /****************************************************************/
 /**
- * Called the first time the hall effect sensor has been triggered since the last beer session completed.
+ * Called the first time the hall effect sensor has been triggered since the last drink session completed.
  */
-void beerStart() {
+void drinkStart() {
   startTime=millis();
 }
 
 /**
  * Called every time the hall effect sensor fires. Represents another ~2.65 ml have been drank.
  */
-void beerPulse() {
+void drinkPulse() {
   endTime=millis();
 }
 
 /**
- * Reset the start and end time for a beer that will be drank and judged.
+ * Reset the start and end time for a drink that will be drank and judged.
  */
 void resetTiming() {
   startTime=0;
@@ -269,10 +218,11 @@ void resetTiming() {
 }
 
 /**
- * Get the time it took to complete the most recent beer.
+ * Get the time it took to complete the most recent drink.
  * 
- * @return How long it took to complete the last beer.
+ * @return How long it took to complete the last drink.
  */
+<<<<<<< HEAD
 int getBeerCompletionDuration() {
   return lastBeer.timeToFinish();
 }
@@ -285,34 +235,47 @@ void setBeerCompletionDuration(int startTime, int endTime) {
   if ((lastBeer.timeToFinish() < storage.getLifetimeFastestBeerTime()) || (storage.getLifetimeFastestBeerTime()<=0)) {
     lifetimeFastestBeerTime = lastBeer.timeToFinish();
     storage.setLifetimeFastestTime();
+=======
+int getDrinkCompletionDuration() {
+  return mostRecentDrinkTime;
+}
+
+void setDrinkCompletionDuration(int startTime, int endTime) {
+  mostRecentDrinkTime = endTime-startTime;
+  //@NOTE:: we should be using globals unless there's a reason to read from memory (globals can exist in the storage class, that's fine; but it looks like the plan is to have them read from memory every time)
+  //@NOTE:: this method does not exist
+  if ((mostRecentDrinkTime < storage.lifetimeFastestTime()) || (storage.lifetimeFastestTime()<=0)) {
+    storage.lifetimeFastestTime(mostRecentDrinkTime);
+>>>>>>> taylor-web-admin
   }
 }
 
 /**
- * Denote the completion of a new beer at the current instant.
+ * Denote the completion of a new drink at the current instant.
  */
-void setBeerCompletionDateTime() {
-  //currentBeerCompletionInstant=now(); @TODO: Now isn't working/validating
+void setDrinkCompletionDateTime() {
+  //currentDrinkCompletionInstant=now(); @TODO: Now isn't working/validating
 }
 
 /**
- * Determines whether or not the completion of the last beer represents a new day.
+ * Determines whether or not the completion of the last drink represents a new day.
  * 
- * @return Is the first beer of new day
+ * @return Is the first drink of new day
  */
 boolean isNewDay() {
-  return (lastBeerCompletionInstant < (currentBeerCompletionInstant-SECONDS_IN_DAY));
+  return (lastDrinkCompletionInstant < (currentDrinkCompletionInstant-SECONDS_IN_DAY));
 }
 
 /****************************************************************/
 /***************** Statistics and State Change ******************/
 /****************************************************************/
 /**
- * Record that a beer has been completed, update any current records, storage and display to the LCD
+ * Record that a drink has been completed, update any current records, storage and display to the LCD
  */
-void recordBeerEnd() {
+void recordDrinkEnd() {
   mostRecentVolume=count*multiplier;
 
+<<<<<<< HEAD
   lastBeer = new Beer(startTime,endTime,mostRecentVolume);
 
 
@@ -322,7 +285,18 @@ void recordBeerEnd() {
   setBeerCompletionDuration(startTime,endTime);
   
   setBeerCompletionDateTime(); // @TODO: This function does nothing
+=======
+  lifetime.addDrink(startTime,endTime,mostRecentVolume);
+  tonight.addDrink(startTime,endTime,mostRecentVolume);
   
+  storeAllValues();
+  
+  setDrinkCompletionDuration(startTime,endTime);
+>>>>>>> taylor-web-admin
+  
+  setDrinkCompletionDateTime(); // @NOTE:: This function does nothing
+
+  //@NOTE:: we'll want to tear this out once we properly define a session
   if (isNewDay()) {
     resetTonightCounts();
   }
@@ -331,22 +305,21 @@ void recordBeerEnd() {
 }
 
 /**
- * Call if more than 12 hours have passed since the last time a beer was drank. 
- * This function will reset all of the relevant variables scoring beer statistics for a given night.
+ * Call if more than 12 hours have passed since the last time a drink was drank. 
+ * This function will reset all of the relevant variables scoring drink statistics for a given night.
  */
 void resetTonightCounts() {
-  tonight = new Record();
+  tonight = *new Record();
 }
 
 /**
- * Resets all of the variables tied to a beer session.
+ * Resets all of the variables tied to a drink session.
  */
-void resetBeerSession() {
+void resetDrinkSession() {
   count=0;
   currCount=0;
   prevCount=0;
   resetTiming();
-  firstDropOfBeer=true; // print it out
 }
 
 /**
@@ -358,11 +331,15 @@ void totalReset() {
   prevCount=0;
   resetTiming();
   
-  lifetime = new Record();
-  tonight = new Record();
+  lifetime = *new Record();
+  tonight = *new Record();
   
+<<<<<<< HEAD
   lastBeer = new Beer();
 
+=======
+  mostRecentDrinkTime = 0;
+>>>>>>> taylor-web-admin
   mostRecentVolume = 0.0;
 
   storeAllValues();
@@ -373,31 +350,20 @@ void totalReset() {
 /****************************************************************/
 
 /**
- * Determines whether or not to print out the beer completion data. 
+ * Determines whether or not to print out the drink completion data. 
  */
-boolean shouldPrintBeerTime() {
-  return ((currCount>0) && (firstDropOfBeer) && (currCount==prevCount));
+boolean shouldPrintDrinkTime() {
+  return ((currCount>0) && (currCount==prevCount));
 }
 
 /**
- * Print out status of the device given the last beer that was completed.
+ * Print out status of the device given the last drink that was completed.
  * 
  * @param storage boolean indicating where to read the data from
  */
 void printStatusReport(bool readFromStorage) {
-  if (readFromStorage) {
-    debugPrintln(STR_LIFETIME_COUNT + storage.lifetimeCount());
-    debugPrintln(STR_LIFETIME_VOLUME + storage.lifetimeVolume() + STR_LIFETIME_VOLUME_UNIT);
-    debugPrintln(STR_FASTEST_TIME + storage.lifetimeFastestTime() + STR_BEER_TIMING_UNIT);
-  }
-  else {
-    debugPrintln(STR_BEER_TIMING + getBeerCompletionDuration() + STR_BEER_TIMING_UNIT);
-    debugPrintln(STR_LIFETIME_COUNT + lifetimeTotalBeerCount);
-    debugPrintln(STR_LIFETIME_VOLUME + lifetimeTotalVolume + STR_LIFETIME_VOLUME_UNIT);
-  }
-  
-  sendToStatusBoard();
-  sendToLcd();
+  //@TODO:: either have this respect the "readFromStorage" variable, or remove it as a parameter
+  display.OutputData(lifetime,tonight,mostRecentDrinkTime,mostRecentVolume);
 }
 
 /****************************************************************/
@@ -409,10 +375,7 @@ void printStatusReport(bool readFromStorage) {
  * @return the integer value stored in the desired address.
  */
 void readFromStorage() {
-  lifetime = new Record();
-  lifetime.count(storage.lifetimeCount());
-  lifetime.volume(storage.lifetimeVolume());
-  lifetime.time(storage.lifetimeFastestTime());
+  lifetime = storage.lifetimeRecord();
 }
 
 /**
@@ -420,67 +383,11 @@ void readFromStorage() {
  * This should happen ANYTIME data that needs to persist is created and/or updated.
  */
 void storeAllValues() {
-  storage.lifetimeCount(lifetimeTotalBeerCount);
-  storage.lifetimeFastestTime(lifetimeFastestBeerTime);
-  storage.lifetimeVolume(lifetimeTotalVolume);
+  storage.lifetimeCount(lifetime.count());
+  storage.lifetimeFastestTime(lifetime.fastestTime());
+  storage.lifetimeVolume(lifetime.volume());
 }
-
-/****************************************************************/
-/********************   Serial Management   *********************/
-/****************************************************************/
-/**
- * Only print to the serial monitor if debug mode is turned on and if not using a status board
- */
-boolean shouldPrint() {
-  return(debugModeOn && !statusBoardEnabled); 
-}
-
-/**
- * Methods used to print debug messages
- * First checks whether it is appropriate to send text to the serial monitor
- */
-void debugPrint(String debugText) { if(shouldPrint()){ Serial.print(debugText); }}
-void debugPrintln(String debugText) { if(shouldPrint()){ Serial.println(debugText); }}
-void debugPrint(int debugText) { if(shouldPrint()){ Serial.print(debugText); }}
-void debugPrintln(int debugText) { if(shouldPrint()){ Serial.println(debugText); }}
-void debugPrint(long debugText) { if(shouldPrint()){ Serial.print(debugText); }}
-void debugPrintln(long debugText) { if(shouldPrint()){ Serial.println(debugText); }}
-void debugPrint(unsigned long debugText) { if(shouldPrint()){ Serial.print(debugText); }}
-void debugPrintln(unsigned long debugText) { if(shouldPrint()){ Serial.println(debugText); }}
-void debugPrint(float debugText) { if(shouldPrint()){ Serial.print(debugText); }}
-void debugPrintln(float debugText) { if(shouldPrint()){ Serial.println(debugText); }}
-void debugPrint(double debugText) { if(shouldPrint()){ Serial.print(debugText); }}
-void debugPrintln(double debugText) { if(shouldPrint()){ Serial.println(debugText); }}
-
-/**
- * Serial String to send to processing as output (e.g. to statusboard)
- * 
- * @return a semicolon delimited string containing the information to send as output
- */
-String buildComString(Record lifetimeRecord, Record tonightRecord,int mostRecentBeerTimeVar, float mostRecentVolumeVar)
-{
-  String toSend = "";
-  String delim = ";";
-  
-  toSend += lifetimeRecord.count();
-  toSend += delim;
-  toSend += tonightRecord.count();
-  toSend += delim;
-  toSend += lifetimeRecord.fastestTime();
-  toSend += delim;
-  toSend += tonightRecord.fastestTime();
-  toSend += delim;
-  toSend += mostRecentBeerTimeVar;
-  toSend += delim;
-  toSend += lifetimeRecord.volume();
-  toSend += delim;
-  toSend += lifetimeRecord.volume();
-  toSend += delim;
-  toSend += mostRecentVolumeVar;
-  toSend += delim;  
-  
-  return (toSend);
-}
+<<<<<<< HEAD
 
 /**
  * Send info to the status board
@@ -564,3 +471,5 @@ void sendToLcd()
   lcd.print(toDisplayValue + " " + toDisplayUnit);
 }
 
+=======
+>>>>>>> taylor-web-admin

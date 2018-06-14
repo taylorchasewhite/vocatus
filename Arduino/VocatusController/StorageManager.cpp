@@ -10,42 +10,66 @@
 */
 #include "Arduino.h"
 #include "StorageManager.h"
+#include "Record.h"
+#include "EEPROM.h"
 
 // Addresses
-const int ADDR_BEER_COUNT             = 0;
+const int ADDR_DRINK_COUNT             = 0;
 const int ADDR_LIFETIME_VOLUME        = 1*sizeof(float);
-const int ADDR_FASTEST_BEER           = 2*sizeof(float);
+const int ADDR_FASTEST_DRINK           = 2*sizeof(float);
 
-const int ADDR_TONIGHT_FASTEST_BEER   = 10*sizeof(float);
-const int ADDR_TONIGHT_BEER_COUNT     = 11*sizeof(float);
+const int ADDR_TONIGHT_FASTEST_DRINK   = 10*sizeof(float);
+const int ADDR_TONIGHT_DRINK_COUNT     = 11*sizeof(float);
 const int ADDR_TONIGHT_VOLUME         = 12*sizeof(float);
 
-StorageManager::StorageManager(int pin)
-{
-  pinMode(pin, OUTPUT);
-  _pin = pin;
+/**
+ * Copy constructor, makes an exact copy in newly allocated memory
+ */
+StorageManager::StorageManager(StorageManager & copy) {
+  // TODO: Write
+
 }
+
+/**
+ * Default constructor, used to allocate space when defining members. 
+ * Sets all values to null, 0, or other non-meaningful data.
+ */
+StorageManager::StorageManager() {
+ 
+}
+
+
 
 //Getters and setters
 float StorageManager::lifetimeCount() { 
-  return readFloatData(ADDR_BEER_COUNT); 
+  return readFloatData(ADDR_DRINK_COUNT); 
 }
+/**
+ * Store the lifetime number of drinks drank during the lifetime of the machine.
+ */
 void StorageManager::lifetimeCount(float count) { 
-  storeData(ADDR_BEER_COUNT,count); 
+  storeData(ADDR_DRINK_COUNT,count); 
 }
 
+/**
+ * Get the fastest lifetime completion time for a drink
+ */
 int StorageManager::lifetimeFastestTime() { 
-  return readFloatData(ADDR_FASTEST_BEER); 
+  return readFloatData(ADDR_FASTEST_DRINK); 
 }
-void StorageManager::lifetimeFastestTime(float beerTime) { 
-  storeData(ADDR_FASTEST_BEER,time); 
+/**
+ * Store the fastest drink by storing the fastest time
+ * @param drinkTime the time in milliseconds that reflects the fastest time for the machine lifetime.
+ */
+void StorageManager::lifetimeFastestTime(float drinkTime) { 
+  storeData(ADDR_FASTEST_DRINK,drinkTime); 
 }
 /**
  * Return the lifetime Record object that is stored in storage
  * @return Record the lifetime record object containing information on volume, speed, etc.
  */
-Record StorageManager::lifetimeRecord() {
-  return new Record(lifetimeCount(),lifetimeVolume(),lifetimeFastestTime());
+Record& StorageManager::lifetimeRecord() {
+  return *new Record((int)lifetimeCount(),lifetimeVolume(),lifetimeFastestTime(),0); // TODO load startTime
 }
 
 float StorageManager::lifetimeVolume() { 
@@ -58,26 +82,27 @@ void StorageManager::lifetimeVolume(float volume) {
 
 /*
   Store all of the records we keep for the lifetime interval.
-  @param beerCount float the float value representing the number of beers drank.
+  @param drinkCount float the float value representing the number of drinks drank.
 */
-void StorageManager::setLifetimeValues(float beerCount,float beerTime, float beerVolume) {
-  lifetimeCount(beerCount);
-  lifetimeFastestTime(beerTime);
-  lifetimeVolume(beerVolume);
+void StorageManager::storeAllValues(float drinkCount,float drinkTime, float drinkVolume) {
+  lifetimeCount(drinkCount);
+  lifetimeFastestTime(drinkTime);
+  lifetimeVolume(drinkVolume);
 }
 
 /**
  * Store all of the records we keep for the tonight interval.
- * @param beerCount float the float value representing the number of beers drank.
- * @param beerTime float the float value representing the number of beers drank.
- * @param beerVolume float the total number milliters drank
+ * @param drinkCount float the float value representing the number of drinks drank.
+ * @param drinkTime float the float value representing the number of drinks drank.
+ * @param drinkVolume float the total number milliters drank
  */
-void StorageManager::setTonightValues(float beerCount,float beerTime, float beerVolume) {
-  lifetimeCount(beerCount);
-  lifetimeFastestTime(beerTime);
-  lifetimeVolume(beerVolume);
+/*void StorageManager::setTonightValues(float drinkCount,float drinkTime, float drinkVolume) {
+  //@TODO this doesn't do anything right now, we should eventually have the storage manager or an abstraction layer handle the logic for tonight vs. lifetime.
+  lifetimeCount(drinkCount);
+  lifetimeFastestTime(drinkTime);
+  lifetimeVolume(drinkVolume);
 
-}
+}*/
 
 /**
  * Get float value held in permanent storage from EEPROM data.
@@ -114,9 +139,9 @@ int StorageManager::readIntegerData(int address) {
 void StorageManager::storeData(int address, int value) {
   float floatVal  = value;
   EEPROM.put(address,floatVal);
-  debugPrint(floatVal);
-  debugPrint(" stored at address ");
-  debugPrintln(address);
+  //debugPrint(floatVal);
+  //debugPrint(" stored at address ");
+  //debugPrintln(address);
 }
 
 /**
@@ -129,9 +154,9 @@ void StorageManager::storeData(int address, int value) {
  */
 void StorageManager::storeData(int address, float value) {
   EEPROM.put(address,value);
-  debugPrint(value);
-  debugPrint(" stored at address ");
-  debugPrintln(address);
+  //debugPrint(value);
+  //debugPrint(" stored at address ");
+  //debugPrintln(address);
 }
 
 /**
@@ -152,5 +177,5 @@ void StorageManager::clearEEPROM() {
       EEPROM.write(i, 0);                       //write 0 to address i
     }
   }
-  debugPrintln("EEPROM erased");
+  //debugPrintln("EEPROM erased");
 }

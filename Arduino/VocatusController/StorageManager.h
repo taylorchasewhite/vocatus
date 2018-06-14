@@ -8,30 +8,32 @@
 #ifndef StorageManager_h
 #define StorageManager_h
 #include "Arduino.h"
+#include "Record.h"
 
 class StorageManager
 {
   public:
-    StorageManager(int pin);
+		StorageManager(StorageManager & copy);
+		StorageManager();
+		
+		float readFloatData(int address);
+		int readIntegerData(int address);
+		
+		float lifetimeCount();
+		void lifetimeCount(float count);
 
-	float readFloatData(int address);
-	int readIntegerData(int address);
+		int lifetimeFastestTime();
+		void lifetimeFastestTime(float drinkTime);
 
-	float getLifetimeCount();
-	void setLifetimeCount(float count);
+		Record& lifetimeRecord();
 
-	int getLifetimeFastestTime();
-	void setLifetimeFastestTime(float beerTime);
+		float lifetimeVolume();
+		void lifetimeVolume(float volume);
 
-	Record getLifetimeRecord();
-
-	float getLifetimeVolume();
-	void storeLifetimeTotalVolume(float volume);
-
-	void storeAllValues(float beerCount,float beerTime, float beerVolume);
-	void storeData(int address, float value);
-	void storeData(int address, int value);
-	void reset();
+		void storeAllValues(float drinkCount,float drinkTime, float drinkVolume);
+		void storeData(int address, float value);
+		void storeData(int address, int value);
+		void reset();
 
   private:
     int _pin;
