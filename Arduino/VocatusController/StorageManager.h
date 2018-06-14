@@ -30,7 +30,19 @@ class StorageManager
 		float lifetimeVolume();
 		void lifetimeVolume(float volume);
 
+		float tonightCount();
+		void tonightCount(float count);
+
+		int tonightFastestTime();
+		void tonightFastestTime(float drinkTime);
+
+		Record& tonightRecord();
+
+		float tonightVolume();
+		void tonightVolume(float volume);
+
 		void storeAllValues(float drinkCount,float drinkTime, float drinkVolume);
+		void storeAllValues(Record& lifetime, Record& tonight);
 		void storeData(int address, float value);
 		void storeData(int address, int value);
 		void reset();

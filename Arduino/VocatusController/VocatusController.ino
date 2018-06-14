@@ -86,6 +86,7 @@ StorageManager storage;
 /****************************************************************/
 void setup() {
   initGlobals();
+  totalReset();
   Serial.begin(bitsPerSecond);
   initializeDisplay(); // @TODO: Would like to get this to run here...not in loop.
 
@@ -112,21 +113,19 @@ void loop() {
   
   if (shouldPrintDrinkTime()) {
     recordDrinkEnd();
-    printStatusReport(false);
-    resetDrinkSession();
   }
 
   //if the mode cycle button is pressed
   if (modeCycleButtonVal == LOW) {
     display.CycleCurrentValueToDisplay();
-    printStatusReport(true);
+    printStatusReport();
   } 
 
   //if the reset button is pressed
   if (resetButtonVal == LOW) {
     display.DebugPrintln("Reset button pushed");
     totalReset();
-    printStatusReport(true);
+    printStatusReport();
   } 
 }
 
@@ -166,10 +165,8 @@ void initGlobals() {
   //initialize all tracking variables to 0 in case they are not read from storage
   tonight = *new Record();
   lifetime = *new Record();
-  
-  lastDrink = *new Drink();
 
-  display = *new DisplayManager(); //set it to whatever mode(s) you want: DEBUG|STATUSBOARD|LCD
+  display = *new DisplayManager(DEBUG); //set it to whatever mode(s) you want: DEBUG|STATUSBOARD|LCD
 
   readFromStorage();
 }
@@ -178,7 +175,7 @@ void initializeDisplay() {
   if (!startingUp) {
     display.DebugPrintln("Welcome to the Red Solo Cup Saver!");
     display.DebugPrintln("----------------------------------");
-    printStatusReport(true);
+    printStatusReport();
     startingUp=true;
   }
 }
@@ -253,7 +250,13 @@ void recordDrinkEnd() {
 
   lifetime.addDrink(startTime,endTime,mostRecentVolume);
   tonight.addDrink(startTime,endTime,mostRecentVolume);
-  
+
+  display.DebugPrint("TONIGHT DEBUG VOLUME:");
+  display.DebugPrintln(tonight.volume());
+
+  display.DebugPrint("TONIGHT DEBUG MOST RECENT LOCAL:");
+  display.DebugPrintln(mostRecentVolume);
+
   storeAllValues();
   
   setDrinkCompletionDuration(startTime,endTime);
@@ -264,6 +267,9 @@ void recordDrinkEnd() {
   if (isNewDay()) {
     resetTonightCounts();
   }
+
+  printStatusReport();
+  resetDrinkSession();
 }
 
 /**
@@ -298,8 +304,8 @@ void totalReset() {
   
   mostRecentDrinkTime = 0;
   mostRecentVolume = 0.0;
-
-  storeAllValues();
+  storage.reset();
+  //storeAllValues();
 }
 
 /****************************************************************/
@@ -318,8 +324,7 @@ boolean shouldPrintDrinkTime() {
  * 
  * @param storage boolean indicating where to read the data from
  */
-void printStatusReport(bool readFromStorage) {
-  //@TODO:: either have this respect the "readFromStorage" variable, or remove it as a parameter
+void printStatusReport() {
   display.OutputData(lifetime,tonight,mostRecentDrinkTime,mostRecentVolume);
 }
 
@@ -340,7 +345,5 @@ void readFromStorage() {
  * This should happen ANYTIME data that needs to persist is created and/or updated.
  */
 void storeAllValues() {
-  storage.lifetimeCount(lifetime.count());
-  storage.lifetimeFastestTime(lifetime.fastestTime());
-  storage.lifetimeVolume(lifetime.volume());
+  storage.storeAllValues(lifetime,tonight);
 }

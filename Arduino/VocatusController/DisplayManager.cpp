@@ -45,7 +45,7 @@ String DisplayManager::_handleSingleCase(int value,String stringIfSingle,String 
 /**
  * Send info to the appropriate output
  */
-void DisplayManager::OutputData(Record lifetimeRecord, Record tonightRecord,int mostRecentDrinkTimeVar, float mostRecentVolumeVar)
+void DisplayManager::OutputData(Record& lifetimeRecord, Record& tonightRecord,int mostRecentDrinkTimeVar, float mostRecentVolumeVar)
 {
   DebugPrintln("command to output captured");//@TODO:: Remove this
   if(_isDebugEnabled) {
@@ -91,7 +91,7 @@ void DisplayManager::DebugPrintln(double debugText) { if(_shouldDebug()){ Serial
 /**
  * Output a standard debug message to the console with the current state of variables
  */
-void DisplayManager::_sendDebugReport(Record lifetimeRecord, Record tonightRecord,int mostRecentDrinkTimeVar, float mostRecentVolumeVar) {
+void DisplayManager::_sendDebugReport(Record& lifetimeRecord, Record& tonightRecord,int mostRecentDrinkTimeVar, float mostRecentVolumeVar) {
   DebugPrintln(LIFECOUNT_LABEL + ": " + lifetimeRecord.count() + " " + _handleSingleCase(lifetimeRecord.count(),LIFECOUNT_UNIT_SINGLE,LIFECOUNT_UNIT));
   DebugPrintln(TONIGHTCOUNT_LABEL + ": " + tonightRecord.count() + " " + _handleSingleCase(tonightRecord.count(),TONIGHTCOUNT_UNIT_SINGLE,TONIGHTCOUNT_UNIT));
   DebugPrintln(LIFESPEED_LABEL + ": " + lifetimeRecord.fastestTime() + " " + LIFESPEED_UNIT);
@@ -111,7 +111,7 @@ void DisplayManager::_sendDebugReport(Record lifetimeRecord, Record tonightRecor
  * 
  * @return a semicolon delimited string containing the information to send as output
  */
-String DisplayManager::_buildComString(Record lifetimeRecordVar, Record tonightRecordVar,int mostRecentDrinkTimeVar, float mostRecentVolumeVar)
+String DisplayManager::_buildComString(Record& lifetimeRecordVar, Record& tonightRecordVar,int mostRecentDrinkTimeVar, float mostRecentVolumeVar)
 {
   String toSend = "";
   String delim = ";";
@@ -136,7 +136,7 @@ String DisplayManager::_buildComString(Record lifetimeRecordVar, Record tonightR
   return (toSend);
 }
 
-void DisplayManager::_sendToStatusBoard(Record lifetimeRecordVar, Record tonightRecordVar,int mostRecentDrinkTimeVar, float mostRecentVolumeVar) {
+void DisplayManager::_sendToStatusBoard(Record& lifetimeRecordVar, Record& tonightRecordVar,int mostRecentDrinkTimeVar, float mostRecentVolumeVar) {
   DebugPrintln("command to send to sb captured");//@TODO:: Remove this
   String comString = _buildComString(lifetimeRecordVar,tonightRecordVar,mostRecentDrinkTimeVar,mostRecentVolumeVar); 
   Serial.println(comString);  
@@ -170,7 +170,7 @@ void DisplayManager::CycleCurrentValueToDisplay() {
 /**
  * Send the relevant info for display on the LCD, based on the current lcdDisplayMode
  */
-void DisplayManager::_sendToLcd(Record lifetimeRecord, Record tonightRecord,int mostRecentDrinkTime)
+void DisplayManager::_sendToLcd(Record& lifetimeRecord, Record& tonightRecord,int mostRecentDrinkTime)
 {
   String toDisplayLabel = "";
   String toDisplayValue = "";

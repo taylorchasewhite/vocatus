@@ -46,6 +46,6 @@ class Record
 	Drink _fastestDrink;
     int _endTime;
 	int _startTime;
-	int _volume;
+	float _volume;
 };
 #endif

@@ -18,8 +18,8 @@ const int ADDR_DRINK_COUNT             = 0;
 const int ADDR_LIFETIME_VOLUME        = 1*sizeof(float);
 const int ADDR_FASTEST_DRINK           = 2*sizeof(float);
 
-const int ADDR_TONIGHT_FASTEST_DRINK   = 10*sizeof(float);
-const int ADDR_TONIGHT_DRINK_COUNT     = 11*sizeof(float);
+const int ADDR_TONIGHT_DRINK_COUNT     = 10*sizeof(float);
+const int ADDR_TONIGHT_FASTEST_DRINK   = 11*sizeof(float);
 const int ADDR_TONIGHT_VOLUME         = 12*sizeof(float);
 
 /**
@@ -39,6 +39,30 @@ StorageManager::StorageManager() {
 }
 
 
+/*
+  Store all of the records we keep for the lifetime interval.
+  @param drinkCount float the float value representing the number of drinks drank.
+*/
+void StorageManager::storeAllValues(float drinkCount,float drinkTime, float drinkVolume) {
+  lifetimeCount(drinkCount);
+  lifetimeFastestTime(drinkTime);
+  lifetimeVolume(drinkVolume);
+  tonightCount()
+}
+
+/*
+  Store all of the records we keep for the lifetime interval.
+  @param lifetime Record the record representing the lifetime values
+  @param tonight Record the record representing the tonight values
+*/
+void StorageManager::storeAllValues(Record& lifetime, Record& tonight) {
+  lifetimeCount(lifetime.count());
+  lifetimeFastestTime(lifetime.fastestTime());
+  lifetimeVolume(lifetime.volume());
+  tonightCount(tonight.count());
+  tonightFastestTime(tonight.fastestTime());
+  tonightVolume(tonight.volume());
+}
 
 //Getters and setters
 float StorageManager::lifetimeCount() { 
@@ -80,14 +104,46 @@ void StorageManager::lifetimeVolume(float volume) {
   storeData(ADDR_LIFETIME_VOLUME,volume); 
 }
 
-/*
-  Store all of the records we keep for the lifetime interval.
-  @param drinkCount float the float value representing the number of drinks drank.
-*/
-void StorageManager::storeAllValues(float drinkCount,float drinkTime, float drinkVolume) {
-  lifetimeCount(drinkCount);
-  lifetimeFastestTime(drinkTime);
-  lifetimeVolume(drinkVolume);
+/**************
+ * Tonight
+ **************/
+float StorageManager::tonightCount() { 
+  return readFloatData(ADDR_TONIGHT_DRINK_COUNT); 
+}
+/**
+ * Store the lifetime number of drinks drank during the lifetime of the machine.
+ */
+void StorageManager::tonightCount(float count) { 
+  storeData(ADDR_TONIGHT_DRINK_COUNT,count); 
+}
+
+/**
+ * Get the fastest lifetime completion time for a drink
+ */
+int StorageManager::tonightFastestTime() { 
+  return readFloatData(ADDR_TONIGHT_FASTEST_DRINK); 
+}
+/**
+ * Store the fastest drink by storing the fastest time
+ * @param drinkTime the time in milliseconds that reflects the fastest time for the machine lifetime.
+ */
+void StorageManager::tonightFastestTime(float drinkTime) { 
+  storeData(ADDR_TONIGHT_FASTEST_DRINK,drinkTime); 
+}
+/**
+ * Return the lifetime Record object that is stored in storage
+ * @return Record the lifetime record object containing information on volume, speed, etc.
+ */
+Record& StorageManager::tonightRecord() {
+  return *new Record((int)tonightCount(),tonightVolume(),tonightFastestTime(),0); // TODO load startTime
+}
+
+float StorageManager::tonightVolume() { 
+  return readFloatData(ADDR_TONIGHT_VOLUME); 
+}
+
+void StorageManager::tonightVolume(float volume) { 
+  storeData(ADDR_TONIGHT_VOLUME,volume); 
 }
 
 /**
