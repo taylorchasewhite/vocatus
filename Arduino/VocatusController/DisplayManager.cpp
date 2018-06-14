@@ -100,9 +100,6 @@ void DisplayManager::_sendDebugReport(Record lifetimeRecord, Record tonightRecor
   DebugPrintln(LASTVOLUME_LABEL + ": " + mostRecentVolumeVar + " " + LASTVOLUME_UNIT);
 }
 
-
-//@TODO:: implement standard debug output
-
 /****************************************************************/
 /*****************   Status Board Management   ******************/
 /****************************************************************/
