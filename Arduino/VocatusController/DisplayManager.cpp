@@ -17,6 +17,8 @@ DisplayManager::DisplayManager(OutputMode myOutputMode) {
 
 DisplayManager::DisplayManager() {
   DisplayManager(DEBUG);
+  DebugPrintln("Hello and welcome to Vocatus, the drink bong that's saving the world,");
+  DebugPrintln("one beer at a time ©.");
 }
 
 /**
