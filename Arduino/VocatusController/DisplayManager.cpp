@@ -13,13 +13,11 @@ const int rs = 7, en = 8, d4 = 9, d5 = 10, d6 = 11, d7 = 12;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
 DisplayManager::DisplayManager(OutputMode myOutputMode) {
-  _changeOutputMode(myOutputMode);
+  this->_changeOutputMode(myOutputMode);
 }
 
 DisplayManager::DisplayManager() {
-  DisplayManager(DEBUG);
-  DebugPrintln("Hello and welcome to Vocatus, the drink bong that's saving the world,");
-  DebugPrintln("one beer at a time ©.");
+  this->_changeOutputMode(STATUSBOARD);
 }
 
 /**
@@ -49,6 +47,7 @@ String DisplayManager::_handleSingleCase(int value,String stringIfSingle,String 
  */
 void DisplayManager::OutputData(Record lifetimeRecord, Record tonightRecord,int mostRecentDrinkTimeVar, float mostRecentVolumeVar)
 {
+  DebugPrintln("command to output captured");//@TODO:: Remove this
   if(_isDebugEnabled) {
     _sendDebugReport(lifetimeRecord,tonightRecord,mostRecentDrinkTimeVar,mostRecentVolumeVar);
   }
@@ -138,6 +137,7 @@ String DisplayManager::_buildComString(Record lifetimeRecordVar, Record tonightR
 }
 
 void DisplayManager::_sendToStatusBoard(Record lifetimeRecordVar, Record tonightRecordVar,int mostRecentDrinkTimeVar, float mostRecentVolumeVar) {
+  DebugPrintln("command to send to sb captured");//@TODO:: Remove this
   String comString = _buildComString(lifetimeRecordVar,tonightRecordVar,mostRecentDrinkTimeVar,mostRecentVolumeVar); 
   Serial.println(comString);  
 }
