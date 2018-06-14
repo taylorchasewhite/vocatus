@@ -13,7 +13,6 @@
 class StorageManager
 {
   public:
-    StorageManager(int pin);
 		StorageManager(StorageManager & copy);
 		StorageManager();
 		

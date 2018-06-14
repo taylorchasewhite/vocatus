@@ -8,6 +8,7 @@
 #define DisplayManager_h
 #include "Arduino.h"
 #include "Record.h"
+#include <Time.h>
 
 enum OutputMode {
   DEBUG       = 0x0001,  //noisy debug info output to the console

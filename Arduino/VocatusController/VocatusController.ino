@@ -71,10 +71,7 @@ Record tonight;
 
 unsigned long endTime;
 unsigned long startTime;
-int lastDrinkDay;
-int lastDrinkHour;
-int currentDrinkDay;
-int currentDrinkHour;
+
 
 const unsigned long SECONDS_IN_DAY = 86400;
 unsigned long lastDrinkCompletionInstant; //@NOTE:: why are all of these globals?
