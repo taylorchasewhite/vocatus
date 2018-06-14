@@ -17,7 +17,7 @@ DisplayManager::DisplayManager(OutputMode myOutputMode) {
 }
 
 DisplayManager::DisplayManager() {
-  this->_changeOutputMode(STATUSBOARD);
+  this->_changeOutputMode(DEBUG);
 }
 
 /**
