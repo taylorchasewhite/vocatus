@@ -30,6 +30,17 @@ void DisplayManager::_changeOutputMode(OutputMode newOutputMode) {
   _isLcdEnabled = ((newOutputMode&LCD) == LCD);
 }
 
+String DisplayManager::_handleSingleCase(float value,String stringIfSingle, String stringIfNotSingle) { 
+  return (_handleSingleCase((int)value, stringIfSingle, stringIfNotSingle));
+}
+String DisplayManager::_handleSingleCase(int value,String stringIfSingle,String stringIfNotSingle) {
+  if(value==1)
+  {
+    return(stringIfSingle);
+  }
+  return(stringIfNotSingle);
+}
+
 /**
  * Send info to the appropriate output
  */
@@ -79,8 +90,8 @@ void DisplayManager::DebugPrintln(double debugText) { if(_shouldDebug()){ Serial
  * Output a standard debug message to the console with the current state of variables
  */
 void DisplayManager::_sendDebugReport(Record lifetimeRecord, Record tonightRecord,int mostRecentDrinkTimeVar, float mostRecentVolumeVar) {
-  DebugPrintln(LIFECOUNT_LABEL + ": " + lifetimeRecord.count() + " " + LIFECOUNT_UNIT);
-  DebugPrintln(TONIGHTCOUNT_LABEL + ": " + tonightRecord.count() + " " + TONIGHTCOUNT_UNIT);
+  DebugPrintln(LIFECOUNT_LABEL + ": " + lifetimeRecord.count() + " " + _handleSingleCase(lifetimeRecord.count(),LIFECOUNT_UNIT_SINGLE,LIFECOUNT_UNIT));
+  DebugPrintln(TONIGHTCOUNT_LABEL + ": " + tonightRecord.count() + " " + _handleSingleCase(tonightRecord.count(),TONIGHTCOUNT_UNIT_SINGLE,TONIGHTCOUNT_UNIT));
   DebugPrintln(LIFESPEED_LABEL + ": " + lifetimeRecord.fastestTime() + " " + LIFESPEED_UNIT);
   DebugPrintln(TONIGHTSPEED_LABEL + ": " + tonightRecord.fastestTime() + " " + TONIGHTSPEED_UNIT);
   DebugPrintln(LASTSPEED_LABEL + ": " + mostRecentDrinkTimeVar + " " + LASTSPEED_UNIT);
@@ -156,11 +167,10 @@ void DisplayManager::CycleCurrentValueToDisplay() {
   _currentValueToDisplay = (CurrentValueToDisplay) intValue;
 }
 
-//@TODO:: implement constants 
 /**
  * Send the relevant info for display on the LCD, based on the current lcdDisplayMode
  */
-void DisplayManager::_sendToLcd(Record lifetimeRecordVar, Record tonightRecordVar,int mostRecentDrinkTimeVar)
+void DisplayManager::_sendToLcd(Record lifetimeRecord, Record tonightRecord,int mostRecentDrinkTime)
 {
   String toDisplayLabel = "";
   String toDisplayValue = "";
@@ -170,27 +180,27 @@ void DisplayManager::_sendToLcd(Record lifetimeRecordVar, Record tonightRecordVa
   switch(_currentValueToDisplay) {
     case LIFECOUNT:
       toDisplayLabel = LIFECOUNT_LABEL;
-      toDisplayValue = lifetimeRecordVar.count();
-      toDisplayUnit  = LIFECOUNT_UNIT; //TODO:: handle 1 drink
+      toDisplayValue = lifetimeRecord.count();
+      toDisplayUnit  = _handleSingleCase(lifetimeRecord.count(),LIFECOUNT_UNIT_SINGLE,LIFECOUNT_UNIT); 
     case TONIGHTCOUNT:
       toDisplayLabel = TONIGHTCOUNT_LABEL;
-      toDisplayValue = tonightRecordVar.count();
-      toDisplayUnit  = TONIGHTCOUNT_UNIT; //TODO:: handle 1 drink
+      toDisplayValue = tonightRecord.count();
+      toDisplayUnit  = _handleSingleCase(tonightRecord.count(),TONIGHTCOUNT_UNIT_SINGLE,TONIGHTCOUNT_UNIT);
     case LIFESPEED:
       toDisplayLabel = LIFESPEED_LABEL;
-      toDisplayValue = lifetimeRecordVar.fastestTime();
+      toDisplayValue = lifetimeRecord.fastestTime();
       toDisplayUnit  = LIFESPEED_UNIT;
     case TONIGHTSPEED:
       toDisplayLabel = TONIGHTSPEED_LABEL;
-      toDisplayValue = tonightRecordVar.fastestTime();
+      toDisplayValue = tonightRecord.fastestTime();
       toDisplayUnit  = TONIGHTSPEED_UNIT  ;
     case LASTSPEED:
       toDisplayLabel = LASTSPEED_LABEL;
-      toDisplayValue = mostRecentDrinkTimeVar;
+      toDisplayValue = mostRecentDrinkTime;
       toDisplayUnit  = LASTSPEED_UNIT;
     default:  //might as well have a saftey case //TODO:: do we want to remove this in the final product for less noisy errors?
       toDisplayLabel = "ERROR:";
-      toDisplayValue = "BAD ENUM VALUE"; 
+      toDisplayValue = "BAD ENUM VALUE " + _currentValueToDisplay; 
   }
 
   //print the first line
