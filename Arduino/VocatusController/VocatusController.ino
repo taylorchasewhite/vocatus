@@ -26,7 +26,8 @@
     2. C++ Style Guide - https://google.github.io/styleguide/cppguide.html
   
   Exceptions to PQA resources linked:
-    Use tabs, not spaces. Use the arduino web IDE to determine what the tab keystroke translates to.
+    Use tabs, not spaces. Use the arduino web IDE to determine what the tab keystroke translates to. 
+      I'm using the Arduino application, not the web IDE, which turns tabs into spaces -SEL
     
   --------------------------
 */
@@ -80,22 +81,10 @@ unsigned long lastDrinkCompletionInstant; //@NOTE:: why are all of these globals
 unsigned long currentDrinkCompletionInstant;
 
 // States
-bool firstDropOfDrink; //@NOTE:: this does nothing; remove all references
 bool startingUp;
 
 // Display strings
 DisplayManager display;
-
-//@Note:: Do these need to be constants? we should either make our debug/LCD strings consistent or get rid of these
-const String STR_DRINK_TIMING          = "Time: ";
-const String STR_DRINK_TIMING_UNIT     = "ms";
-const String STR_PREV_COUNT           = "Prev: ";
-const String STR_CURR_COUNT           = "Curr: ";
-const String STR_FASTEST_TIME         = "Fastest time: ";
-const String STR_LIFETIME_COUNT       = "Total drinks: ";
-const String STR_LIFETIME_VOLUME      = "Total volume: ";
-const String STR_LIFETIME_VOLUME_UNIT = " ml";
-const String STR_TONIGHT              = " tonight";
 
 // Addresses
 StorageManager storage;
@@ -169,7 +158,6 @@ void loop() {
 void Flow() {
   if (count==0) {
       drinkStart();
-      firstDropOfDrink=true;
   }
   count++;
   drinkPulse();
@@ -195,7 +183,6 @@ void initGlobals() {
   currCount=0;
   prevCount=-1;
   
-  firstDropOfDrink=false;
   startingUp = false;
   
   //initialize all tracking variables to 0 in case they are not read from storage
@@ -317,7 +304,6 @@ void resetDrinkSession() {
   currCount=0;
   prevCount=0;
   resetTiming();
-  firstDropOfDrink=true; // print it out
 }
 
 /**
@@ -346,7 +332,7 @@ void totalReset() {
  * Determines whether or not to print out the drink completion data. 
  */
 boolean shouldPrintDrinkTime() {
-  return ((currCount>0) && (firstDropOfDrink) && (currCount==prevCount));
+  return ((currCount>0) && (currCount==prevCount));
 }
 
 /**
@@ -355,10 +341,7 @@ boolean shouldPrintDrinkTime() {
  * @param storage boolean indicating where to read the data from
  */
 void printStatusReport(bool readFromStorage) {
-    display.DebugPrintln(STR_LIFETIME_COUNT + lifetime.count());
-    display.DebugPrintln(STR_LIFETIME_VOLUME + lifetime.volume() + STR_LIFETIME_VOLUME_UNIT);
-    display.DebugPrintln(STR_FASTEST_TIME + lifetime.fastestTime() + STR_DRINK_TIMING_UNIT);
-  
+  //@TODO:: either have this respect the "readFromStorage" variable, or remove it as a parameter
   display.OutputData(lifetime,tonight,mostRecentDrinkTime,mostRecentVolume);
 }
 
