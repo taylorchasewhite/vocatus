@@ -36,7 +36,7 @@ Record::Record(int count, float volume, int fastestTime,int startTime) {
  */
 Record::Record(Record &copy) {
 	this->addVolume(copy.volume());
-	_fastestDrink=new Drink(copy.fastestTime());
+	_fastestDrink=*new Drink(copy.fastestTime());
 	this->count(copy.count());
 }
 
