@@ -26,7 +26,7 @@ enum Type {
 Record::Record(int count, float volume, int fastestTime,int startTime) {
 	this->count(count);
 	this->addVolume(volume);
-	_fastestDrink=new Drink(fastestTime);
+	_fastestDrink=*new Drink(fastestTime);
 	//startTime(startTime);
 }
 
@@ -69,7 +69,7 @@ Record::Record() {
  * @param volume float the amount of recorded liquid in this drink
  */
 void Record::addDrink(int startTime, int endTime, float volume) {
-	this->addDrink(new Drink(startTime,endTime,volume));
+	this->addDrink(*new Drink(startTime,endTime,volume));
 }
 
 /**
@@ -78,9 +78,9 @@ void Record::addDrink(int startTime, int endTime, float volume) {
  * 
  * @param drink Drink The drink that was just drank.
  */
-void Record::addDrink(Drink* drink) {
+void Record::addDrink(Drink& drink) {
 	this->addCount();
-	this->addVolume(drink->volume());
+	this->addVolume(drink.volume());
 	this->evalAndUpdateFastestDrink(drink);
 }
 
@@ -130,8 +130,8 @@ void Record::endTime(int endTime) {
  * @param newDrink Drink the newly drank drink to be evaluated against the fastest drink.
  * @return bool if the new drink is the fastest drink, return true, else, return false.
  */
-bool Record::evalAndUpdateFastestDrink(Drink* newDrink) {
-	if (newDrink->startTime()-newDrink->endTime() < _fastestDrink->timeToFinish()) {
+bool Record::evalAndUpdateFastestDrink(Drink& newDrink) {
+	if (newDrink.startTime()-newDrink.endTime() < _fastestDrink.timeToFinish()) {
 		_fastestDrink=newDrink;
 		return true;	
 	}
@@ -144,14 +144,14 @@ bool Record::evalAndUpdateFastestDrink(Drink* newDrink) {
  * 
  */
 float Record::fastestTime() { // return the completion duration of the fastest drink
-	return _fastestDrink->timeToFinish();
+	return _fastestDrink.timeToFinish();
 } 			
 
 /**
  * Return the fastest Drink drank during the course of this record.
  * @return Drink return the Drink that has the fastest time recorded
  */
-Drink Record::fastestDrink() { // Same as fastest time but returns the Drink record.
+Drink& Record::fastestDrink() { // Same as fastest time but returns the Drink record.
 	return _fastestDrink;
 } 		
 

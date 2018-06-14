@@ -2,7 +2,7 @@
   @title:   Vocatus: Flow Meter - Making the world a better place
   @author:  Stephen Lago & Taylor White  
   @date:    May 2, 2018
-  @purpose: Store and calculate flow meter data for a beer bong.
+  @purpose: Store and calculate flow meter data for a drink bong.
   --------------------------
 */
 
@@ -146,7 +146,7 @@ void loop() {
 
   //if the reset button is pressed
   if (resetButtonVal == LOW) {
-    debugPrintln("Reset button pushed");
+    display.DebugPrintln("Reset button pushed");
     totalReset();
     printStatusReport(true);
   } 
@@ -161,7 +161,7 @@ void Flow() {
   }
   count++;
   drinkPulse();
-  if(shouldPrint()){ display.DebugPrintln(count); }
+  display.DebugPrintln(count);
 }
 
 /****************************************************************/
@@ -191,7 +191,7 @@ void initGlobals() {
   
   lastDrink = *new Drink();
 
-  display = new DisplayManager(DEBUG); //set it to whatever mode(s) you want: DEBUG|STATUSBOARD|LCD
+  display = *new DisplayManager(); //set it to whatever mode(s) you want: DEBUG|STATUSBOARD|LCD
 
   readFromStorage();
 }
@@ -243,8 +243,7 @@ void setDrinkCompletionDuration(int startTime, int endTime) {
   mostRecentDrinkTime = endTime-startTime;
   //@NOTE:: we should be using globals unless there's a reason to read from memory (globals can exist in the storage class, that's fine; but it looks like the plan is to have them read from memory every time)
   //@NOTE:: this method does not exist
-  if ((mostRecentDrinkTime < storage.lifetimeFastestDrinkTime()) || (storage.lifetimeFastestDrinkTime()<=0)) {
-    lifetimeFastestDrinkTime = mostRecentDrinkTime;
+  if ((mostRecentDrinkTime < storage.lifetimeFastestTime()) || (storage.lifetimeFastestTime()<=0)) {
     storage.lifetimeFastestTime(mostRecentDrinkTime);
   }
 }
@@ -294,7 +293,7 @@ void recordDrinkEnd() {
  * This function will reset all of the relevant variables scoring drink statistics for a given night.
  */
 void resetTonightCounts() {
-  tonight = new Record();
+  tonight = *new Record();
 }
 
 /**
@@ -316,8 +315,8 @@ void totalReset() {
   prevCount=0;
   resetTiming();
   
-  lifetime = new Record();
-  tonight = new Record();
+  lifetime = *new Record();
+  tonight = *new Record();
   
   mostRecentDrinkTime = 0;
   mostRecentVolume = 0.0;
@@ -364,6 +363,6 @@ void readFromStorage() {
  */
 void storeAllValues() {
   storage.lifetimeCount(lifetime.count());
-  storage.lifetimeFastestTime(lifetime.fastestTime();
+  storage.lifetimeFastestTime(lifetime.fastestTime());
   storage.lifetimeVolume(lifetime.volume());
 }
