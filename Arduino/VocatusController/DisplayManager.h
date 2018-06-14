@@ -24,6 +24,27 @@ enum CurrentValueToDisplay {
   ENDVALUE //this value should always be last to support cycling; add new values before this guy
 };
 
+//constant string values for display
+const String LIFECOUNT_LABEL          = "Lifetime";
+const String LIFECOUNT_UNIT           = "drinks";
+const String LIFECOUNT_UNIT_SINGLE    = "drink";
+const String TONIGHTCOUNT_LABEL       = "Tonight";
+const String TONIGHTCOUNT_UNIT        = "drinks";
+const String TONIGHTCOUNT_UNIT_SINGLE = "drink";
+const String LIFESPEED_LABEL          = "All-Time Record";
+const String LIFESPEED_UNIT           = "ms";
+const String TONIGHTSPEED_LABEL       = "Tonight's Record";
+const String TONIGHTSPEED_UNIT        = "ms";
+const String LASTSPEED_LABEL          = "Last Drink";
+const String LASTSPEED_UNIT           = "ms";
+const String LIFEVOLUME_LABEL         = "All-Time Volume";
+const String LIFEVOLUME_UNIT          = "mL";
+const String TONIGHTVOLUME_LABEL      = "Tonight's Volume";
+const String TONIGHTVOLUME_UNIT       = "mL";
+const String LASTVOLUME_LABEL         = "Last Volume";
+const String LASTVOLUME_UNIT          = "mL";
+
+
 class DisplayManager
 {
   public:
@@ -54,22 +75,16 @@ class DisplayManager
     bool _isStatusBoardEnabled;
 
     bool _shouldDebug();
+    String _handleSingleCase(float,String,String);
+    String _handleSingleCase(int,String,String);
+    String _createDebugString(String, int, String);
+    String _createDebugString(String, float, String);
+    void _sendDebugReport(Record, Record, int, float);
     void _changeOutputMode(OutputMode);
     String _buildComString(Record, Record, int, float);
     void _sendToStatusBoard(Record, Record, int, float);
     void _initLcd();
     void _sendToLcd(Record, Record, int);
-
-    //@Note:: Do these need to be constants? we should either make our debug/LCD strings consistent or get rid of these
-    const String STR_BEER_TIMING          = "Time: ";
-    const String STR_BEER_TIMING_UNIT     = "ms";
-    const String STR_PREV_COUNT           = "Prev: ";
-    const String STR_CURR_COUNT           = "Curr: ";
-    const String STR_FASTEST_TIME         = "Fastest time: ";
-    const String STR_LIFETIME_COUNT       = "Total drinks: ";
-    const String STR_LIFETIME_VOLUME      = "Total volume: ";
-    const String STR_LIFETIME_VOLUME_UNIT = " ml";
-    const String STR_TONIGHT              = " tonight";
 };
 
 #endif
