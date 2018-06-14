@@ -61,11 +61,6 @@ double flowRate;
 volatile int count;
 
 // Timing
-//@NOTE:: we aren't using these anywhere
-Drink lifetimeBestDrink;
-Drink tonightBestDrink; 
-Drink lastDrink;
-
 Record lifetime;
 Record tonight;
 
