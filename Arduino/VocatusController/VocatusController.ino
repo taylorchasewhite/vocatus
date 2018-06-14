@@ -52,11 +52,8 @@ int modeCycleButtonInPin;
 int currCount;
 int prevCount;
 
-<<<<<<< HEAD
-=======
 int mostRecentDrinkTime;  // The time it took in ms to finish the last drink
 
->>>>>>> taylor-web-admin
 float mostRecentVolume;
 float multiplier;
 
@@ -170,13 +167,7 @@ void initGlobals() {
   tonight = *new Record();
   lifetime = *new Record();
   
-<<<<<<< HEAD
-  lastBeer = new Beer();
-
-  mostRecentVolume = 0.0;
-=======
   lastDrink = *new Drink();
->>>>>>> taylor-web-admin
 
   display = *new DisplayManager(); //set it to whatever mode(s) you want: DEBUG|STATUSBOARD|LCD
 
@@ -222,20 +213,6 @@ void resetTiming() {
  * 
  * @return How long it took to complete the last drink.
  */
-<<<<<<< HEAD
-int getBeerCompletionDuration() {
-  return lastBeer.timeToFinish();
-}
-
-void setBeerCompletionDuration(int startTime, int endTime) {
-  lastBeer.startTime(startTime);
-  lastBeer.endTime(endTime);
-
-  //TODO:: we should be using globals unless there's a reason to read from memory
-  if ((lastBeer.timeToFinish() < storage.getLifetimeFastestBeerTime()) || (storage.getLifetimeFastestBeerTime()<=0)) {
-    lifetimeFastestBeerTime = lastBeer.timeToFinish();
-    storage.setLifetimeFastestTime();
-=======
 int getDrinkCompletionDuration() {
   return mostRecentDrinkTime;
 }
@@ -246,7 +223,6 @@ void setDrinkCompletionDuration(int startTime, int endTime) {
   //@NOTE:: this method does not exist
   if ((mostRecentDrinkTime < storage.lifetimeFastestTime()) || (storage.lifetimeFastestTime()<=0)) {
     storage.lifetimeFastestTime(mostRecentDrinkTime);
->>>>>>> taylor-web-admin
   }
 }
 
@@ -275,24 +251,12 @@ boolean isNewDay() {
 void recordDrinkEnd() {
   mostRecentVolume=count*multiplier;
 
-<<<<<<< HEAD
-  lastBeer = new Beer(startTime,endTime,mostRecentVolume);
-
-
-  lifetime.addBeer(startTime,endTime,mostRecentVolume);
-  tonight.addBeer(startTime,endTime,mostRecentVolume);
-  
-  setBeerCompletionDuration(startTime,endTime);
-  
-  setBeerCompletionDateTime(); // @TODO: This function does nothing
-=======
   lifetime.addDrink(startTime,endTime,mostRecentVolume);
   tonight.addDrink(startTime,endTime,mostRecentVolume);
   
   storeAllValues();
   
   setDrinkCompletionDuration(startTime,endTime);
->>>>>>> taylor-web-admin
   
   setDrinkCompletionDateTime(); // @NOTE:: This function does nothing
 
@@ -334,12 +298,7 @@ void totalReset() {
   lifetime = *new Record();
   tonight = *new Record();
   
-<<<<<<< HEAD
-  lastBeer = new Beer();
-
-=======
   mostRecentDrinkTime = 0;
->>>>>>> taylor-web-admin
   mostRecentVolume = 0.0;
 
   storeAllValues();
@@ -387,89 +346,3 @@ void storeAllValues() {
   storage.lifetimeFastestTime(lifetime.fastestTime());
   storage.lifetimeVolume(lifetime.volume());
 }
-<<<<<<< HEAD
-
-/**
- * Send info to the status board
- */
-void sendToStatusBoard()
-{
-  if(statusBoardEnabled) { 
-    String comString = buildComString(lifetime,tonight,lastBeer.timeToFinish(),mostRecentVolume); 
-    Serial.println(comString);  
-  }
-}
-
-/****************************************************************/
-/********************     LCD Management    *********************/
-/****************************************************************/
-/**
- * Only print to the lcd display if lcd mode is turned on
- */
-bool shouldSendToLcd() {
-  return(lcdModeEnabled);
-}
-
-
-/**
- * Cycle through to the next display mode according to the order in the enum
- */
-void cycleMode() {
-  int intValue = (int) lcdDisplayMode;
-  intValue++; //increment by one
-  if(intValue == ENDVALUE) {
-    intValue = 0; //close the cycle
-  }
-  lcdDisplayMode = (DisplayMode) intValue;
-}
-
-
-/**
- * Send the relevant info for display on the LCD, based on the current lcdDisplayMode
- */
-void sendToLcd()
-{
-  if(!shouldSendToLcd()) { return; } //short circuit this if we shouldn't be doing anything
-
-  String toDisplayLabel = "";
-  String toDisplayValue = "";
-  String toDisplayUnit = "";
-
-  //use the current mode to determine what to show on the LCD
-  switch(lcdDisplayMode) {
-    case LIFECOUNT:
-      toDisplayLabel = "Lifetime:";
-      toDisplayValue = lifetime.count();
-      toDisplayUnit = "beers"; //TODO:: handle 1 drink
-    case TONIGHTCOUNT:
-      toDisplayLabel = "Tonight:";
-      toDisplayValue = tonight.count();
-      toDisplayUnit = "beers"; //TODO:: handle 1 drink
-    case LIFESPEED:
-      toDisplayLabel = "All-Time Record:";
-      toDisplayValue = lifetime.fastestTime();
-      toDisplayUnit = "ms";
-    case TONIGHTSPEED:
-      toDisplayLabel = "Tonight's Record";
-      toDisplayValue = tonight.fastestTime();
-      toDisplayUnit = "ms";
-    case LASTSPEED:
-      toDisplayLabel = "Last Drink";
-      toDisplayValue = lastBeer.timeToFinish();
-      toDisplayUnit = "ms";
-    default:  //might as well have a saftey case //TODO:: do we want to remove this in the final product for less noisy errors?
-      toDisplayLabel = "ERROR:";
-      toDisplayValue = "BAD ENUM VALUE"; 
-  }
-
-  //print the first line
-  lcd.setCursor(0,0); 
-  lcd.print(toDisplayLabel);
-
-  //print the second line
-  lcd.setCursor(0,1); 
-  lcd.print(toDisplayValue + " " + toDisplayUnit);
-}
-
-=======
->>>>>>> taylor-web-admin
