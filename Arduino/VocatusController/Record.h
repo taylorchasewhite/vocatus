@@ -28,7 +28,7 @@ class Record
   	int endTime();
   	void endTime(int endTime);
 
-	bool Record::evalAndUpdateFastestDrink(Drink& drink);
+	bool evalAndUpdateFastestDrink(Drink& drink);
 
 	float fastestTime(); 			// return the completion duration of the fastest drink
 	Drink& fastestDrink(); 			// Same as fastest time but returns the Drink record.
