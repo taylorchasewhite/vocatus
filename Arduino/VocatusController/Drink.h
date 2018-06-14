@@ -8,7 +8,7 @@
 #ifndef Drink_h
 #define Drink_h
 #include "Arduino.h"
-
+  
 class Drink
 {
   public:
@@ -24,6 +24,7 @@ class Drink
 	void startTime(int startTime);
 	
 	int flowRate();
+	bool isFinished();
 	int timeToFinish();
 
 	int volume();

@@ -13,28 +13,27 @@
 class StorageManager
 {
   public:
-    StorageManager(int pin);
 		StorageManager(StorageManager & copy);
 		StorageManager();
+		
+		float readFloatData(int address);
+		int readIntegerData(int address);
+		
+		float lifetimeCount();
+		void lifetimeCount(float count);
 
-	float readFloatData(int address);
-	int readIntegerData(int address);
+		int lifetimeFastestTime();
+		void lifetimeFastestTime(float drinkTime);
 
-	float lifetimeCount();
-	void lifetimeCount(float count);
+		Record& lifetimeRecord();
 
-	int lifetimeFastestTime();
-	void lifetimeFastestTime(float drinkTime);
+		float lifetimeVolume();
+		void lifetimeVolume(float volume);
 
-	Record lifetimeRecord();
-
-	float lifetimeVolume();
-	void lifetimeVolume(float volume);
-
-	void storeAllValues(float drinkCount,float drinkTime, float drinkVolume);
-	void storeData(int address, float value);
-	void storeData(int address, int value);
-	void reset();
+		void storeAllValues(float drinkCount,float drinkTime, float drinkVolume);
+		void storeData(int address, float value);
+		void storeData(int address, int value);
+		void reset();
 
   private:
     int _pin;

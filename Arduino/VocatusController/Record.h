@@ -19,7 +19,7 @@ class Record
 	Record();
 
 	void addDrink(int startTime, int endTime, float volume);
-	void addDrink(Drink* drink);
+	void addDrink(Drink& drink);
 	void addCount();
 
 	int count();
@@ -28,10 +28,10 @@ class Record
   	int endTime();
   	void endTime(int endTime);
 
-	bool Record::evalAndUpdateFastestDrink(Drink* drink);
+	bool evalAndUpdateFastestDrink(Drink& drink);
 
 	float fastestTime(); 			// return the completion duration of the fastest drink
-	Drink fastestDrink(); 			// Same as fastest time but returns the Drink record.
+	Drink& fastestDrink(); 			// Same as fastest time but returns the Drink record.
 	  
 	int startTime();
 	void startTime(int startTime);
