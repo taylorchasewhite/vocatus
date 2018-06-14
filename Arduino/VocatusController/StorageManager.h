@@ -26,7 +26,7 @@ class StorageManager
 		int lifetimeFastestTime();
 		void lifetimeFastestTime(float drinkTime);
 
-		Record lifetimeRecord();
+		Record& lifetimeRecord();
 
 		float lifetimeVolume();
 		void lifetimeVolume(float volume);

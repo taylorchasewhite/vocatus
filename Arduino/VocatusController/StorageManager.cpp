@@ -73,7 +73,7 @@ void StorageManager::lifetimeFastestTime(float drinkTime) {
  * Return the lifetime Record object that is stored in storage
  * @return Record the lifetime record object containing information on volume, speed, etc.
  */
-Record StorageManager::lifetimeRecord() {
+Record& StorageManager::lifetimeRecord() {
   return *new Record((int)lifetimeCount(),lifetimeVolume(),lifetimeFastestTime(),0); // TODO load startTime
 }
 

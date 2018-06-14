@@ -65,8 +65,8 @@ Drink lifetimeBestDrink;
 Drink tonightBestDrink; 
 Drink lastDrink;
 
-Record& lifetime;
-Record& tonight;
+Record lifetime;
+Record tonight;
 
 unsigned long endTime;
 unsigned long startTime;
@@ -157,7 +157,7 @@ void loop() {
 
   //if the reset button is pressed
   if (resetButtonVal == LOW) {
-    debugPrintln("Reset button pushed");
+    display.DebugPrintln("Reset button pushed");
     totalReset();
     printStatusReport(true);
   } 
@@ -173,7 +173,7 @@ void Flow() {
   }
   count++;
   drinkPulse();
-  if(shouldPrint()){ display.DebugPrintln(count); }
+  display.DebugPrintln(count);
 }
 
 /****************************************************************/
@@ -204,7 +204,7 @@ void initGlobals() {
   
   lastDrink = *new Drink();
 
-  display = new DisplayManager(DEBUG); //set it to whatever mode(s) you want: DEBUG|STATUSBOARD|LCD
+  display = *new DisplayManager(); //set it to whatever mode(s) you want: DEBUG|STATUSBOARD|LCD
 
   readFromStorage();
 }
@@ -380,6 +380,6 @@ void readFromStorage() {
  */
 void storeAllValues() {
   storage.lifetimeCount(lifetime.count());
-  storage.lifetimeFastestTime(lifetime.fastestTime()));
+  storage.lifetimeFastestTime(lifetime.fastestTime());
   storage.lifetimeVolume(lifetime.volume());
 }
