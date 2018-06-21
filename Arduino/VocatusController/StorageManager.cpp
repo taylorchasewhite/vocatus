@@ -47,7 +47,7 @@ void StorageManager::storeAllValues(float drinkCount,float drinkTime, float drin
   lifetimeCount(drinkCount);
   lifetimeFastestTime(drinkTime);
   lifetimeVolume(drinkVolume);
-  tonightCount()
+  tonightCount();
 }
 
 /*
