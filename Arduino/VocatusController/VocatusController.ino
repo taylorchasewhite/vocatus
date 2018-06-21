@@ -41,12 +41,11 @@
 /****************************************************************/
 /********************        Globals        *********************/
 /****************************************************************/
-// Init & Constants
+// Arduino constants 
 int bitsPerSecond;
-int changeDisplayPin;
-int flowPin;
 int resetButtonInPin;
-int modeCycleButtonInPin;
+int cycleDisplayButtonInPin;
+int flowPin;
 
 // Counts
 int currCount;
@@ -72,36 +71,61 @@ const unsigned long SECONDS_IN_DAY = 86400;
 unsigned long lastDrinkCompletionInstant; //@NOTE:: why are all of these globals?
 unsigned long currentDrinkCompletionInstant;
 
-// States
-bool startingUp;
-
-// Display strings
+// I/O Controls
 DisplayManager display;
-
-// Addresses
 StorageManager storage;
 
+
 /****************************************************************/
-/********************         Core          *********************/
+/********************      Initialize       *********************/
 /****************************************************************/
+/**
+ * Set starting values for globals
+ */
+void initGlobals() {
+  flowPin = 2;
+  resetButtonInPin = 3;
+  cycleDisplayButtonInPin = 5;
+  bitsPerSecond = 9600;   // initialize serial communication at 9600 bits per second:
+  multiplier = 3.05; //TCW: 2.647  Chode: 3.05
+
+  currCount = 0;
+  prevCount = -1;
+  
+  currCount=0;
+  prevCount=-1;
+  
+  //initialize all tracking variables to 0 in case they are not read from storage
+  tonight = *new Record();
+  lifetime = *new Record();
+
+  display = *new DisplayManager(DEBUG|LCD); //set it to whatever mode(s) you want: DEBUG|STATUSBOARD|LCD
+
+  readFromStorage();
+}
+
+
 void setup() {
   initGlobals();
   Serial.begin(bitsPerSecond);
-  initializeDisplay(); // @TODO: Would like to get this to run here...not in loop.
+  printStatusReport(true);
 
   //Setup pins
   pinMode(flowPin, INPUT);           
   pinMode(resetButtonInPin, INPUT_PULLUP);
-  pinMode(modeCycleButtonInPin, INPUT_PULLUP);
+  pinMode(cycleDisplayButtonInPin, INPUT_PULLUP);
   
   attachInterrupt(0, Flow, RISING);  //Configures interrupt 0 (pin 2 on the Arduino Uno) to run the function "Flow" 
 
 }
 
+/****************************************************************/
+/********************         Core          *********************/
+/****************************************************************/
 void loop() {
   //read the pushbutton value into a variable
   int resetButtonVal = digitalRead(resetButtonInPin);
-  int modeCycleButtonVal = digitalRead(modeCycleButtonInPin);
+  int modeCycleButtonVal = digitalRead(cycleDisplayButtonInPin);
   
   prevCount=currCount;
   currCount=count;
@@ -141,45 +165,6 @@ void Flow() {
   count++;
   drinkPulse();
   display.DebugPrintln(count);
-}
-
-/****************************************************************/
-/********************      Initialize       *********************/
-/****************************************************************/
-/**
- * Set starting values for globals
- */
-void initGlobals() {
-  flowPin = 2;
-  resetButtonInPin = 3;
-  modeCycleButtonInPin = 5;
-  bitsPerSecond = 9600;   // initialize serial communication at 9600 bits per second:
-  multiplier = 3.05; //TCW: 2.647  Chode: 3.05
-
-  currCount = 0;
-  prevCount = -1;
-  
-  currCount=0;
-  prevCount=-1;
-  
-  startingUp = false;
-  
-  //initialize all tracking variables to 0 in case they are not read from storage
-  tonight = *new Record();
-  lifetime = *new Record();
-
-  display = *new DisplayManager(DEBUG|LCD); //set it to whatever mode(s) you want: DEBUG|STATUSBOARD|LCD
-
-  readFromStorage();
-}
-
-void initializeDisplay() {
-  if (!startingUp) {
-    display.DebugPrintln("Welcome to the Red Solo Cup Saver!");
-    display.DebugPrintln("----------------------------------");
-    printStatusReport(true);
-    startingUp=true;
-  }
 }
 
 /****************************************************************/

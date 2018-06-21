@@ -75,6 +75,7 @@ class DisplayManager
     bool _isLcdEnabled;
     bool _isStatusBoardEnabled;
 
+    void _initDebug();
     bool _shouldDebug();
     String _handleSingleCase(float,String,String);
     String _handleSingleCase(int,String,String);
