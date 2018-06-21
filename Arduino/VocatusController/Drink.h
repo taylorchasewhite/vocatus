@@ -24,6 +24,7 @@ class Drink
 	void startTime(int startTime);
 	
 	int flowRate();
+	bool isFinished();
 	int timeToFinish();
 
 	int volume();

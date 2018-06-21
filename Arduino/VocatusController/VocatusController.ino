@@ -117,13 +117,14 @@ void loop() {
 
   //if the mode cycle button is pressed
   if (modeCycleButtonVal == LOW) {
+    display.DebugPrintln("  ==LCD Cycle Button pressed==");
     display.CycleCurrentValueToDisplay();
     printStatusReport();
   } 
 
   //if the reset button is pressed
   if (resetButtonVal == LOW) {
-    display.DebugPrintln("Reset button pushed");
+    display.DebugPrintln("  ==Reset button pushed==");
     totalReset();
     printStatusReport();
   } 
@@ -166,7 +167,7 @@ void initGlobals() {
   tonight = *new Record();
   lifetime = *new Record();
 
-  display = *new DisplayManager(DEBUG); //set it to whatever mode(s) you want: DEBUG|STATUSBOARD|LCD
+  display = *new DisplayManager(DEBUG|LCD); //set it to whatever mode(s) you want: DEBUG|STATUSBOARD|LCD
 
   readFromStorage();
 }

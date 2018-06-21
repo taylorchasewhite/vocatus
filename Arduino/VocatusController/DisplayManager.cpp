@@ -14,10 +14,12 @@ LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
 DisplayManager::DisplayManager(OutputMode myOutputMode) {
   this->_changeOutputMode(myOutputMode);
+  this->_currentValueToDisplay = LIFECOUNT;
 }
 
 DisplayManager::DisplayManager() {
-  this->_changeOutputMode(STATUSBOARD);
+  this->_changeOutputMode(DEBUG);
+  this->_currentValueToDisplay = LIFECOUNT;
 }
 
 /**
@@ -29,6 +31,7 @@ void DisplayManager::_changeOutputMode(OutputMode newOutputMode) {
   _isDebugEnabled = ((newOutputMode&DEBUG) == DEBUG);
   _isStatusBoardEnabled = ((newOutputMode&STATUSBOARD) == STATUSBOARD);
   _isLcdEnabled = ((newOutputMode&LCD) == LCD);
+  if(_isLcdEnabled){_initLcd();}
 }
 
 String DisplayManager::_handleSingleCase(float value,String stringIfSingle, String stringIfNotSingle) { 
@@ -47,7 +50,6 @@ String DisplayManager::_handleSingleCase(int value,String stringIfSingle,String 
  */
 void DisplayManager::OutputData(Record& lifetimeRecord, Record& tonightRecord,int mostRecentDrinkTimeVar, float mostRecentVolumeVar)
 {
-  DebugPrintln("command to output captured");//@TODO:: Remove this
   if(_isDebugEnabled) {
     _sendDebugReport(lifetimeRecord,tonightRecord,mostRecentDrinkTimeVar,mostRecentVolumeVar);
   }
@@ -136,8 +138,8 @@ String DisplayManager::_buildComString(Record& lifetimeRecordVar, Record& tonigh
   return (toSend);
 }
 
+
 void DisplayManager::_sendToStatusBoard(Record& lifetimeRecordVar, Record& tonightRecordVar,int mostRecentDrinkTimeVar, float mostRecentVolumeVar) {
-  DebugPrintln("command to send to sb captured");//@TODO:: Remove this
   String comString = _buildComString(lifetimeRecordVar,tonightRecordVar,mostRecentDrinkTimeVar,mostRecentVolumeVar); 
   Serial.println(comString);  
 }
@@ -161,7 +163,7 @@ void DisplayManager::_initLcd() {
 void DisplayManager::CycleCurrentValueToDisplay() {
   int intValue = (int) _currentValueToDisplay;
   intValue++; //increment by one
-  if(intValue == ENDVALUE) {
+  if((intValue >= ENDVALUE) || (intValue < 0)) {
     intValue = 0; //close the cycle
   }
   _currentValueToDisplay = (CurrentValueToDisplay) intValue;
@@ -182,26 +184,35 @@ void DisplayManager::_sendToLcd(Record& lifetimeRecord, Record& tonightRecord,in
       toDisplayLabel = LIFECOUNT_LABEL;
       toDisplayValue = lifetimeRecord.count();
       toDisplayUnit  = _handleSingleCase(lifetimeRecord.count(),LIFECOUNT_UNIT_SINGLE,LIFECOUNT_UNIT); 
+      break;
     case TONIGHTCOUNT:
       toDisplayLabel = TONIGHTCOUNT_LABEL;
       toDisplayValue = tonightRecord.count();
       toDisplayUnit  = _handleSingleCase(tonightRecord.count(),TONIGHTCOUNT_UNIT_SINGLE,TONIGHTCOUNT_UNIT);
+      break;
     case LIFESPEED:
       toDisplayLabel = LIFESPEED_LABEL;
       toDisplayValue = lifetimeRecord.fastestTime();
       toDisplayUnit  = LIFESPEED_UNIT;
+      break;
     case TONIGHTSPEED:
       toDisplayLabel = TONIGHTSPEED_LABEL;
       toDisplayValue = tonightRecord.fastestTime();
       toDisplayUnit  = TONIGHTSPEED_UNIT  ;
+      break;
     case LASTSPEED:
       toDisplayLabel = LASTSPEED_LABEL;
       toDisplayValue = mostRecentDrinkTime;
       toDisplayUnit  = LASTSPEED_UNIT;
+      break;
     default:  //might as well have a saftey case //TODO:: do we want to remove this in the final product for less noisy errors?
       toDisplayLabel = "ERROR:";
       toDisplayValue = "BAD ENUM VALUE " + _currentValueToDisplay; 
+      break;
   }
+
+  //erase previous screen
+  lcd.clear();
 
   //print the first line
   lcd.setCursor(0,0); 
