@@ -27,7 +27,7 @@ const int ADDR_TONIGHT_VOLUME         = 12*sizeof(float);
  */
 StorageManager::StorageManager(StorageManager & copy) {
   // TODO: Write
-  _io = new StorageIO();
+  _io = new *StorageIO();
 }
 
 /**

@@ -5,9 +5,9 @@
  * Created by Taylor White, Stephen Lago, May 15, 2018
  * See https://www.arduino.cc/en/Hacking/LibraryTutorial for information on class conventions here.
  */
-#ifndef StorageIO_h
-#define StorageIO_h
+
 #include "Arduino.h"
+#include "StorageIO.h"
 #include "Record.h"
 #include "EEPROM.h"
 
@@ -17,7 +17,7 @@
  * @param address integer value denoting where to read from
  * @return the float value stored in the desired address
  */
-float StorageManager::readFloatData(int address) {
+float StorageIO::readFloatData(int address) {
   float value;
   EEPROM.get(address,value);
   return value;
@@ -29,7 +29,7 @@ float StorageManager::readFloatData(int address) {
  * @param address integer value denoting where to read from
  * @return the integer value stored in the desired address.
  */
-int StorageManager::readIntegerData(int address) {
+int StorageIO::readIntegerData(int address) {
   int value;
   EEPROM.get(address, value);
   return value;
@@ -43,7 +43,7 @@ int StorageManager::readIntegerData(int address) {
  * @param address integer value denoting where to store the data to
  * @param value integer value you desire to store into EEPROM
  */
-void StorageManager::storeData(int address, int value) {
+void StorageIO::storeData(int address, int value) {
   float floatVal  = value;
   EEPROM.put(address,floatVal);
   //debugPrint(floatVal);
@@ -59,7 +59,7 @@ void StorageManager::storeData(int address, int value) {
  * @param address integer value denoting where to store the data to
  * @param value float value you desire to store into EEPROM.
  */
-void StorageManager::storeData(int address, float value) {
+void StorageIO::storeData(int address, float value) {
   EEPROM.put(address,value);
   //debugPrint(value);
   //debugPrint(" stored at address ");
@@ -69,7 +69,7 @@ void StorageManager::storeData(int address, float value) {
 /**
  * Reset all of the permanent storage in the Arduino. There's no going back once you do this.
  */ 
-void StorageManager::reset() {
+void StorageIO::reset() {
   clearEEPROM();
 }
 
@@ -77,7 +77,7 @@ void StorageManager::reset() {
  * Only call this when resetting the device to factory settings!
  * Permanently erases all persistent data stored on the arduino or board.
  */
-void StorageManager::clearEEPROM() {
+void StorageIO::clearEEPROM() {
   for (int i = 0 ; i < EEPROM.length() ; i++) {
     if(EEPROM.read(i) != 0) {                   //skip already "empty" addresses
     

@@ -13,7 +13,7 @@
 class StorageIO
 {
   public:
-		StorageIO(StorageManager & copy);
+		StorageIO(StorageIO& copy);
 		StorageIO();
 		
 		float readFloatData(int address);
