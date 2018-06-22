@@ -27,7 +27,7 @@ const int ADDR_TONIGHT_VOLUME         = 12*sizeof(float);
  */
 StorageManager::StorageManager(StorageManager & copy) {
   // TODO: Write
-  _io = new *StorageIO();
+  _io =* new StorageIO();
 }
 
 /**
@@ -35,7 +35,7 @@ StorageManager::StorageManager(StorageManager & copy) {
  * Sets all values to null, 0, or other non-meaningful data.
  */
 StorageManager::StorageManager() {
-  _io = new StorageIO();
+  _io =* new StorageIO();
 }
 
 
@@ -66,7 +66,7 @@ void StorageManager::storeAllValues(Record& lifetime, Record& tonight) {
 
 //Getters and setters
 float StorageManager::lifetimeCount() { 
-  return readFloatData(ADDR_DRINK_COUNT); 
+  return _io.readFloatData(ADDR_DRINK_COUNT); 
 }
 /**
  * Store the lifetime number of drinks drank during the lifetime of the machine.

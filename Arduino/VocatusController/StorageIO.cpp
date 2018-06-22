@@ -12,6 +12,21 @@
 #include "EEPROM.h"
 
 /**
+ * Copy constructor, makes an exact copy in newly allocated memory
+ */
+StorageIO::StorageIO(StorageIO & copy) {
+  // TODO: Write
+}
+
+/**
+ * Default constructor, used to allocate space when defining members. 
+ * Sets all values to null, 0, or other non-meaningful data.
+ */
+StorageIO::StorageIO() {
+  
+}
+
+/**
  * Get float value held in permanent storage from EEPROM data.
  * 
  * @param address integer value denoting where to read from
