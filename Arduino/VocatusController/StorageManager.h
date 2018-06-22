@@ -44,12 +44,11 @@ class StorageManager
 
 		void storeAllValues(float drinkCount,float drinkTime, float drinkVolume);
 		void storeAllValues(Record& lifetime, Record& tonight);
-		void storeData(int address, float value);
-		void storeData(int address, int value);
 		void reset();
 
   private:
     int _pin;
-		void clearEEPROM();
+	void clearEEPROM();
+	StorageIO _io;
 };
 #endif

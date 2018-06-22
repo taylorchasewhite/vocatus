@@ -27,7 +27,7 @@ const int ADDR_TONIGHT_VOLUME         = 12*sizeof(float);
  */
 StorageManager::StorageManager(StorageManager & copy) {
   // TODO: Write
-
+  _io = new StorageIO();
 }
 
 /**
@@ -35,7 +35,7 @@ StorageManager::StorageManager(StorageManager & copy) {
  * Sets all values to null, 0, or other non-meaningful data.
  */
 StorageManager::StorageManager() {
- 
+  _io = new StorageIO();
 }
 
 
@@ -72,21 +72,21 @@ float StorageManager::lifetimeCount() {
  * Store the lifetime number of drinks drank during the lifetime of the machine.
  */
 void StorageManager::lifetimeCount(float count) { 
-  storeData(ADDR_DRINK_COUNT,count); 
+  _io.storeData(ADDR_DRINK_COUNT,count); 
 }
 
 /**
  * Get the fastest lifetime completion time for a drink
  */
 int StorageManager::lifetimeFastestTime() { 
-  return readFloatData(ADDR_FASTEST_DRINK); 
+  return _io.readFloatData(ADDR_FASTEST_DRINK); 
 }
 /**
  * Store the fastest drink by storing the fastest time
  * @param drinkTime the time in milliseconds that reflects the fastest time for the machine lifetime.
  */
 void StorageManager::lifetimeFastestTime(float drinkTime) { 
-  storeData(ADDR_FASTEST_DRINK,drinkTime); 
+  _io.storeData(ADDR_FASTEST_DRINK,drinkTime); 
 }
 /**
  * Return the lifetime Record object that is stored in storage
@@ -97,38 +97,38 @@ Record& StorageManager::lifetimeRecord() {
 }
 
 float StorageManager::lifetimeVolume() { 
-  return readFloatData(ADDR_LIFETIME_VOLUME); 
+  return _io.readFloatData(ADDR_LIFETIME_VOLUME); 
 }
 
 void StorageManager::lifetimeVolume(float volume) { 
-  storeData(ADDR_LIFETIME_VOLUME,volume); 
+  _io.storeData(ADDR_LIFETIME_VOLUME,volume); 
 }
 
 /**************
  * Tonight
  **************/
 float StorageManager::tonightCount() { 
-  return readFloatData(ADDR_TONIGHT_DRINK_COUNT); 
+  return _io.readFloatData(ADDR_TONIGHT_DRINK_COUNT); 
 }
 /**
  * Store the lifetime number of drinks drank during the lifetime of the machine.
  */
 void StorageManager::tonightCount(float count) { 
-  storeData(ADDR_TONIGHT_DRINK_COUNT,count); 
+  _io.storeData(ADDR_TONIGHT_DRINK_COUNT,count); 
 }
 
 /**
  * Get the fastest lifetime completion time for a drink
  */
 int StorageManager::tonightFastestTime() { 
-  return readFloatData(ADDR_TONIGHT_FASTEST_DRINK); 
+  return _io.readFloatData(ADDR_TONIGHT_FASTEST_DRINK); 
 }
 /**
  * Store the fastest drink by storing the fastest time
  * @param drinkTime the time in milliseconds that reflects the fastest time for the machine lifetime.
  */
 void StorageManager::tonightFastestTime(float drinkTime) { 
-  storeData(ADDR_TONIGHT_FASTEST_DRINK,drinkTime); 
+  _io.storeData(ADDR_TONIGHT_FASTEST_DRINK,drinkTime); 
 }
 /**
  * Return the lifetime Record object that is stored in storage
@@ -139,11 +139,11 @@ Record& StorageManager::tonightRecord() {
 }
 
 float StorageManager::tonightVolume() { 
-  return readFloatData(ADDR_TONIGHT_VOLUME); 
+  return _io.readFloatData(ADDR_TONIGHT_VOLUME); 
 }
 
 void StorageManager::tonightVolume(float volume) { 
-  storeData(ADDR_TONIGHT_VOLUME,volume); 
+  _io.storeData(ADDR_TONIGHT_VOLUME,volume); 
 }
 
 /**
@@ -161,77 +161,8 @@ void StorageManager::tonightVolume(float volume) {
 }*/
 
 /**
- * Get float value held in permanent storage from EEPROM data.
- * 
- * @param address integer value denoting where to read from
- * @return the float value stored in the desired address
- */
-float StorageManager::readFloatData(int address) {
-  float value;
-  EEPROM.get(address,value);
-  return value;
-}
-
-/**
- * Get integer value held in permanent storage from EEPROM data.
- * 
- * @param address integer value denoting where to read from
- * @return the integer value stored in the desired address.
- */
-int StorageManager::readIntegerData(int address) {
-  int value;
-  EEPROM.get(address, value);
-  return value;
-}
-
-/**
- * Store integer value into permanent storage at EEPROM.
- * NOTE: There are a limited number of times this can be called, 
- * try to store to addresses as few times as possible.
- * 
- * @param address integer value denoting where to store the data to
- * @param value integer value you desire to store into EEPROM
- */
-void StorageManager::storeData(int address, int value) {
-  float floatVal  = value;
-  EEPROM.put(address,floatVal);
-  //debugPrint(floatVal);
-  //debugPrint(" stored at address ");
-  //debugPrintln(address);
-}
-
-/**
- * Store float value into permanent storage at EEPROM.
- * NOTE: There are a limited number of times this can be called, 
- * try to store to addresses as few times as possible.
- * 
- * @param address integer value denoting where to store the data to
- * @param value float value you desire to store into EEPROM.
- */
-void StorageManager::storeData(int address, float value) {
-  EEPROM.put(address,value);
-  //debugPrint(value);
-  //debugPrint(" stored at address ");
-  //debugPrintln(address);
-}
-
-/**
  * Reset all of the permanent storage in the Arduino. There's no going back once you do this.
  */ 
 void StorageManager::reset() {
-  clearEEPROM();
-}
-
-/**
- * Only call this when resetting the device to factory settings!
- * Permanently erases all persistent data stored on the arduino or board.
- */
-void StorageManager::clearEEPROM() {
-  for (int i = 0 ; i < EEPROM.length() ; i++) {
-    if(EEPROM.read(i) != 0) {                   //skip already "empty" addresses
-    
-      EEPROM.write(i, 0);                       //write 0 to address i
-    }
-  }
-  //debugPrintln("EEPROM erased");
+  _io.reset();
 }
