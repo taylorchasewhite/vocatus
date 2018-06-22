@@ -27,38 +27,34 @@
   
   Exceptions to PQA resources linked:
     Use tabs, not spaces. Use the arduino web IDE to determine what the tab keystroke translates to. 
-      I'm using the Arduino application, not the web IDE, which turns tabs into spaces -SEL
+      --I'm using the Arduino application, not the web IDE, which turns tabs into spaces -SEL
     
   --------------------------
 */
 
 #include "Record.h"
-#include "Drink.h"
 #include "DisplayManager.h"
-#include <EEPROM.h>
 #include "StorageManager.h"
 
 /****************************************************************/
 /********************        Globals        *********************/
 /****************************************************************/
-// Init & Constants
+// Arduino constants 
 int bitsPerSecond;
-int changeDisplayPin;
-int flowPin;
 int resetButtonInPin;
-int modeCycleButtonInPin;
+int cycleDisplayButtonInPin;
+int flowPin;
 
 // Counts
-int currCount;
-int prevCount;
+int prevFlowCount;
+bool drinkInProgress;
 
 int mostRecentDrinkTime;  // The time it took in ms to finish the last drink
 
 float mostRecentVolume;
 float multiplier;
 
-double flowRate;
-volatile int count;
+volatile int flowCount; //@NOTE:: I don't think this needs to be volatile. It's only needed if the variable could be changed from outside of the code (e.g another class)
 
 // Timing
 Record lifetime;
@@ -72,48 +68,75 @@ const unsigned long SECONDS_IN_DAY = 86400;
 unsigned long lastDrinkCompletionInstant; //@NOTE:: why are all of these globals?
 unsigned long currentDrinkCompletionInstant;
 
-// States
-bool startingUp;
-
-// Display strings
+// I/O Controls
 DisplayManager display;
-
-// Addresses
 StorageManager storage;
+
+
+/****************************************************************/
+/********************      Initialize       *********************/
+/****************************************************************/
+/**
+ * Set starting values for globals
+ */
+void initGlobals() {
+  flowPin = 2;
+  resetButtonInPin = 3;
+  cycleDisplayButtonInPin = 5;
+  bitsPerSecond = 9600;   // initialize serial communication at 9600 bits per second:
+  multiplier = 3.05; //TCW: 2.647  Chode: 3.05
+
+  flowCount = 0;
+  prevFlowCount = -1;
+  drinkInProgress = false;
+  
+  //initialize all tracking variables to 0 in case they are not read from storage
+  tonight = *new Record();
+  lifetime = *new Record();
+
+  display = *new DisplayManager(DEBUG); //set it to whatever mode(s) you want: DEBUG|STATUSBOARD|LCD
+  storage = *new StorageManager();
+}
+
+/**
+ * Standard Arduino setup code, run before starting the loop when code is first initialized
+ */
+void setup() {
+  //boot operations
+  initGlobals();
+  readFromStorage();
+
+  //Setup Arduino
+  Serial.begin(bitsPerSecond);
+  
+  pinMode(flowPin, INPUT);           
+  pinMode(resetButtonInPin, INPUT_PULLUP);
+  pinMode(cycleDisplayButtonInPin, INPUT_PULLUP);
+  
+  attachInterrupt(0, Flow, RISING);  //Configures interrupt 0 (pin 2 on the Arduino Uno) to run the function "Flow" 
+
+  //print an initial report
+  printStatusReport(true);
+}
 
 /****************************************************************/
 /********************         Core          *********************/
 /****************************************************************/
-void setup() {
-  initGlobals();
-  Serial.begin(bitsPerSecond);
-  initializeDisplay(); // @TODO: Would like to get this to run here...not in loop.
-
-  //Setup pins
-  pinMode(flowPin, INPUT);           
-  pinMode(resetButtonInPin, INPUT_PULLUP);
-  pinMode(modeCycleButtonInPin, INPUT_PULLUP);
-  
-  attachInterrupt(0, Flow, RISING);  //Configures interrupt 0 (pin 2 on the Arduino Uno) to run the function "Flow" 
-
-}
-
 void loop() {
   //read the pushbutton value into a variable
   int resetButtonVal = digitalRead(resetButtonInPin);
-  int modeCycleButtonVal = digitalRead(modeCycleButtonInPin);
+  int modeCycleButtonVal = digitalRead(cycleDisplayButtonInPin);
   
-  prevCount=currCount;
-  currCount=count;
+  prevFlowCount=flowCount;
   
   interrupts();   //Enables interrupts on the Arduino
   delay (1000);   //Wait 1 second 
   noInterrupts(); //Disable the interrupts on the Arduino
-  
-  if (shouldPrintDrinkTime()) {
+
+  if(isDrinkOver()) {
     recordDrinkEnd();
     printStatusReport(false);
-    resetDrinkSession();
+    resetCurrentDrink();
   }
 
   //if the mode cycle button is pressed
@@ -135,51 +158,12 @@ void loop() {
  * The method to run each time we recieve input from the device
  */
 void Flow() {
-  if (count==0) {
-      drinkStart();
+  if (flowCount==0) {
+    startDrink();
   }
-  count++;
+  flowCount++;
   drinkPulse();
-  display.DebugPrintln(count);
-}
-
-/****************************************************************/
-/********************      Initialize       *********************/
-/****************************************************************/
-/**
- * Set starting values for globals
- */
-void initGlobals() {
-  flowPin = 2;
-  resetButtonInPin = 3;
-  modeCycleButtonInPin = 5;
-  bitsPerSecond = 9600;   // initialize serial communication at 9600 bits per second:
-  multiplier = 3.05; //TCW: 2.647  Chode: 3.05
-
-  currCount = 0;
-  prevCount = -1;
-  
-  currCount=0;
-  prevCount=-1;
-  
-  startingUp = false;
-  
-  //initialize all tracking variables to 0 in case they are not read from storage
-  tonight = *new Record();
-  lifetime = *new Record();
-
-  display = *new DisplayManager(DEBUG|LCD); //set it to whatever mode(s) you want: DEBUG|STATUSBOARD|LCD
-
-  readFromStorage();
-}
-
-void initializeDisplay() {
-  if (!startingUp) {
-    display.DebugPrintln("Welcome to the Red Solo Cup Saver!");
-    display.DebugPrintln("----------------------------------");
-    printStatusReport(true);
-    startingUp=true;
-  }
+  display.DebugPrintln(flowCount);
 }
 
 /****************************************************************/
@@ -188,7 +172,7 @@ void initializeDisplay() {
 /**
  * Called the first time the hall effect sensor has been triggered since the last drink session completed.
  */
-void drinkStart() {
+void startDrink() {
   startTime=millis();
 }
 
@@ -200,26 +184,11 @@ void drinkPulse() {
 }
 
 /**
- * Reset the start and end time for a drink that will be drank and judged.
+ * Use the timing globals to record the duration for the latest drink
  */
-void resetTiming() {
-  startTime=0;
-  endTime=0;
-}
-
-/**
- * Get the time it took to complete the most recent drink.
- * 
- * @return How long it took to complete the last drink.
- */
-int getDrinkCompletionDuration() {
-  return mostRecentDrinkTime;
-}
-
-void setDrinkCompletionDuration(int startTime, int endTime) {
+void setDrinkCompletionDuration() {
   mostRecentDrinkTime = endTime-startTime;
   //@NOTE:: we should be using globals unless there's a reason to read from memory (globals can exist in the storage class, that's fine; but it looks like the plan is to have them read from memory every time)
-  //@NOTE:: this method does not exist
   if ((mostRecentDrinkTime < storage.lifetimeFastestTime()) || (storage.lifetimeFastestTime()<=0)) {
     storage.lifetimeFastestTime(mostRecentDrinkTime);
   }
@@ -248,57 +217,61 @@ boolean isNewDay() {
  * Record that a drink has been completed, update any current records, storage and display to the LCD
  */
 void recordDrinkEnd() {
-  mostRecentVolume=count*multiplier;
+  mostRecentVolume=flowCount*multiplier;
 
   lifetime.addDrink(startTime,endTime,mostRecentVolume);
   tonight.addDrink(startTime,endTime,mostRecentVolume);
   
-  storeAllValues();
-  
-  setDrinkCompletionDuration(startTime,endTime);
+  setDrinkCompletionDuration();
   
   setDrinkCompletionDateTime(); // @NOTE:: This function does nothing
 
   //@NOTE:: we'll want to tear this out once we properly define a session
   if (isNewDay()) {
-    resetTonightCounts();
+    resetTonightRecord();
   }
 
   storeAllValues();
 }
 
 /**
+ * Resets all of the variables tied to the most recent drink
+ */
+void resetCurrentDrink() {
+  //reset volume variables
+  flowCount=0;
+  prevFlowCount=-1;
+  mostRecentVolume = 0.0;
+
+  //reset timing variables
+  startTime=0;
+  endTime=0;
+  mostRecentDrinkTime = 0;
+}
+
+/**
  * Call if more than 12 hours have passed since the last time a drink was drank. 
  * This function will reset all of the relevant variables scoring drink statistics for a given night.
  */
-void resetTonightCounts() {
+void resetTonightRecord() {
   tonight = *new Record();
 }
 
 /**
- * Resets all of the variables tied to a drink session.
+ * Call if a total reset is needed. 
+ * This function will reset all of the relevant variables scoring drink statistics for the device lifetime.
  */
-void resetDrinkSession() {
-  count=0;
-  currCount=0;
-  prevCount=0;
-  resetTiming();
+void resetLifetimeRecord() {
+  lifetime = *new Record();
 }
 
 /**
  * Completely reset all tracked values, including tonight and lifetime
  */
 void totalReset() {
-  count=0;
-  currCount=0;
-  prevCount=0;
-  resetTiming();
-  
-  lifetime = *new Record();
-  tonight = *new Record();
-  
-  mostRecentDrinkTime = 0;
-  mostRecentVolume = 0.0;
+  resetCurrentDrink();
+  resetTonightRecord();
+  resetLifetimeRecord();
 
   storeAllValues();
 }
@@ -308,10 +281,12 @@ void totalReset() {
 /****************************************************************/
 
 /**
- * Determines whether or not to print out the drink completion data. 
+ * Determines whether the "current" drink has completed or not
+ * First check makes sure it only happens after some liquid has passed through
+ * Second check makes sure that we don't cut off a drink mid-stream
  */
-boolean shouldPrintDrinkTime() {
-  return ((currCount>0) && (currCount==prevCount));
+boolean isDrinkOver() {
+  return ((flowCount>0) && (flowCount==prevFlowCount));
 }
 
 /**
@@ -341,7 +316,7 @@ void readFromStorage() {
  * This should happen ANYTIME data that needs to persist is created and/or updated.
  */
 void storeAllValues() {
-  storage.lifetimeCount(lifetime.count());
+  storage.lifetimeCount(lifetime.count()); //@NOTE::This is a good example of where this notation can be confusing since count is also a variable in the current class
   storage.lifetimeFastestTime(lifetime.fastestTime());
   storage.lifetimeVolume(lifetime.volume());
 }
