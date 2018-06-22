@@ -100,13 +100,7 @@ void initGlobals() {
 void setup() {
   //boot operations
   initGlobals();
-<<<<<<< HEAD
-  totalReset();
-  Serial.begin(bitsPerSecond);
-  initializeDisplay(); // @TODO: Would like to get this to run here...not in loop.
-=======
   readFromStorage();
->>>>>>> master
 
   //Setup Arduino
   Serial.begin(bitsPerSecond);
@@ -137,11 +131,8 @@ void loop() {
 
   if(isDrinkOver()) {
     recordDrinkEnd();
-<<<<<<< HEAD
-=======
     printStatusReport(false);
     resetCurrentDrink();
->>>>>>> master
   }
 
   //if the mode cycle button is pressed
@@ -168,50 +159,7 @@ void Flow() {
   }
   flowCount++;
   drinkPulse();
-<<<<<<< HEAD
-  display.DebugPrintln(count);
-}
-
-/****************************************************************/
-/********************      Initialize       *********************/
-/****************************************************************/
-/**
- * Set starting values for globals
- */
-void initGlobals() {
-  flowPin = 2;
-  resetButtonInPin = 3;
-  modeCycleButtonInPin = 5;
-  bitsPerSecond = 9600;   // initialize serial communication at 9600 bits per second:
-  multiplier = 3.05; //TCW: 2.647  Chode: 3.05
-
-  currCount = 0;
-  prevCount = -1;
-  
-  currCount=0;
-  prevCount=-1;
-  
-  startingUp = false;
-  
-  //initialize all tracking variables to 0 in case they are not read from storage
-  tonight = *new Record();
-  lifetime = *new Record();
-
-  display = *new DisplayManager(DEBUG|LCD); //set it to whatever mode(s) you want: DEBUG|STATUSBOARD|LCD
-
-  readFromStorage();
-}
-
-void initializeDisplay() {
-  if (!startingUp) {
-    display.DebugPrintln("Welcome to the Red Solo Cup Saver!");
-    display.DebugPrintln("----------------------------------");
-    printStatusReport();
-    startingUp=true;
-  }
-=======
   display.DebugPrintln(flowCount);
->>>>>>> master
 }
 
 /****************************************************************/
@@ -269,21 +217,8 @@ void recordDrinkEnd() {
 
   lifetime.addDrink(startTime,endTime,mostRecentVolume);
   tonight.addDrink(startTime,endTime,mostRecentVolume);
-<<<<<<< HEAD
-
-  display.DebugPrint("TONIGHT DEBUG VOLUME:");
-  display.DebugPrintln(tonight.volume());
-
-  display.DebugPrint("TONIGHT DEBUG MOST RECENT LOCAL:");
-  display.DebugPrintln(mostRecentVolume);
-
-  storeAllValues();
-  
-  setDrinkCompletionDuration(startTime,endTime);
-=======
   
   setDrinkCompletionDuration();
->>>>>>> master
   
   setDrinkCompletionDateTime(); // @NOTE:: This function does nothing
 
@@ -331,26 +266,11 @@ void resetLifetimeRecord() {
  * Completely reset all tracked values, including tonight and lifetime
  */
 void totalReset() {
-<<<<<<< HEAD
-  count=0;
-  currCount=0;
-  prevCount=0;
-  resetTiming();
-  
-  lifetime = *new Record();
-  tonight = *new Record();
-  
-  mostRecentDrinkTime = 0;
-  mostRecentVolume = 0.0;
-  storage.reset();
-  //storeAllValues();
-=======
   resetCurrentDrink();
   resetTonightRecord();
   resetLifetimeRecord();
 
   storeAllValues();
->>>>>>> master
 }
 
 /****************************************************************/
@@ -392,11 +312,7 @@ void readFromStorage() {
  * This should happen ANYTIME data that needs to persist is created and/or updated.
  */
 void storeAllValues() {
-<<<<<<< HEAD
-  storage.storeAllValues(lifetime,tonight);
-=======
   storage.lifetimeCount(lifetime.count()); //@NOTE::This is a good example of where this notation can be confusing since count is also a variable in the current class
   storage.lifetimeFastestTime(lifetime.fastestTime());
   storage.lifetimeVolume(lifetime.volume());
->>>>>>> master
 }
