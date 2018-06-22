@@ -16,7 +16,7 @@ These are a few of our favorite things (and requirements to contribute to and co
 * You'll need an [Arduino](https://www.arduino.cc/), we recommend getting the [starter kit](https://store.arduino.cc/usa/arduino-starter-kit).
 * An [IDE](https://en.wikipedia.org/wiki/Integrated_development_environment). We use [Visual Studio Code](https://code.visualstudio.com/)
 * An Arduino account and access to the [web editor](https://create.arduino.cc/editor)
-* A (cheap) [flow meter](https://www.amazon.com/Flowmeters/b?ie=UTF8&node=3206433011)
+* A [flow meter](https://www.amazon.com/Flowmeters/b?ie=UTF8&node=3206433011)
 * (optional) [Processing](https://processing.org/download/) - Used to display a control board on your machine from the microcontroller.
 * And last but not least, Github (obviously)
 
