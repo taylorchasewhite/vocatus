@@ -46,15 +46,11 @@ int cycleDisplayButtonInPin;
 int flowPin;
 
 // Counts
-int prevFlowCount;
-bool drinkInProgress;
-
-int mostRecentDrinkTime;  // The time it took in ms to finish the last drink
-
-float mostRecentVolume;
-float multiplier;
-
 volatile int flowCount; //@NOTE:: I don't think this needs to be volatile. It's only needed if the variable could be changed from outside of the code (e.g another class)
+int prevFlowCount;
+
+float multiplier;
+float mostRecentVolume;
 
 // Timing
 Record lifetime;
@@ -62,7 +58,7 @@ Record tonight;
 
 unsigned long endTime;
 unsigned long startTime;
-
+int mostRecentDrinkTime;  // The time it took in ms to finish the last drink
 
 const unsigned long SECONDS_IN_DAY = 86400;
 unsigned long lastDrinkCompletionInstant; //@NOTE:: why are all of these globals?
