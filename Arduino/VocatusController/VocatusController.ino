@@ -183,8 +183,10 @@ void drinkPulse() {
   endTime=millis();
 }
 
-
-void setDrinkCompletionDuration(int startTime, int endTime) {
+/**
+ * Use the timing globals to record the duration for the latest drink
+ */
+void setDrinkCompletionDuration() {
   mostRecentDrinkTime = endTime-startTime;
   //@NOTE:: we should be using globals unless there's a reason to read from memory (globals can exist in the storage class, that's fine; but it looks like the plan is to have them read from memory every time)
   if ((mostRecentDrinkTime < storage.lifetimeFastestTime()) || (storage.lifetimeFastestTime()<=0)) {
@@ -220,9 +222,7 @@ void recordDrinkEnd() {
   lifetime.addDrink(startTime,endTime,mostRecentVolume);
   tonight.addDrink(startTime,endTime,mostRecentVolume);
   
-  storeAllValues();
-  
-  setDrinkCompletionDuration(startTime,endTime);
+  setDrinkCompletionDuration();
   
   setDrinkCompletionDateTime(); // @NOTE:: This function does nothing
 
