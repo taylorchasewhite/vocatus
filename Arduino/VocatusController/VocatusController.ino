@@ -27,15 +27,13 @@
   
   Exceptions to PQA resources linked:
     Use tabs, not spaces. Use the arduino web IDE to determine what the tab keystroke translates to. 
-      I'm using the Arduino application, not the web IDE, which turns tabs into spaces -SEL
+      --I'm using the Arduino application, not the web IDE, which turns tabs into spaces -SEL
     
   --------------------------
 */
 
 #include "Record.h"
-#include "Drink.h"
 #include "DisplayManager.h"
-#include <EEPROM.h>
 #include "StorageManager.h"
 
 /****************************************************************/
@@ -48,8 +46,8 @@ int cycleDisplayButtonInPin;
 int flowPin;
 
 // Counts
-int currCount;
 int prevCount;
+bool drinkInProgress;
 
 int mostRecentDrinkTime;  // The time it took in ms to finish the last drink
 
@@ -57,7 +55,7 @@ float mostRecentVolume;
 float multiplier;
 
 double flowRate;
-volatile int count;
+volatile int count; //@NOTE:: I don't think this needs to be volatile. It's only needed if the variable could be changed from outside of the code (e.g another class)
 
 // Timing
 Record lifetime;
@@ -89,34 +87,37 @@ void initGlobals() {
   bitsPerSecond = 9600;   // initialize serial communication at 9600 bits per second:
   multiplier = 3.05; //TCW: 2.647  Chode: 3.05
 
-  currCount = 0;
+  count = 0;
   prevCount = -1;
-  
-  currCount=0;
-  prevCount=-1;
+  drinkInProgress = false;
   
   //initialize all tracking variables to 0 in case they are not read from storage
   tonight = *new Record();
   lifetime = *new Record();
 
-  display = *new DisplayManager(DEBUG|LCD); //set it to whatever mode(s) you want: DEBUG|STATUSBOARD|LCD
-
-  readFromStorage();
+  display = *new DisplayManager(DEBUG); //set it to whatever mode(s) you want: DEBUG|STATUSBOARD|LCD
+  storage = *new StorageManager();
 }
 
-
+/**
+ * Standard Arduino setup code, run before starting the loop when code is first initialized
+ */
 void setup() {
+  //boot operations
   initGlobals();
-  Serial.begin(bitsPerSecond);
-  printStatusReport(true);
+  readFromStorage();
 
-  //Setup pins
+  //Setup Arduino
+  Serial.begin(bitsPerSecond);
+  
   pinMode(flowPin, INPUT);           
   pinMode(resetButtonInPin, INPUT_PULLUP);
   pinMode(cycleDisplayButtonInPin, INPUT_PULLUP);
   
   attachInterrupt(0, Flow, RISING);  //Configures interrupt 0 (pin 2 on the Arduino Uno) to run the function "Flow" 
 
+  //print an initial report
+  printStatusReport(true);
 }
 
 /****************************************************************/
@@ -127,17 +128,16 @@ void loop() {
   int resetButtonVal = digitalRead(resetButtonInPin);
   int modeCycleButtonVal = digitalRead(cycleDisplayButtonInPin);
   
-  prevCount=currCount;
-  currCount=count;
+  prevCount=count;
   
   interrupts();   //Enables interrupts on the Arduino
   delay (1000);   //Wait 1 second 
   noInterrupts(); //Disable the interrupts on the Arduino
-  
-  if (shouldPrintDrinkTime()) {
+
+  if(isDrinkOver()) {
     recordDrinkEnd();
     printStatusReport(false);
-    resetDrinkSession();
+    resetCurrentDrink();
   }
 
   //if the mode cycle button is pressed
@@ -160,7 +160,7 @@ void loop() {
  */
 void Flow() {
   if (count==0) {
-      drinkStart();
+    drinkStart();
   }
   count++;
   drinkPulse();
@@ -263,10 +263,9 @@ void resetTonightCounts() {
 /**
  * Resets all of the variables tied to a drink session.
  */
-void resetDrinkSession() {
+void resetCurrentDrink() {
   count=0;
-  currCount=0;
-  prevCount=0;
+  prevCount=-1;
   resetTiming();
 }
 
@@ -275,8 +274,7 @@ void resetDrinkSession() {
  */
 void totalReset() {
   count=0;
-  currCount=0;
-  prevCount=0;
+  prevCount=-1;
   resetTiming();
   
   lifetime = *new Record();
@@ -295,8 +293,8 @@ void totalReset() {
 /**
  * Determines whether or not to print out the drink completion data. 
  */
-boolean shouldPrintDrinkTime() {
-  return ((currCount>0) && (currCount==prevCount));
+boolean isDrinkOver() {
+  return ((count>0) && (count==prevCount));
 }
 
 /**
