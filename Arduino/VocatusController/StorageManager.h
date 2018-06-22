@@ -8,6 +8,7 @@
 #ifndef StorageManager_h
 #define StorageManager_h
 #include "Arduino.h"
+#include "StorageIO.h"
 #include "Record.h"
 
 class StorageManager
