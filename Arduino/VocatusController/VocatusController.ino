@@ -84,7 +84,6 @@ void initGlobals() {
 
   flowCount = 0;
   prevFlowCount = -1;
-  drinkInProgress = false;
   
   //initialize all tracking variables to 0 in case they are not read from storage
   tonight = *new Record();
@@ -112,7 +111,7 @@ void setup() {
   attachInterrupt(0, Flow, RISING);  //Configures interrupt 0 (pin 2 on the Arduino Uno) to run the function "Flow" 
 
   //print an initial report
-  printStatusReport(true);
+  printStatusReport()
 }
 
 /****************************************************************/
@@ -131,7 +130,7 @@ void loop() {
 
   if(isDrinkOver()) {
     recordDrinkEnd();
-    printStatusReport(false);
+    printStatusReport()
     resetCurrentDrink();
   }
 
@@ -139,14 +138,14 @@ void loop() {
   if (modeCycleButtonVal == LOW) {
     display.DebugPrintln("  ==LCD Cycle Button pressed==");
     display.CycleCurrentValueToDisplay();
-    printStatusReport(true);
+    printStatusReport()
   } 
 
   //if the reset button is pressed
   if (resetButtonVal == LOW) {
     display.DebugPrintln("  ==Reset button pushed==");
     totalReset();
-    printStatusReport(true);
+    printStatusReport()
   } 
 }
 
@@ -290,8 +289,7 @@ boolean isDrinkOver() {
  * 
  * @param storage boolean indicating where to read the data from
  */
-void printStatusReport(bool readFromStorage) {
-  //@TODO:: either have this respect the "readFromStorage" variable, or remove it as a parameter
+void printStatusReport() {
   display.OutputData(lifetime,tonight,mostRecentDrinkTime,mostRecentVolume);
 }
 

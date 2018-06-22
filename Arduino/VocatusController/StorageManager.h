@@ -8,6 +8,7 @@
 #ifndef StorageManager_h
 #define StorageManager_h
 #include "Arduino.h"
+#include "StorageIO.h"
 #include "Record.h"
 
 class StorageManager
@@ -30,13 +31,24 @@ class StorageManager
 		float lifetimeVolume();
 		void lifetimeVolume(float volume);
 
+		float tonightCount();
+		void tonightCount(float count);
+
+		int tonightFastestTime();
+		void tonightFastestTime(float drinkTime);
+
+		Record& tonightRecord();
+
+		float tonightVolume();
+		void tonightVolume(float volume);
+
 		void storeAllValues(float drinkCount,float drinkTime, float drinkVolume);
-		void storeData(int address, float value);
-		void storeData(int address, int value);
+		void storeAllValues(Record& lifetime, Record& tonight);
 		void reset();
 
   private:
     int _pin;
-		void clearEEPROM();
+	void clearEEPROM();
+	StorageIO _io;
 };
 #endif
