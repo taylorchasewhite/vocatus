@@ -12,6 +12,9 @@
 const int rs = 7, en = 8, d4 = 9, d5 = 10, d6 = 11, d7 = 12;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
+/****************************************************************/
+/***********************   Constructors   ***********************/
+/****************************************************************/
 DisplayManager::DisplayManager(OutputMode myOutputMode) {
   this->_changeOutputMode(myOutputMode);
   this->_currentValueToDisplay = LIFECOUNT;
@@ -22,18 +25,30 @@ DisplayManager::DisplayManager() {
   this->_currentValueToDisplay = LIFECOUNT;
 }
 
+
+/****************************************************************/
+/********************   General Functions   *********************/
+/****************************************************************/
 /**
  * centralized place for changing the output mode
  * updates the boolean state values to make sure they are always correct
  */
 void DisplayManager::_changeOutputMode(OutputMode newOutputMode) {
+  //set new modes
   _outputMode = newOutputMode;
   _isDebugEnabled = ((newOutputMode&DEBUG) == DEBUG);
   _isStatusBoardEnabled = ((newOutputMode&STATUSBOARD) == STATUSBOARD);
   _isLcdEnabled = ((newOutputMode&LCD) == LCD);
+
+  //run any init code
   if(_isLcdEnabled){_initLcd();}
+  if(_isDebugEnabled){_initDebug();}
 }
 
+/**
+ * Methods used for making sure that display appropriately handles the "1" case
+ * E.g. it says "1 drink" instead of "1 drinks"
+ */
 String DisplayManager::_handleSingleCase(float value,String stringIfSingle, String stringIfNotSingle) { 
   return (_handleSingleCase((int)value, stringIfSingle, stringIfNotSingle));
 }
@@ -43,6 +58,14 @@ String DisplayManager::_handleSingleCase(int value,String stringIfSingle,String 
     return(stringIfSingle);
   }
   return(stringIfNotSingle);
+}
+
+/**
+ * Setup code to run when initializing the display manager
+ */
+void DisplayManager::_initDebug() {
+  DebugPrintln("Welcome to Vocatus!");
+  DebugPrintln("----------------------------------");
 }
 
 /**
