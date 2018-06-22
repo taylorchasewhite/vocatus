@@ -46,7 +46,7 @@ int cycleDisplayButtonInPin;
 int flowPin;
 
 // Counts
-int prevCount;
+int prevFlowCount;
 bool drinkInProgress;
 
 int mostRecentDrinkTime;  // The time it took in ms to finish the last drink
@@ -54,8 +54,7 @@ int mostRecentDrinkTime;  // The time it took in ms to finish the last drink
 float mostRecentVolume;
 float multiplier;
 
-double flowRate;
-volatile int count; //@NOTE:: I don't think this needs to be volatile. It's only needed if the variable could be changed from outside of the code (e.g another class)
+volatile int flowCount; //@NOTE:: I don't think this needs to be volatile. It's only needed if the variable could be changed from outside of the code (e.g another class)
 
 // Timing
 Record lifetime;
@@ -87,8 +86,8 @@ void initGlobals() {
   bitsPerSecond = 9600;   // initialize serial communication at 9600 bits per second:
   multiplier = 3.05; //TCW: 2.647  Chode: 3.05
 
-  count = 0;
-  prevCount = -1;
+  flowCount = 0;
+  prevFlowCount = -1;
   drinkInProgress = false;
   
   //initialize all tracking variables to 0 in case they are not read from storage
@@ -128,7 +127,7 @@ void loop() {
   int resetButtonVal = digitalRead(resetButtonInPin);
   int modeCycleButtonVal = digitalRead(cycleDisplayButtonInPin);
   
-  prevCount=count;
+  prevFlowCount=flowCount;
   
   interrupts();   //Enables interrupts on the Arduino
   delay (1000);   //Wait 1 second 
@@ -159,12 +158,12 @@ void loop() {
  * The method to run each time we recieve input from the device
  */
 void Flow() {
-  if (count==0) {
-    drinkStart();
+  if (flowCount==0) {
+    startDrink();
   }
-  count++;
+  flowCount++;
   drinkPulse();
-  display.DebugPrintln(count);
+  display.DebugPrintln(flowCount);
 }
 
 /****************************************************************/
@@ -173,7 +172,7 @@ void Flow() {
 /**
  * Called the first time the hall effect sensor has been triggered since the last drink session completed.
  */
-void drinkStart() {
+void startDrink() {
   startTime=millis();
 }
 
@@ -184,27 +183,10 @@ void drinkPulse() {
   endTime=millis();
 }
 
-/**
- * Reset the start and end time for a drink that will be drank and judged.
- */
-void resetTiming() {
-  startTime=0;
-  endTime=0;
-}
-
-/**
- * Get the time it took to complete the most recent drink.
- * 
- * @return How long it took to complete the last drink.
- */
-int getDrinkCompletionDuration() {
-  return mostRecentDrinkTime;
-}
 
 void setDrinkCompletionDuration(int startTime, int endTime) {
   mostRecentDrinkTime = endTime-startTime;
   //@NOTE:: we should be using globals unless there's a reason to read from memory (globals can exist in the storage class, that's fine; but it looks like the plan is to have them read from memory every time)
-  //@NOTE:: this method does not exist
   if ((mostRecentDrinkTime < storage.lifetimeFastestTime()) || (storage.lifetimeFastestTime()<=0)) {
     storage.lifetimeFastestTime(mostRecentDrinkTime);
   }
@@ -233,7 +215,7 @@ boolean isNewDay() {
  * Record that a drink has been completed, update any current records, storage and display to the LCD
  */
 void recordDrinkEnd() {
-  mostRecentVolume=count*multiplier;
+  mostRecentVolume=flowCount*multiplier;
 
   lifetime.addDrink(startTime,endTime,mostRecentVolume);
   tonight.addDrink(startTime,endTime,mostRecentVolume);
@@ -246,42 +228,50 @@ void recordDrinkEnd() {
 
   //@NOTE:: we'll want to tear this out once we properly define a session
   if (isNewDay()) {
-    resetTonightCounts();
+    resetTonightRecord();
   }
 
   storeAllValues();
 }
 
 /**
+ * Resets all of the variables tied to the most recent drink
+ */
+void resetCurrentDrink() {
+  //reset volume variables
+  flowCount=0;
+  prevFlowCount=-1;
+  mostRecentVolume = 0.0;
+
+  //reset timing variables
+  startTime=0;
+  endTime=0;
+  mostRecentDrinkTime = 0;
+}
+
+/**
  * Call if more than 12 hours have passed since the last time a drink was drank. 
  * This function will reset all of the relevant variables scoring drink statistics for a given night.
  */
-void resetTonightCounts() {
+void resetTonightRecord() {
   tonight = *new Record();
 }
 
 /**
- * Resets all of the variables tied to a drink session.
+ * Call if a total reset is needed. 
+ * This function will reset all of the relevant variables scoring drink statistics for the device lifetime.
  */
-void resetCurrentDrink() {
-  count=0;
-  prevCount=-1;
-  resetTiming();
+void resetLifetimeRecord() {
+  lifetime = *new Record();
 }
 
 /**
  * Completely reset all tracked values, including tonight and lifetime
  */
 void totalReset() {
-  count=0;
-  prevCount=-1;
-  resetTiming();
-  
-  lifetime = *new Record();
-  tonight = *new Record();
-  
-  mostRecentDrinkTime = 0;
-  mostRecentVolume = 0.0;
+  resetCurrentDrink();
+  resetTonightRecord();
+  resetLifetimeRecord();
 
   storeAllValues();
 }
@@ -291,10 +281,12 @@ void totalReset() {
 /****************************************************************/
 
 /**
- * Determines whether or not to print out the drink completion data. 
+ * Determines whether the "current" drink has completed or not
+ * First check makes sure it only happens after some liquid has passed through
+ * Second check makes sure that we don't cut off a drink mid-stream
  */
 boolean isDrinkOver() {
-  return ((count>0) && (count==prevCount));
+  return ((flowCount>0) && (flowCount==prevFlowCount));
 }
 
 /**
@@ -324,7 +316,7 @@ void readFromStorage() {
  * This should happen ANYTIME data that needs to persist is created and/or updated.
  */
 void storeAllValues() {
-  storage.lifetimeCount(lifetime.count());
+  storage.lifetimeCount(lifetime.count()); //@NOTE::This is a good example of where this notation can be confusing since count is also a variable in the current class
   storage.lifetimeFastestTime(lifetime.fastestTime());
   storage.lifetimeVolume(lifetime.volume());
 }
