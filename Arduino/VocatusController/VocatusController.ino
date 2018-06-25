@@ -135,7 +135,7 @@ void loop() {
   }
 
   //if the mode cycle button is pressed
-  if (modeCycleButtonVal == LOW) {
+  if (modeCycleButtonVal == HIGH) {
     display.DebugPrintln("  ==LCD Cycle Button pressed==");
     display.CycleCurrentValueToDisplay();
     printStatusReport();
