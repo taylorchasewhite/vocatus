@@ -10,6 +10,7 @@
 */
 #include "Arduino.h"
 #include "StorageManager.h"
+#include "StorageIO.h"
 #include "Record.h"
 #include "EEPROM.h"
 

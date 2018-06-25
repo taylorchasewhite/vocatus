@@ -111,7 +111,7 @@ void setup() {
   attachInterrupt(0, Flow, RISING);  //Configures interrupt 0 (pin 2 on the Arduino Uno) to run the function "Flow" 
 
   //print an initial report
-  printStatusReport()
+  printStatusReport();
 }
 
 /****************************************************************/
@@ -130,7 +130,7 @@ void loop() {
 
   if(isDrinkOver()) {
     recordDrinkEnd();
-    printStatusReport()
+    printStatusReport();
     resetCurrentDrink();
   }
 
@@ -138,14 +138,14 @@ void loop() {
   if (modeCycleButtonVal == LOW) {
     display.DebugPrintln("  ==LCD Cycle Button pressed==");
     display.CycleCurrentValueToDisplay();
-    printStatusReport()
+    printStatusReport();
   } 
 
   //if the reset button is pressed
   if (resetButtonVal == LOW) {
     display.DebugPrintln("  ==Reset button pushed==");
     totalReset();
-    printStatusReport()
+    printStatusReport();
   } 
 }
 
