@@ -111,7 +111,7 @@ void setup() {
   attachInterrupt(0, Flow, RISING);  //Configures interrupt 0 (pin 2 on the Arduino Uno) to run the function "Flow" 
 
   //print an initial report
-  printStatusReport()
+  printStatusReport();
 }
 
 /****************************************************************/
@@ -130,7 +130,7 @@ void loop() {
 
   if(isDrinkOver()) {
     recordDrinkEnd();
-    printStatusReport()
+    printStatusReport();
     resetCurrentDrink();
   }
 
@@ -138,14 +138,14 @@ void loop() {
   if (modeCycleButtonVal == LOW) {
     display.DebugPrintln("  ==LCD Cycle Button pressed==");
     display.CycleCurrentValueToDisplay();
-    printStatusReport()
+    printStatusReport();
   } 
 
   //if the reset button is pressed
   if (resetButtonVal == LOW) {
     display.DebugPrintln("  ==Reset button pushed==");
     totalReset();
-    printStatusReport()
+    printStatusReport();
   } 
 }
 
@@ -190,13 +190,6 @@ void setDrinkCompletionDuration() {
 }
 
 /**
- * Denote the completion of a new drink at the current instant.
- */
-void setDrinkCompletionDateTime() {
-  //currentDrinkCompletionInstant=now(); @TODO: Now isn't working/validating
-}
-
-/**
  * Determines whether or not the completion of the last drink represents a new day.
  * 
  * @return Is the first drink of new day
@@ -219,8 +212,6 @@ void recordDrinkEnd() {
   
   setDrinkCompletionDuration();
   
-  setDrinkCompletionDateTime(); // @NOTE:: This function does nothing
-
   //@NOTE:: we'll want to tear this out once we properly define a session
   if (isNewDay()) {
     resetTonightRecord();
