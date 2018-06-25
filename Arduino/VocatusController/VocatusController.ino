@@ -190,13 +190,6 @@ void setDrinkCompletionDuration() {
 }
 
 /**
- * Denote the completion of a new drink at the current instant.
- */
-void setDrinkCompletionDateTime() {
-  //currentDrinkCompletionInstant=now(); @TODO: Now isn't working/validating
-}
-
-/**
  * Determines whether or not the completion of the last drink represents a new day.
  * 
  * @return Is the first drink of new day
@@ -219,8 +212,6 @@ void recordDrinkEnd() {
   
   setDrinkCompletionDuration();
   
-  setDrinkCompletionDateTime(); // @NOTE:: This function does nothing
-
   //@NOTE:: we'll want to tear this out once we properly define a session
   if (isNewDay()) {
     resetTonightRecord();
