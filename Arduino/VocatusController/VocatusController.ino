@@ -142,7 +142,7 @@ void loop() {
   } 
 
   //if the reset button is pressed
-  if (resetButtonVal == LOW) {
+  if (resetButtonVal == HIGH) {
     display.DebugPrintln("  ==Reset button pushed==");
     totalReset();
     printStatusReport();
