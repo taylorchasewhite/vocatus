@@ -108,11 +108,10 @@ void setup() {
   pinMode(resetButtonInPin, INPUT_PULLUP);
   pinMode(cycleDisplayButtonInPin, INPUT_PULLUP);
   
-  attachInterrupt(digitalPinToInterrupt(flowPin), Flow, RISING);  //Configures interrupt 0 (pin 2 on the Arduino Uno) to run the function "Flow" 
+  attachInterrupt(digitalPinToInterrupt(flowPin), Flow, RISING);
   attachInterrupt(digitalPinToInterrupt(resetButtonInPin), resetListener, RISING);
   attachInterrupt(digitalPinToInterrupt(cycleDisplayButtonInPin), displayButtonListener, RISING);
 
-  //print an initial report
   printStatusReport();
 }
 
@@ -120,9 +119,6 @@ void setup() {
 /********************         Core          *********************/
 /****************************************************************/
 void loop() {
-  //read the pushbutton value into a variable
-  int resetButtonVal = digitalRead(resetButtonInPin);
-  int modeCycleButtonVal = digitalRead(cycleDisplayButtonInPin);
   
   prevFlowCount=flowCount;
   
@@ -138,7 +134,7 @@ void loop() {
 }
 
 /**
- * The method to run each time we recieve input from the device
+ * Called when liquid flows through the flow meter.
  */
 void Flow() {
   if (flowCount==0) {
@@ -149,6 +145,9 @@ void Flow() {
   display.DebugPrintln(flowCount);
 }
 
+/**
+ * Called when the display cycle button is pressed.
+ */
 void displayButtonListener() {
     display.DebugPrintln("  ==LCD Cycle Button pressed==");
     display.CycleCurrentValueToDisplay();
@@ -207,9 +206,9 @@ void recordDrinkEnd() {
   setDrinkCompletionDuration();
   
   //@NOTE:: we'll want to tear this out once we properly define a session
-  if (isNewDay()) {
+  /*if (isNewDay()) {
     resetTonightRecord();
-  }
+  }*/
 
   storeAllValues();
 }
@@ -295,6 +294,7 @@ void printStatusReport() {
  */
 void readFromStorage() {
   lifetime = storage.lifetimeRecord();
+  tonight = storage.tonightRecord();
 }
 
 /**
@@ -302,7 +302,5 @@ void readFromStorage() {
  * This should happen ANYTIME data that needs to persist is created and/or updated.
  */
 void storeAllValues() {
-  storage.lifetimeCount(lifetime.count()); //@NOTE::This is a good example of where this notation can be confusing since count is also a variable in the current class
-  storage.lifetimeFastestTime(lifetime.fastestTime());
-  storage.lifetimeVolume(lifetime.volume());
+  storage.storeAllValues(lifetime,tonight);
 }
