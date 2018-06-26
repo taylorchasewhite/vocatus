@@ -108,7 +108,9 @@ void setup() {
   pinMode(resetButtonInPin, INPUT_PULLUP);
   pinMode(cycleDisplayButtonInPin, INPUT_PULLUP);
   
-  attachInterrupt(0, Flow, RISING);  //Configures interrupt 0 (pin 2 on the Arduino Uno) to run the function "Flow" 
+  attachInterrupt(digitalPinToInterrupt(flowPin), Flow, RISING);  //Configures interrupt 0 (pin 2 on the Arduino Uno) to run the function "Flow" 
+  attachInterrupt(digitalPinToInterrupt(resetButtonInPin), resetListener, RISING);
+  attachInterrupt(digitalPinToInterrupt(cycleDisplayButtonInPin), displayButtonListener, RISING);
 
   //print an initial report
   printStatusReport();
@@ -133,20 +135,6 @@ void loop() {
     printStatusReport();
     resetCurrentDrink();
   }
-
-  //if the mode cycle button is pressed
-  if (modeCycleButtonVal == HIGH) {
-    display.DebugPrintln("  ==LCD Cycle Button pressed==");
-    display.CycleCurrentValueToDisplay();
-    printStatusReport();
-  } 
-
-  //if the reset button is pressed
-  if (resetButtonVal == HIGH) {
-    display.DebugPrintln("  ==Reset button pushed==");
-    totalReset();
-    printStatusReport();
-  } 
 }
 
 /**
@@ -159,6 +147,12 @@ void Flow() {
   flowCount++;
   drinkPulse();
   display.DebugPrintln(flowCount);
+}
+
+void displayButtonListener() {
+    display.DebugPrintln("  ==LCD Cycle Button pressed==");
+    display.CycleCurrentValueToDisplay();
+    printStatusReport();
 }
 
 /****************************************************************/
@@ -220,6 +214,23 @@ void recordDrinkEnd() {
   storeAllValues();
 }
 
+void resetListener() {
+    display.DebugPrintln("  ==Reset button pushed==");
+    reset();
+    printStatusReport();
+}
+
+/**
+ * Completely reset all tracked values, including tonight and lifetime
+ */
+void reset() {
+  resetCurrentDrink();
+  resetTonightRecord();
+  resetLifetimeRecord();
+
+  storeAllValues();
+}
+
 /**
  * Resets all of the variables tied to the most recent drink
  */
@@ -251,16 +262,6 @@ void resetLifetimeRecord() {
   lifetime = *new Record();
 }
 
-/**
- * Completely reset all tracked values, including tonight and lifetime
- */
-void totalReset() {
-  resetCurrentDrink();
-  resetTonightRecord();
-  resetLifetimeRecord();
-
-  storeAllValues();
-}
 
 /****************************************************************/
 /********************        Printing       *********************/
