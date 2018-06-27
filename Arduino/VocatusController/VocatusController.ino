@@ -288,7 +288,7 @@ boolean isDrinkOver() {
  * @param storage boolean indicating where to read the data from
  */
 void printStatusReport() {
-  display.OutputData(&lifetime,&tonight,mostRecentDrinkTime,mostRecentVolume);
+  display.OutputData(lifetime,tonight,mostRecentDrinkTime,mostRecentVolume);
 }
 
 /****************************************************************/

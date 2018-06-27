@@ -65,7 +65,7 @@ class DisplayManager
     void DebugPrint(double);
     void DebugPrintln(double);
 
-    void OutputData(Record*, Record*, int, float);
+    void OutputData(Record&, Record&, int, float);
     void CycleCurrentValueToDisplay();
   private:
     OutputMode _outputMode;
@@ -81,12 +81,12 @@ class DisplayManager
     String _handleSingleCase(int,String,String);
     String _createDebugString(String, int, String);
     String _createDebugString(String, float, String);
-    void _sendDebugReport(Record*, Record*, int, float);
+    void _sendDebugReport(Record&, Record&, int, float);
     void _changeOutputMode(OutputMode);
-    String _buildComString(Record*, Record*, int, float);
-    void _sendToStatusBoard(Record*, Record*, int, float);
+    String _buildComString(Record&, Record&, int, float);
+    void _sendToStatusBoard(Record&, Record&, int, float);
     void _initLcd();
-    void _sendToLcd(Record*, Record*, int);
+    void _sendToLcd(Record&, Record&, int);
 };
 
 #endif
