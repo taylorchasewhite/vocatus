@@ -81,7 +81,7 @@ void Record::addDrink(int startTime, int endTime, float volume) {
 void Record::addDrink(Drink& drink) {
 	this->addCount();
 	this->addVolume(drink.volume());
-	Serial.print("PASSED IN VOLUME: ");
+	Serial.print("PASSED IN VOLUME (Drink): ");
 	Serial.println(drink.volume());
 	this->evalAndUpdateFastestDrink(drink);
 }

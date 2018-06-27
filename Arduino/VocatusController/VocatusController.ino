@@ -122,7 +122,7 @@ void loop() {
   prevFlowCount=flowCount;
   
   interrupts();   //Enables interrupts on the Arduino
-  delay (1000);   //Wait 1 second 
+  delay (500);   //Wait 1 second 
   noInterrupts(); //Disable the interrupts on the Arduino
 
   if(isDrinkOver()) {
@@ -210,10 +210,11 @@ boolean isNewDay() {
  * Record that a drink has been completed, update any current records, storage and display to the LCD
  */
 void recordDrinkEnd() {
-  mostRecentVolume=flowCount*multiplier;
+  mostRecentVolume=(float)flowCount*multiplier;
 
   lifetime.addDrink(startTime,endTime,mostRecentVolume);
   tonight.addDrink(startTime,endTime,mostRecentVolume);
+  
   
   setDrinkCompletionDuration();
   

@@ -15,7 +15,7 @@ class Drink
   	Drink();
 	Drink(Drink &copy);
 	Drink(int duration);
-	Drink(int startTime, int endTime, int volume);
+	Drink(int startTime, int endTime, float volume);
 	
   	int endTime();
   	void endTime(int endTime);
@@ -27,14 +27,14 @@ class Drink
 	bool isFinished();
 	int timeToFinish();
 
-	int volume();
-	void volume(int volume);
+	float volume();
+	void volume(float volume);
 
   private:
     int _drinkDay;
 	int _drinkHour;
 	int _endTime;
 	int _startTime;
-	int _volume;
+	float _volume;
 };
 #endif

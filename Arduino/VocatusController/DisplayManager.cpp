@@ -53,7 +53,11 @@ void DisplayManager::_changeOutputMode(OutputMode newOutputMode) {
  * E.g. it says "1 drink" instead of "1 drinks"
  */
 String DisplayManager::_handleSingleCase(float value,String stringIfSingle, String stringIfNotSingle) { 
-  return (_handleSingleCase((int)value, stringIfSingle, stringIfNotSingle));
+  if(value==1.0)
+  {
+    return(stringIfSingle);
+  }
+  return(stringIfNotSingle);
 }
 String DisplayManager::_handleSingleCase(int value,String stringIfSingle,String stringIfNotSingle) {
   if(value==1)
@@ -116,19 +120,38 @@ void DisplayManager::DebugPrint(float debugText) { if(_shouldDebug()){ Serial.pr
 void DisplayManager::DebugPrintln(float debugText) { if(_shouldDebug()){ Serial.println(debugText); }}
 void DisplayManager::DebugPrint(double debugText) { if(_shouldDebug()){ Serial.print(debugText); }}
 void DisplayManager::DebugPrintln(double debugText) { if(_shouldDebug()){ Serial.println(debugText); }}
+//void DisplayManager::DebugPrint(String debugText) { if(_shouldDebug()){ Serial.print("#");Serial.print(debugText);Serial.print("%"); }}
+//void DisplayManager::DebugPrintln(String debugText) { if(_shouldDebug()){ Serial.print("#");Serial.println(debugText);Serial.print("%"); }}
+//void DisplayManager::DebugPrint(int debugText) { if(_shouldDebug()){ Serial.print("#");Serial.print(debugText);Serial.print("%"); }}
+//void DisplayManager::DebugPrintln(int debugText) { if(_shouldDebug()){ Serial.print("#");Serial.println(debugText);Serial.print("%"); }}
+//void DisplayManager::DebugPrint(long debugText) { if(_shouldDebug()){ Serial.print("#");Serial.print(debugText);Serial.print("%"); }}
+//void DisplayManager::DebugPrintln(long debugText) { if(_shouldDebug()){ Serial.print("#");Serial.println(debugText);Serial.print("%"); }}
+//void DisplayManager::DebugPrint(unsigned long debugText) { if(_shouldDebug()){ Serial.print("#");Serial.print(debugText);Serial.print("%"); }}
+//void DisplayManager::DebugPrintln(unsigned long debugText) { if(_shouldDebug()){ Serial.print("#");Serial.println(debugText);Serial.print("%"); }}
+//void DisplayManager::DebugPrint(float debugText) { if(_shouldDebug()){ Serial.print("#");Serial.print(debugText);Serial.print("%"); }}
+//void DisplayManager::DebugPrintln(float debugText) { if(_shouldDebug()){ Serial.print("#");Serial.println(debugText);Serial.print("%"); }}
+//void DisplayManager::DebugPrint(double debugText) { if(_shouldDebug()){ Serial.print("#");Serial.print(debugText);Serial.print("%"); }}
+//void DisplayManager::DebugPrintln(double debugText) { if(_shouldDebug()){ Serial.print("#");Serial.println(debugText);Serial.print("%"); }}
 
 /**
  * Output a standard debug message to the console with the current state of variables
  */
 void DisplayManager::_sendDebugReport(Record& lifetimeRecord, Record& tonightRecord,int mostRecentDrinkTimeVar, float mostRecentVolumeVar) {
-  //DebugPrintln(LIFECOUNT_LABEL + ": " + lifetimeRecord.count() + " " + _handleSingleCase(lifetimeRecord.count(),LIFECOUNT_UNIT_SINGLE,LIFECOUNT_UNIT));
-  //DebugPrintln(TONIGHTCOUNT_LABEL + ": " + tonightRecord.count() + " " + _handleSingleCase(tonightRecord.count(),TONIGHTCOUNT_UNIT_SINGLE,TONIGHTCOUNT_UNIT));
-  //DebugPrintln(LIFESPEED_LABEL + ": " + lifetimeRecord.fastestTime() + " " + LIFESPEED_UNIT);
-  //DebugPrintln(TONIGHTSPEED_LABEL + ": " + tonightRecord.fastestTime() + " " + TONIGHTSPEED_UNIT);
+  //Serial.print("_sendDebugReport lifetime count before: ");
+  //Serial.println(lifetimeRecord.count());
+  //Serial.println("=Output Start=");
+  DebugPrint(LIFECOUNT_LABEL);
+  DebugPrint(": ");
+  DebugPrint(lifetimeRecord.count());
+  DebugPrintln(" " + _handleSingleCase(lifetimeRecord.count(),LIFECOUNT_UNIT_SINGLE,LIFECOUNT_UNIT));
+  DebugPrintln(TONIGHTCOUNT_LABEL + ": " + tonightRecord.count() + " " + _handleSingleCase(tonightRecord.count(),TONIGHTCOUNT_UNIT_SINGLE,TONIGHTCOUNT_UNIT));
+  DebugPrintln(LIFESPEED_LABEL + ": " + lifetimeRecord.fastestTime() + " " + LIFESPEED_UNIT);
+  DebugPrintln(TONIGHTSPEED_LABEL + ": " + tonightRecord.fastestTime() + " " + TONIGHTSPEED_UNIT);
   //DebugPrintln(LASTSPEED_LABEL + ": " + mostRecentDrinkTimeVar + " " + LASTSPEED_UNIT);
-  //DebugPrintln(LIFEVOLUME_LABEL + ": " + lifetimeRecord.volume() + " " + LIFEVOLUME_UNIT);
-  //DebugPrintln(TONIGHTVOLUME_LABEL + ": " + tonightRecord.volume() + " " + TONIGHTVOLUME_UNIT);
+  DebugPrintln(LIFEVOLUME_LABEL + ": " + lifetimeRecord.volume() + " " + LIFEVOLUME_UNIT);
+  DebugPrintln(TONIGHTVOLUME_LABEL + ": " + tonightRecord.volume() + " " + TONIGHTVOLUME_UNIT);
   //DebugPrintln(LASTVOLUME_LABEL + ": " + mostRecentVolumeVar + " " + LASTVOLUME_UNIT);
+  Serial.println("=Output End=");
 }
 
 /****************************************************************/
