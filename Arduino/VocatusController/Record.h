@@ -44,7 +44,7 @@ class Record
   private:
 	int _count;
 	Drink _fastestDrink;
-    int _endTime;
+  int _endTime;
 	int _startTime;
 	float _volume;
 };

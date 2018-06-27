@@ -14,11 +14,6 @@
 //@NOTE:: Not sold on variable naming convention; makes it confusing to parse the code
 //examples: count(), startTime(), endTime()
 
-enum Type {
-	LifeTime,
-	Tonight
-} recordType;
-
 /**
  * Initialize a new record with just count,volume and fastestTime.
  * @param count int the number of drinks this record should have
@@ -47,18 +42,15 @@ Record::Record(Record &copy) {
 Record::Record() {
 	_count=0;
 	//Drink* _fastestDrink; // TODO, what to do?
-    _endTime=0;
+  _endTime=0;
 	_startTime=0;
-	float _volume=0;
+	_volume=0;
 }
 
 //Notes:
 //change "Record" to "DrinkList" or "Session" 
 //move calculation logic from controller to ^^
 
-//Record::Record(enum type) {
-
-//}
 
 /**
  * Record the successful completion of another drink. Update the count indicating number of drinks drank,
