@@ -53,8 +53,8 @@ float multiplier;
 float mostRecentVolume;
 
 // Timing
-Record lifetime;
-Record tonight;
+Record* lifetime;
+Record*  tonight;
 
 unsigned long endTime;
 unsigned long startTime;
@@ -65,8 +65,8 @@ unsigned long lastDrinkCompletionInstant; //@NOTE:: why are all of these globals
 unsigned long currentDrinkCompletionInstant;
 
 // I/O Controls
-DisplayManager display;
-StorageManager storage;
+DisplayManager* display;
+StorageManager* storage;
 
 
 /****************************************************************/
@@ -82,11 +82,11 @@ void initGlobals() {
   prevFlowCount = -1;
   
   //initialize all tracking variables to 0 in case they are not read from storage
-  tonight = *new Record();
-  lifetime = *new Record();
+  tonight = new Record();
+  lifetime = new Record();
 
-  display = *new DisplayManager(DEBUG); //set it to whatever mode(s) you want: DEBUG|STATUSBOARD|LCD
-  storage = *new StorageManager(); //@NOTE:: Temp storage testing
+  display = new DisplayManager(DEBUG); //set it to whatever mode(s) you want: DEBUG|STATUSBOARD|LCD
+  storage = new StorageManager(); //@NOTE:: Temp storage testing
 }
 
 /**
@@ -133,14 +133,14 @@ void loop() {
 
   //if the mode cycle button is pressed
   if (modeCycleButtonVal == LOW) {
-    display.DebugPrintln("  ==LCD Cycle Button pressed==");
-    display.CycleCurrentValueToDisplay();
+    display->DebugPrintln("  ==LCD Cycle Button pressed==");
+    display->CycleCurrentValueToDisplay();
     printStatusReport();
   } 
 
   //if the reset button is pressed
   if (resetButtonVal == LOW) {
-    display.DebugPrintln("  ==Reset button pushed==");
+    display->DebugPrintln("  ==Reset button pushed==");
     totalReset();
     readFromStorage();
     printStatusReport();
@@ -156,7 +156,7 @@ void Flow() {
   }
   flowCount++;
   drinkPulse();
-  display.DebugPrintln(flowCount);
+  display->DebugPrintln(flowCount);
 }
 
 /****************************************************************/
@@ -212,8 +212,8 @@ boolean isNewDay() {
 void recordDrinkEnd() {
   mostRecentVolume=(float)flowCount*multiplier;
 
-  lifetime.addDrink(startTime,endTime,mostRecentVolume);
-  tonight.addDrink(startTime,endTime,mostRecentVolume);
+  lifetime->addDrink(startTime,endTime,mostRecentVolume);
+  tonight->addDrink(startTime,endTime,mostRecentVolume);
   
   
   setDrinkCompletionDuration();
@@ -248,7 +248,7 @@ void resetCurrentDrink() {
  * This function will reset all of the relevant variables scoring drink statistics for a given night.
  */
 void resetTonightRecord() {
-  tonight = *new Record();
+  tonight = new Record();
 }
 
 /**
@@ -256,7 +256,7 @@ void resetTonightRecord() {
  * This function will reset all of the relevant variables scoring drink statistics for the device lifetime.
  */
 void resetLifetimeRecord() {
-  lifetime = *new Record();
+  lifetime = new Record();
 }
 
 /**
@@ -289,7 +289,7 @@ boolean isDrinkOver() {
  * @param storage boolean indicating where to read the data from
  */
 void printStatusReport() {
-  display.OutputData(lifetime,tonight,mostRecentDrinkTime,mostRecentVolume);
+  display->OutputData(*lifetime,*tonight,mostRecentDrinkTime,mostRecentVolume);
 }
 
 /****************************************************************/

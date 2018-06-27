@@ -137,9 +137,13 @@ void DisplayManager::DebugPrintln(double debugText) { if(_shouldDebug()){ Serial
  * Output a standard debug message to the console with the current state of variables
  */
 void DisplayManager::_sendDebugReport(Record& lifetimeRecord, Record& tonightRecord,int mostRecentDrinkTimeVar, float mostRecentVolumeVar) {
-  //Serial.print("_sendDebugReport lifetime count before: ");
-  //Serial.println(lifetimeRecord.count());
-  //Serial.println("=Output Start=");
+  Serial.print("_sendDebugReport lifetime count before: ");
+  Serial.println(lifetimeRecord.count());
+  Serial.print("_sendDebugReport tonight count before: ");
+  Serial.println(tonightRecord.count());
+  Serial.print("_sendDebugReport lifetime record before: ");
+  Serial.println(lifetimeRecord.fastestTime());
+  Serial.println("=Output Start=");
   DebugPrint(LIFECOUNT_LABEL);
   DebugPrint(": ");
   DebugPrint(lifetimeRecord.count());
