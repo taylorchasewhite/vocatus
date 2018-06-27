@@ -16,11 +16,13 @@ LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 /***********************   Constructors   ***********************/
 /****************************************************************/
 DisplayManager::DisplayManager(OutputMode myOutputMode) {
+  Serial.println("=====DisplayManager parameterized constructor executed====="); //@NOTE:: displaymanager testing
   this->_changeOutputMode(myOutputMode);
   this->_currentValueToDisplay = LIFECOUNT;
 }
 
 DisplayManager::DisplayManager() {
+  Serial.println("=====DisplayManager default constructor executed====="); //@NOTE:: displaymanager testing
   this->_changeOutputMode(DEBUG);
   this->_currentValueToDisplay = LIFECOUNT;
 }
@@ -34,6 +36,7 @@ DisplayManager::DisplayManager() {
  * updates the boolean state values to make sure they are always correct
  */
 void DisplayManager::_changeOutputMode(OutputMode newOutputMode) {
+  //Serial.println("=====DisplayManager changeOutputMode executed====="); //@NOTE:: displaymanager testing
   //set new modes
   _outputMode = newOutputMode;
   _isDebugEnabled = ((newOutputMode&DEBUG) == DEBUG);
@@ -64,6 +67,7 @@ String DisplayManager::_handleSingleCase(int value,String stringIfSingle,String 
  * Setup code to run when initializing the display manager
  */
 void DisplayManager::_initDebug() {
+  //Serial.println("=====DisplayManager initDebug executed====="); //@NOTE:: displaymanager testing
   DebugPrintln("Welcome to Vocatus!");
   DebugPrintln("----------------------------------");
 }
@@ -71,7 +75,7 @@ void DisplayManager::_initDebug() {
 /**
  * Send info to the appropriate output
  */
-void DisplayManager::OutputData(Record& lifetimeRecord, Record& tonightRecord,int mostRecentDrinkTimeVar, float mostRecentVolumeVar)
+void DisplayManager::OutputData(Record* lifetimeRecord, Record* tonightRecord,int mostRecentDrinkTimeVar, float mostRecentVolumeVar)
 {
   if(_isDebugEnabled) {
     _sendDebugReport(lifetimeRecord,tonightRecord,mostRecentDrinkTimeVar,mostRecentVolumeVar);
@@ -116,15 +120,15 @@ void DisplayManager::DebugPrintln(double debugText) { if(_shouldDebug()){ Serial
 /**
  * Output a standard debug message to the console with the current state of variables
  */
-void DisplayManager::_sendDebugReport(Record& lifetimeRecord, Record& tonightRecord,int mostRecentDrinkTimeVar, float mostRecentVolumeVar) {
-  DebugPrintln(LIFECOUNT_LABEL + ": " + lifetimeRecord.count() + " " + _handleSingleCase(lifetimeRecord.count(),LIFECOUNT_UNIT_SINGLE,LIFECOUNT_UNIT));
-  DebugPrintln(TONIGHTCOUNT_LABEL + ": " + tonightRecord.count() + " " + _handleSingleCase(tonightRecord.count(),TONIGHTCOUNT_UNIT_SINGLE,TONIGHTCOUNT_UNIT));
-  DebugPrintln(LIFESPEED_LABEL + ": " + lifetimeRecord.fastestTime() + " " + LIFESPEED_UNIT);
-  DebugPrintln(TONIGHTSPEED_LABEL + ": " + tonightRecord.fastestTime() + " " + TONIGHTSPEED_UNIT);
-  DebugPrintln(LASTSPEED_LABEL + ": " + mostRecentDrinkTimeVar + " " + LASTSPEED_UNIT);
-  DebugPrintln(LIFEVOLUME_LABEL + ": " + lifetimeRecord.volume() + " " + LIFEVOLUME_UNIT);
-  DebugPrintln(TONIGHTVOLUME_LABEL + ": " + tonightRecord.volume() + " " + TONIGHTVOLUME_UNIT);
-  DebugPrintln(LASTVOLUME_LABEL + ": " + mostRecentVolumeVar + " " + LASTVOLUME_UNIT);
+void DisplayManager::_sendDebugReport(Record* lifetimeRecord, Record* tonightRecord,int mostRecentDrinkTimeVar, float mostRecentVolumeVar) {
+  //DebugPrintln(LIFECOUNT_LABEL + ": " + lifetimeRecord.count() + " " + _handleSingleCase(lifetimeRecord.count(),LIFECOUNT_UNIT_SINGLE,LIFECOUNT_UNIT));
+  //DebugPrintln(TONIGHTCOUNT_LABEL + ": " + tonightRecord.count() + " " + _handleSingleCase(tonightRecord.count(),TONIGHTCOUNT_UNIT_SINGLE,TONIGHTCOUNT_UNIT));
+  //DebugPrintln(LIFESPEED_LABEL + ": " + lifetimeRecord.fastestTime() + " " + LIFESPEED_UNIT);
+  //DebugPrintln(TONIGHTSPEED_LABEL + ": " + tonightRecord.fastestTime() + " " + TONIGHTSPEED_UNIT);
+  //DebugPrintln(LASTSPEED_LABEL + ": " + mostRecentDrinkTimeVar + " " + LASTSPEED_UNIT);
+  //DebugPrintln(LIFEVOLUME_LABEL + ": " + lifetimeRecord.volume() + " " + LIFEVOLUME_UNIT);
+  DebugPrintln(TONIGHTVOLUME_LABEL + ": " + tonightRecord->volume() + " " + TONIGHTVOLUME_UNIT);
+  //DebugPrintln(LASTVOLUME_LABEL + ": " + mostRecentVolumeVar + " " + LASTVOLUME_UNIT);
 }
 
 /****************************************************************/
@@ -136,24 +140,24 @@ void DisplayManager::_sendDebugReport(Record& lifetimeRecord, Record& tonightRec
  * 
  * @return a semicolon delimited string containing the information to send as output
  */
-String DisplayManager::_buildComString(Record& lifetimeRecordVar, Record& tonightRecordVar,int mostRecentDrinkTimeVar, float mostRecentVolumeVar)
+String DisplayManager::_buildComString(Record* lifetimeRecordVar, Record* tonightRecordVar,int mostRecentDrinkTimeVar, float mostRecentVolumeVar)
 {
   String toSend = "";
   String delim = ";";
   
-  toSend += lifetimeRecordVar.count();
+  toSend += lifetimeRecordVar->count();
   toSend += delim;
-  toSend += tonightRecordVar.count();
+  toSend += tonightRecordVar->count();
   toSend += delim;
-  toSend += lifetimeRecordVar.fastestTime();
+  toSend += lifetimeRecordVar->fastestTime();
   toSend += delim;
-  toSend += tonightRecordVar.fastestTime();
+  toSend += tonightRecordVar->fastestTime();
   toSend += delim;
   toSend += mostRecentDrinkTimeVar;
   toSend += delim;
-  toSend += lifetimeRecordVar.volume();
+  toSend += lifetimeRecordVar->volume();
   toSend += delim;
-  toSend += tonightRecordVar.volume();
+  toSend += tonightRecordVar->volume();
   toSend += delim;
   toSend += mostRecentVolumeVar;
   toSend += delim;  
@@ -162,7 +166,7 @@ String DisplayManager::_buildComString(Record& lifetimeRecordVar, Record& tonigh
 }
 
 
-void DisplayManager::_sendToStatusBoard(Record& lifetimeRecordVar, Record& tonightRecordVar,int mostRecentDrinkTimeVar, float mostRecentVolumeVar) {
+void DisplayManager::_sendToStatusBoard(Record* lifetimeRecordVar, Record* tonightRecordVar,int mostRecentDrinkTimeVar, float mostRecentVolumeVar) {
   String comString = _buildComString(lifetimeRecordVar,tonightRecordVar,mostRecentDrinkTimeVar,mostRecentVolumeVar); 
   Serial.println(comString);  
 }
@@ -195,7 +199,7 @@ void DisplayManager::CycleCurrentValueToDisplay() {
 /**
  * Send the relevant info for display on the LCD, based on the current lcdDisplayMode
  */
-void DisplayManager::_sendToLcd(Record& lifetimeRecord, Record& tonightRecord,int mostRecentDrinkTime)
+void DisplayManager::_sendToLcd(Record* lifetimeRecord, Record* tonightRecord,int mostRecentDrinkTime)
 {
   String toDisplayLabel = "";
   String toDisplayValue = "";
@@ -205,22 +209,22 @@ void DisplayManager::_sendToLcd(Record& lifetimeRecord, Record& tonightRecord,in
   switch(_currentValueToDisplay) {
     case LIFECOUNT:
       toDisplayLabel = LIFECOUNT_LABEL;
-      toDisplayValue = lifetimeRecord.count();
-      toDisplayUnit  = _handleSingleCase(lifetimeRecord.count(),LIFECOUNT_UNIT_SINGLE,LIFECOUNT_UNIT); 
+      toDisplayValue = lifetimeRecord->count();
+      toDisplayUnit  = _handleSingleCase(lifetimeRecord->count(),LIFECOUNT_UNIT_SINGLE,LIFECOUNT_UNIT); 
       break;
     case TONIGHTCOUNT:
       toDisplayLabel = TONIGHTCOUNT_LABEL;
-      toDisplayValue = tonightRecord.count();
-      toDisplayUnit  = _handleSingleCase(tonightRecord.count(),TONIGHTCOUNT_UNIT_SINGLE,TONIGHTCOUNT_UNIT);
+      toDisplayValue = tonightRecord->count();
+      toDisplayUnit  = _handleSingleCase(tonightRecord->count(),TONIGHTCOUNT_UNIT_SINGLE,TONIGHTCOUNT_UNIT);
       break;
     case LIFESPEED:
       toDisplayLabel = LIFESPEED_LABEL;
-      toDisplayValue = lifetimeRecord.fastestTime();
+      toDisplayValue = lifetimeRecord->fastestTime();
       toDisplayUnit  = LIFESPEED_UNIT;
       break;
     case TONIGHTSPEED:
       toDisplayLabel = TONIGHTSPEED_LABEL;
-      toDisplayValue = tonightRecord.fastestTime();
+      toDisplayValue = tonightRecord->fastestTime();
       toDisplayUnit  = TONIGHTSPEED_UNIT  ;
       break;
     case LASTSPEED:

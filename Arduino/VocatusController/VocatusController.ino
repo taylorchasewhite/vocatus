@@ -40,10 +40,10 @@
 /********************        Globals        *********************/
 /****************************************************************/
 // Arduino constants 
-int bitsPerSecond;
-int resetButtonInPin;
-int cycleDisplayButtonInPin;
-int flowPin;
+const int bitsPerSecond = 9600; // initialize serial communication at 9600 bits per second:
+const int resetButtonInPin = 3;
+const int cycleDisplayButtonInPin = 5;
+const int flowPin = 2;
 
 // Counts
 volatile int flowCount; //@NOTE:: I don't think this needs to be volatile. It's only needed if the variable could be changed from outside of the code (e.g another class)
@@ -76,12 +76,8 @@ StorageManager storage;
  * Set starting values for globals
  */
 void initGlobals() {
-  flowPin = 2;
-  resetButtonInPin = 3;
-  cycleDisplayButtonInPin = 5;
-  bitsPerSecond = 9600;   // initialize serial communication at 9600 bits per second:
+  //flow trackers
   multiplier = 3.05; //TCW: 2.647  Chode: 3.05
-
   flowCount = 0;
   prevFlowCount = -1;
   
@@ -90,28 +86,29 @@ void initGlobals() {
   lifetime = *new Record();
 
   display = *new DisplayManager(DEBUG); //set it to whatever mode(s) you want: DEBUG|STATUSBOARD|LCD
-  storage = *new StorageManager();
+  storage = *new StorageManager(); //@NOTE:: Temp storage testing
 }
 
 /**
  * Standard Arduino setup code, run before starting the loop when code is first initialized
  */
 void setup() {
-  //boot operations
-  initGlobals();
-  readFromStorage();
-
-  //Setup Arduino
+    //Setup Arduino
   Serial.begin(bitsPerSecond);
+  Serial.println("=====Controller steup executed====="); //@NOTE:: displaymanager testing
   
   pinMode(flowPin, INPUT);           
   pinMode(resetButtonInPin, INPUT_PULLUP);
   pinMode(cycleDisplayButtonInPin, INPUT_PULLUP);
   
   attachInterrupt(0, Flow, RISING);  //Configures interrupt 0 (pin 2 on the Arduino Uno) to run the function "Flow" 
-
+  
+  //boot operations
+  initGlobals();
+  readFromStorage();
+  
   //print an initial report
-  printStatusReport()
+  //printStatusReport();
 }
 
 /****************************************************************/
@@ -130,7 +127,7 @@ void loop() {
 
   if(isDrinkOver()) {
     recordDrinkEnd();
-    printStatusReport()
+    printStatusReport();
     resetCurrentDrink();
   }
 
@@ -138,14 +135,15 @@ void loop() {
   if (modeCycleButtonVal == LOW) {
     display.DebugPrintln("  ==LCD Cycle Button pressed==");
     display.CycleCurrentValueToDisplay();
-    printStatusReport()
+    printStatusReport();
   } 
 
   //if the reset button is pressed
   if (resetButtonVal == LOW) {
     display.DebugPrintln("  ==Reset button pushed==");
     totalReset();
-    printStatusReport()
+    readFromStorage();
+    printStatusReport();
   } 
 }
 
@@ -184,9 +182,9 @@ void drinkPulse() {
 void setDrinkCompletionDuration() {
   mostRecentDrinkTime = endTime-startTime;
   //@NOTE:: we should be using globals unless there's a reason to read from memory (globals can exist in the storage class, that's fine; but it looks like the plan is to have them read from memory every time)
-  if ((mostRecentDrinkTime < storage.lifetimeFastestTime()) || (storage.lifetimeFastestTime()<=0)) {
-    storage.lifetimeFastestTime(mostRecentDrinkTime);
-  }
+  //if ((mostRecentDrinkTime < storage.lifetimeFastestTime()) || (storage.lifetimeFastestTime()<=0)) {//@NOTE:: Temp storage testing
+    //storage.lifetimeFastestTime(mostRecentDrinkTime); //@NOTE:: Temp storage testing
+  //} //@NOTE:: Temp storage testing
 }
 
 /**
@@ -290,7 +288,7 @@ boolean isDrinkOver() {
  * @param storage boolean indicating where to read the data from
  */
 void printStatusReport() {
-  display.OutputData(lifetime,tonight,mostRecentDrinkTime,mostRecentVolume);
+  display.OutputData(&lifetime,&tonight,mostRecentDrinkTime,mostRecentVolume);
 }
 
 /****************************************************************/
@@ -302,7 +300,7 @@ void printStatusReport() {
  * @return the integer value stored in the desired address.
  */
 void readFromStorage() {
-  lifetime = storage.lifetimeRecord();
+  //lifetime = storage.lifetimeRecord(); //@NOTE:: Temp storage testing
 }
 
 /**
@@ -310,7 +308,7 @@ void readFromStorage() {
  * This should happen ANYTIME data that needs to persist is created and/or updated.
  */
 void storeAllValues() {
-  storage.lifetimeCount(lifetime.count()); //@NOTE::This is a good example of where this notation can be confusing since count is also a variable in the current class
-  storage.lifetimeFastestTime(lifetime.fastestTime());
-  storage.lifetimeVolume(lifetime.volume());
+  //storage.lifetimeCount(lifetime.count()); //@NOTE::This is a good example of where this notation can be confusing since count is also a variable in the current class //@NOTE:: Temp storage testing
+  //storage.lifetimeFastestTime(lifetime.fastestTime()); //@NOTE:: Temp storage testing
+  //storage.lifetimeVolume(lifetime.volume()); //@NOTE:: Temp storage testing
 }
