@@ -13,28 +13,28 @@ class Drink
 {
   public:
   	Drink();
-	Drink(Drink &copy);
-	Drink(int duration);
-	Drink(int startTime, int endTime, int volume);
+  	Drink(Drink &copy);
+  	Drink(int duration);
+  	Drink(int startTime, int endTime, float volume);
 	
   	int endTime();
   	void endTime(int endTime);
 	  
-	int startTime();
-	void startTime(int startTime);
-	
-	int flowRate();
-	bool isFinished();
-	int timeToFinish();
-
-	float volume();
-	void volume(float volume);
+	  int startTime();
+	  void startTime(int startTime);
+	  
+	  int flowRate();
+	  bool isFinished();
+	  int timeToFinish();
+	  
+	  float volume();
+	  void volume(float volume);
 
   private:
     int _drinkDay;
-	int _drinkHour;
-	int _endTime;
-	int _startTime;
-	float _volume;
+    int _drinkHour;
+    int _endTime;
+    int _startTime;
+    int _volume;
 };
 #endif

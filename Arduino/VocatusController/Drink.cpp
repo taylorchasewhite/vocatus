@@ -30,7 +30,7 @@ Drink::Drink(Drink &copy) {
 }
 
 
-Drink::Drink(int startTime,int endTime, int volume) {
+Drink::Drink(int startTime,int endTime, float volume) {
 	this->startTime(startTime);
 	this->endTime(endTime);
 	this->volume(volume);
