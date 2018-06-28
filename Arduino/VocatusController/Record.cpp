@@ -22,6 +22,9 @@ enum Type {
 /**
  * Initialize a new record with just count,volume and fastestTime.
  * @param count int the number of drinks this record should have
+ * @param volume float the volume of drank during this record's lifetime
+ * @param fastestTime int the fastest beer time during this record's lifetime
+ * @param startTime int the start instant of this record (how long ago since it started)
  */
 Record::Record(int count, float volume, int fastestTime,int startTime) {
 	this->count(count);
@@ -32,7 +35,7 @@ Record::Record(int count, float volume, int fastestTime,int startTime) {
 
 /**
  * Initialize a new record that is a copy of the values in Record
- * @param copy this is the Record that we will copy from
+ * @param copy Record this is the Record that we will copy from
  */
 Record::Record(Record &copy) {
 	this->addVolume(copy.volume());
@@ -51,14 +54,6 @@ Record::Record() {
 	_startTime=0;
 	_volume=0;
 }
-
-//Notes:
-//change "Record" to "DrinkList" or "Session" 
-//move calculation logic from controller to ^^
-
-//Record::Record(enum type) {
-
-//}
 
 /**
  * Record the successful completion of another drink. Update the count indicating number of drinks drank,
@@ -103,6 +98,7 @@ int Record::count() {
 /**
  * Will *set* the count for this record--be careful when using this, generally it should only be incremented
  * using addCount()
+ * @param count int the count of the number of drinks consumed during this record's lifetime
  */
 void Record::count(int count) {
 	_count=count;
@@ -169,6 +165,7 @@ int Record::startTime() {
 /**
  * Set the Record's start time to represent when it was initialized and began tracking drink consumption.
  * @TODO: Should this be a datetime?
+ * @param startTime int the instant this Record was created/started
  */
 void Record::startTime(int startTime) {
 	_startTime=startTime;
@@ -191,9 +188,10 @@ float Record::volume() {
 	return _volume;
 }
 
-/*
-	Given a float volume value, add it to this record's total volume.
-*/
+/**
+ * Given a float volume value, add it to this record's total volume
+ * @param volume float the amount of volume to add to this record
+ */
 void Record::addVolume(float volume) {
 	_volume += volume;
 }

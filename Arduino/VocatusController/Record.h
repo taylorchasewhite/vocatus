@@ -14,38 +14,38 @@ class Record
 {
   public:
   	//Record(Type type);
-	Record(int count, float volume, int fastestTime,int startTime);
-	Record(Record &copy);
-	Record();
+	  Record(int count, float volume, int fastestTime,int startTime);
+	  Record(Record &copy);
+	  Record();
 
-	void addDrink(int startTime, int endTime, float volume);
-	void addDrink(Drink& drink);
-	void addCount();
+	  void addDrink(int startTime, int endTime, float volume);
+	  void addDrink(Drink& drink);
+	  void addCount();
 
-	int count();
-	void count(int count);
+	  int count();
+	  void count(int count);
 	
   	int endTime();
   	void endTime(int endTime);
 
-	bool evalAndUpdateFastestDrink(Drink& drink);
+	  bool evalAndUpdateFastestDrink(Drink& drink);
 
-	float fastestTime(); 			// return the completion duration of the fastest drink
-	Drink& fastestDrink(); 			// Same as fastest time but returns the Drink record.
+	  float fastestTime(); 			// return the completion duration of the fastest drink
+	  Drink& fastestDrink(); 			// Same as fastest time but returns the Drink record.
 	  
-	int startTime();
-	void startTime(int startTime);
+	  int startTime();
+	  void startTime(int startTime);
 	
-	int flowRate();
+	  int flowRate();
 
-	float volume();					// what's the total volume consumed for this record's lifetime
-	void addVolume(float volume);
+	  float volume();					// what's the total volume consumed for this record's lifetime
+	  void addVolume(float volume);
 
   private:
-	int _count;
-	Drink _fastestDrink;
+	  int _count;
+	  Drink _fastestDrink;
     int _endTime;
-	int _startTime;
-	float _volume;
+	  int _startTime;
+	  float _volume;
 };
 #endif
