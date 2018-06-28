@@ -278,28 +278,28 @@ boolean isDrinkOver() {
  * @param storage boolean indicating where to read the data from
  */
 void printStatusReport() {
-  Serial.println("Lifetime");
-  Serial.println("---------");
-  Serial.print(lifetime.count());
-  Serial.println(" drinks");
-
-  Serial.print(lifetime.volume());
-  Serial.println(" ml");
-
-  Serial.println("Tonight");
-  Serial.println("---------");
-  Serial.print(tonight.count());
-  Serial.println(" drinks");
-
-  Serial.print(tonight.volume());
-  Serial.println(" ml");
-
-  Serial.print("Most Recent Drink Time: ");
-  Serial.print(mostRecentDrinkTime);
-  Serial.print(" ms");
+//  Serial.println("Lifetime");
+//  Serial.println("---------");
+//  Serial.print(lifetime.count());
+//  Serial.println(" drinks");
+//
+//  Serial.print(lifetime.volume());
+//  Serial.println(" ml");
+//
+//  Serial.println("Tonight");
+//  Serial.println("---------");
+//  Serial.print(tonight.count());
+//  Serial.println(" drinks");
+//
+//  Serial.print(tonight.volume());
+//  Serial.println(" ml");
+//
+//  Serial.print("Most Recent Drink Time: ");
+//  Serial.print(mostRecentDrinkTime);
+//  Serial.print(" ms");
 
   
-  //display.OutputData(lifetime,tonight,mostRecentDrinkTime,mostRecentVolume);
+  display.OutputData(lifetime,tonight,mostRecentDrinkTime,mostRecentVolume);
 }
 
 /****************************************************************/
