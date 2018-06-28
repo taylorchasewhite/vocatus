@@ -46,6 +46,20 @@ Drink::Drink(int duration) {
 	this->volume(0);
 }
 
+Drink::~Drink(){
+  delete &_drinkDay;
+  delete &_drinkHour;
+  delete &_endTime;
+  delete &_startTime;
+  delete &_volume;
+}
+
+void Drink::Reset(){
+  _endTime = 0;
+  _startTime = 0;
+  _volume = 0.0;
+}
+
 /**
  * Get the last instant drink consumption was recorded
  * @TODO should this be a datetime?
