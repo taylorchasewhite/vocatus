@@ -69,6 +69,8 @@ unsigned long currentDrinkCompletionInstant;
 DisplayManager display;
 StorageManager storage;
 
+//states
+bool justReset;
 
 /****************************************************************/
 /********************      Initialize       *********************/
@@ -87,8 +89,10 @@ void initGlobals() {
   tonight = *new Record();
   lifetime = *new Record();
 
-  display = *new DisplayManager(DEBUG); //set it to whatever mode(s) you want: DEBUG|STATUSBOARD|LCD
+  display = *new DisplayManager(DEBUG|LCD); //set it to whatever mode(s) you want: DEBUG|STATUSBOARD|LCD
   storage = *new StorageManager();
+
+  justReset = false;
 }
 
 /**
@@ -99,7 +103,6 @@ void setup() {
   
   initGlobals();
   readFromStorage();
-
   
   pinMode(PIN_FLOW, INPUT);           
   pinMode(PIN_RESET, INPUT_PULLUP);
@@ -116,7 +119,6 @@ void setup() {
 /********************         Core          *********************/
 /****************************************************************/
 void loop() {
-  
   prevFlowCount=flowCount;
   
   interrupts();   //Enables interrupts on the Arduino
@@ -146,6 +148,7 @@ void Flow() {
  * Called when the display cycle button is pressed.
  */
 void displayButtonListener() {
+  Serial.println("====Executed LCDListener====");
     display.DebugPrintln("  ==LCD Cycle Button pressed==");
     display.CycleCurrentValueToDisplay();
     printStatusReport();
@@ -195,6 +198,7 @@ boolean isNewDay() {
  * Record that a drink has been completed, update any current records, storage and display to the LCD
  */
 void recordDrinkEnd() {
+  justReset = false;
   mostRecentVolume=flowCount*multiplier;
 
   lifetime.addDrink(startTime,endTime,mostRecentVolume);
@@ -212,7 +216,7 @@ void recordDrinkEnd() {
 
 void resetListener() {
     display.DebugPrintln("  ==Reset button pushed==");
-    reset();
+    if(!justReset){reset();} //prevent multiple resets in a row
     printStatusReport();
 }
 
@@ -225,6 +229,7 @@ void reset() {
   resetLifetimeRecord();
 
   storeAllValues();
+  justReset = true;
 }
 
 /**
