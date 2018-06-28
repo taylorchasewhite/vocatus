@@ -19,6 +19,10 @@ class Record
 	  Record(Record &copy);
 	  Record();
 
+    ~Record();
+
+    void Reset();
+
 	  void addDrink(int startTime, int endTime, float volume);
 	  void addDrink(Drink& drink);
 	  void addCount();

@@ -16,6 +16,10 @@ class Drink
   	Drink(Drink &copy);
   	Drink(int duration);
   	Drink(int startTime, int endTime, float volume);
+
+    ~Drink();
+
+    void Reset();
 	
   	int endTime();
   	void endTime(int endTime);

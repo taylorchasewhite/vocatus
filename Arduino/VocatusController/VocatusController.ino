@@ -88,7 +88,7 @@ void initGlobals() {
   tonight = *new Record();
   lifetime = *new Record();
 
-  display = *new DisplayManager(DEBUG); //set it to whatever mode(s) you want: DEBUG|STATUSBOARD|LCD
+  display = *new DisplayManager(DEBUG|LCD); //set it to whatever mode(s) you want: DEBUG|STATUSBOARD|LCD
   storage = *new StorageManager();
 }
 
@@ -117,7 +117,6 @@ void setup() {
 /********************         Core          *********************/
 /****************************************************************/
 void loop() {
-  
   prevFlowCount=flowCount;
   
   interrupts();   //Enables interrupts on the Arduino
@@ -147,6 +146,7 @@ void Flow() {
  * Called when the display cycle button is pressed.
  */
 void displayButtonListener() {
+  Serial.println("====Executed LCDListener====");
     display.DebugPrintln("  ==LCD Cycle Button pressed==");
     display.CycleCurrentValueToDisplay();
     printStatusReport();
@@ -212,7 +212,7 @@ void recordDrinkEnd() {
 }
 
 void resetListener() {
-    display.DebugPrintln("  ==Reset button pushed==");
+    display.DebugPrintln("==Reset button pushed==");
     reset();
     printStatusReport();
 }
@@ -248,7 +248,7 @@ void resetCurrentDrink() {
  * This function will reset all of the relevant variables scoring drink statistics for a given night.
  */
 void resetTonightRecord() {
-  tonight = *new Record();
+  tonight.Reset();
 }
 
 /**
@@ -256,7 +256,7 @@ void resetTonightRecord() {
  * This function will reset all of the relevant variables scoring drink statistics for the device lifetime.
  */
 void resetLifetimeRecord() {
-  lifetime = *new Record();
+  lifetime.Reset();
 }
 
 
@@ -301,7 +301,7 @@ void printStatusReport() {
   Serial.print("/");
   Serial.print(year(tonight.endTime()));
 
-  Serial.print(" ");
+  Serial.print(" "
 
   Serial.print(hour(tonight.endTime()));
   Serial.print(":");
@@ -311,10 +311,6 @@ void printStatusReport() {
   Serial.print("Most Recent Drink Time: ");
   Serial.print(mostRecentDrinkTime);
   Serial.print(" ms");
-
-
-  Serial.print(hour());
-
   
   //display.OutputData(lifetime,tonight,mostRecentDrinkTime,mostRecentVolume);
 }
