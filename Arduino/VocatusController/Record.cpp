@@ -49,7 +49,7 @@ Record::Record() {
 	//Drink* _fastestDrink; // TODO, what to do?
     _endTime=0;
 	_startTime=0;
-	float _volume=0;
+	_volume=0;
 }
 
 //Notes:

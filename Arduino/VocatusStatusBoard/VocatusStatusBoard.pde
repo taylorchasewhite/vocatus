@@ -5,7 +5,7 @@ import processing.serial.*;
 /****************************************************************/
 
   Serial myPort;        // The serial port
-  boolean debugMode = false;  //set to true to see noisy output in the serial window
+  boolean debugMode = true;  //set to true to see noisy output in the serial window
   boolean deviceAttached = true; //set this to false when testing code without a device attached to the computer (skips any messing around with Serial stuff)
   
   int xPos = 1;         // current horizontal position of the graph

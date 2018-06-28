@@ -40,10 +40,11 @@
 /********************        Globals        *********************/
 /****************************************************************/
 // Arduino constants 
-int bitsPerSecond;
-int resetButtonInPin;
-int cycleDisplayButtonInPin;
-int flowPin;
+const int BITS_PER_SECOND = 9600; // initialize serial communication at 9600 bits per second:
+
+const int PIN_FLOW = 2;
+const int PIN_RESET = 3;
+const int PIN_CYCLE_DISPLAY = 5;
 
 // Counts
 volatile int flowCount; //@NOTE:: I don't think this needs to be volatile. It's only needed if the variable could be changed from outside of the code (e.g another class)
@@ -76,10 +77,7 @@ StorageManager storage;
  * Set starting values for globals
  */
 void initGlobals() {
-  flowPin = 2;
-  resetButtonInPin = 3;
-  cycleDisplayButtonInPin = 5;
-  bitsPerSecond = 9600;   // initialize serial communication at 9600 bits per second:
+
   multiplier = 3.05; //TCW: 2.647  Chode: 3.05
 
   flowCount = 0;
@@ -97,20 +95,19 @@ void initGlobals() {
  * Standard Arduino setup code, run before starting the loop when code is first initialized
  */
 void setup() {
-  //boot operations
+  Serial.begin(BITS_PER_SECOND);
+  
   initGlobals();
   readFromStorage();
 
-  //Setup Arduino
-  Serial.begin(bitsPerSecond);
   
-  pinMode(flowPin, INPUT);           
-  pinMode(resetButtonInPin, INPUT_PULLUP);
-  pinMode(cycleDisplayButtonInPin, INPUT_PULLUP);
+  pinMode(PIN_FLOW, INPUT);           
+  pinMode(PIN_RESET, INPUT_PULLUP);
+  pinMode(PIN_CYCLE_DISPLAY, INPUT_PULLUP);
   
-  attachInterrupt(digitalPinToInterrupt(flowPin), Flow, RISING);
-  attachInterrupt(digitalPinToInterrupt(resetButtonInPin), resetListener, RISING);
-  attachInterrupt(digitalPinToInterrupt(cycleDisplayButtonInPin), displayButtonListener, RISING);
+  attachInterrupt(digitalPinToInterrupt(PIN_FLOW), Flow, RISING);
+  attachInterrupt(digitalPinToInterrupt(PIN_RESET), resetListener, RISING);
+  attachInterrupt(digitalPinToInterrupt(PIN_CYCLE_DISPLAY), displayButtonListener, RISING);
 
   printStatusReport();
 }
@@ -281,7 +278,15 @@ boolean isDrinkOver() {
  * @param storage boolean indicating where to read the data from
  */
 void printStatusReport() {
-  display.OutputData(lifetime,tonight,mostRecentDrinkTime,mostRecentVolume);
+  Serial.print("Lifetime: ");
+  Serial.println(lifetime.count());
+
+  Serial.print("Tonight: ");
+  Serial.println(tonight.count());
+
+  Serial.print("Most Recent: ");
+  Serial.println(mostRecentDrinkTime);
+  //display.OutputData(lifetime,tonight,mostRecentDrinkTime,mostRecentVolume);
 }
 
 /****************************************************************/
