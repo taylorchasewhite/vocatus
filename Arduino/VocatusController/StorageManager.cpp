@@ -42,13 +42,26 @@ StorageManager::StorageManager() {
 
 /*
   Store all of the records we keep for the lifetime interval.
-  @param drinkCount float the float value representing the number of drinks drank.
+  @param drinkCount float the value representing the number of drinks drank.
+  @param fastestDrinkTime float the value representing the amount of time needed to record the fastest drink time
+  @param drinkVolume float the amount of volume drank during the lifetime record
 */
-void StorageManager::storeAllValues(float drinkCount,float drinkTime, float drinkVolume) {
+void StorageManager::storeLifetimeValues(float drinkCount,float fastestDrinkTime, float drinkVolume) {
   lifetimeCount(drinkCount);
-  lifetimeFastestTime(drinkTime);
+  lifetimeFastestTime(fastestDrinkTime);
   lifetimeVolume(drinkVolume);
-  tonightCount();
+}
+
+/*
+  Store all of the records we keep for the lifetime interval.
+  @param drinkCount float the value representing the number of drinks drank.
+  @param fastestDrinkTime float the value representing the amount of time needed to record the fastest drink time
+  @param drinkVolume float the amount of volume drank during the lifetime record
+*/
+void StorageManager::storeTonightValues(float drinkCount,float drinkTime, float drinkVolume) {
+  tonightCount(drinkCount);
+  tonightFastestTime(drinkTime);
+  tonightVolume(drinkVolume);
 }
 
 /*
@@ -139,27 +152,20 @@ Record& StorageManager::tonightRecord() {
   return *new Record((int)tonightCount(),tonightVolume(),tonightFastestTime(),0); // TODO load startTime
 }
 
+/**
+ * Return the volume from memory that represents the amount of liquid drank tonight.
+ * @return float the amount of liquid consumed tonight
+ */
 float StorageManager::tonightVolume() { 
   return _io.readFloatData(ADDR_TONIGHT_VOLUME); 
 }
 
+/**
+ * Set in memory the amount of liquid drank tonight
+ */
 void StorageManager::tonightVolume(float volume) { 
   _io.storeData(ADDR_TONIGHT_VOLUME,volume); 
 }
-
-/**
- * Store all of the records we keep for the tonight interval.
- * @param drinkCount float the float value representing the number of drinks drank.
- * @param drinkTime float the float value representing the number of drinks drank.
- * @param drinkVolume float the total number milliters drank
- */
-/*void StorageManager::setTonightValues(float drinkCount,float drinkTime, float drinkVolume) {
-  //@TODO this doesn't do anything right now, we should eventually have the storage manager or an abstraction layer handle the logic for tonight vs. lifetime.
-  lifetimeCount(drinkCount);
-  lifetimeFastestTime(drinkTime);
-  lifetimeVolume(drinkVolume);
-
-}*/
 
 /**
  * Reset all of the permanent storage in the Arduino. There's no going back once you do this.
