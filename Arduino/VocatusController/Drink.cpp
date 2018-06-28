@@ -93,10 +93,10 @@ int Drink::timeToFinish() {
 	return _endTime-_startTime;
 }
 
-int Drink::volume() {
+float Drink::volume() {
 	return _volume;
 }
 
-void Drink::volume(int volume) {
+void Drink::volume(float volume) {
 	_volume=volume;
 }
