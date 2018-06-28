@@ -216,7 +216,7 @@ void recordDrinkEnd() {
   mostRecentVolume=(float)flowCount*multiplier;
 
   lifetime->addDrink(startTime,endTime,mostRecentVolume);
-  tonight->addDrink(startTime,endTime,mostRecentVolume);
+  //tonight->addDrink(startTime,endTime,mostRecentVolume);
   
   setDrinkCompletionDuration();
   

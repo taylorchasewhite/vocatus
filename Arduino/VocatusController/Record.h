@@ -19,7 +19,7 @@ class Record
 	Record();
 
 	void addDrink(int startTime, int endTime, float volume);
-	void addDrink(Drink& drink);
+	void addDrink(Drink* drink);
 	void addCount();
 
 	int count();

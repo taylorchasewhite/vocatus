@@ -18,7 +18,7 @@
 Drink::Drink() {
 	this->startTime(0);
 	this->endTime(0);
-	this->volume(0.0);
+	this->setVolume(0.0);
 }
 
 /**
@@ -31,9 +31,15 @@ Drink::Drink(Drink &copy) {
 
 
 Drink::Drink(int startTime,int endTime, float volume) {
+  Serial.print("=DrinkConstructor Volume BEFORE (param): ");
+  Serial.println(volume);
+  //Serial.print("=DrinkConstructor Volume BEFORE (member): ");
+  //Serial.println(this->volume());
 	this->startTime(startTime);
 	this->endTime(endTime);
-	this->volume(volume);
+	this->setVolume(volume);
+  Serial.print("=DrinkConstructor Volume AFTER (member): ");
+  Serial.println(this->getVolume());
 }
 
 /**
@@ -43,7 +49,7 @@ Drink::Drink(int startTime,int endTime, float volume) {
 Drink::Drink(int duration) {
 	this->startTime(0);
 	this->endTime(duration);
-	this->volume(0.0);
+	this->setVolume(0.0);
 }
 
 /**
@@ -93,10 +99,10 @@ int Drink::timeToFinish() {
 	return _endTime-_startTime;
 }
 
-float Drink::volume() {
+float Drink::getVolume() {
 	return _volume;
 }
 
-void Drink::volume(float volume) {
-	_volume=volume;
+void Drink::setVolume(float newVolume) {
+	_volume=newVolume;
 }
