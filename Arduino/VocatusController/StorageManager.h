@@ -42,13 +42,14 @@ class StorageManager
 		float tonightVolume();
 		void tonightVolume(float volume);
 
+    void storeLifetimeValues(float drinkCount,float fastestDrinkTime, float drinkVolume);
+    void storeTonightValues(float drinkCount,float fastestDrinkTime, float drinkVolume);
+    
 		void storeAllValues(float drinkCount,float drinkTime, float drinkVolume);
 		void storeAllValues(Record& lifetime, Record& tonight);
 		void reset();
 
   private:
-    int _pin;
-	void clearEEPROM();
-	StorageIO _io;
+	  StorageIO _io;
 };
 #endif

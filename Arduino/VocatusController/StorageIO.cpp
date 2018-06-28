@@ -85,19 +85,18 @@ void StorageIO::storeData(int address, float value) {
  * Reset all of the permanent storage in the Arduino. There's no going back once you do this.
  */ 
 void StorageIO::reset() {
-  clearEEPROM();
+  _clearEEPROM();
 }
 
 /**
  * Only call this when resetting the device to factory settings!
  * Permanently erases all persistent data stored on the arduino or board.
  */
-void StorageIO::clearEEPROM() {
+void StorageIO::_clearEEPROM() {
   for (int i = 0 ; i < EEPROM.length() ; i++) {
     if(EEPROM.read(i) != 0) {                   //skip already "empty" addresses
     
       EEPROM.write(i, 0);                       //write 0 to address i
     }
   }
-  //debugPrintln("EEPROM erased");
 }

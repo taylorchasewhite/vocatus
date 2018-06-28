@@ -29,6 +29,6 @@ class StorageIO
 		void reset();
 
   private:
-  	void clearEEPROM();
+  	void _clearEEPROM();
 };
 #endif
