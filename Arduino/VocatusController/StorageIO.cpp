@@ -82,6 +82,18 @@ void StorageIO::storeData(int address, float value) {
 }
 
 /**
+ * Store unsigned long value into permanent storage at EEPROM.
+ * NOTE: There are a limited number of times this can be called, 
+ * try to store to addresses as few times as possible.
+ * 
+ * @param address integer value denoting where to store the data to
+ * @param value time_t value you desire to store into EEPROM.
+ */
+void StorageIO::storeData(int address, time_t value) {
+  EEPROM.put(address,(unsigned long)value);
+}
+
+/**
  * Reset all of the permanent storage in the Arduino. There's no going back once you do this.
  */ 
 void StorageIO::reset() {
