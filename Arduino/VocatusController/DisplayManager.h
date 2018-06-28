@@ -82,6 +82,7 @@ class DisplayManager
     String _createDebugString(String, int, String);
     String _createDebugString(String, float, String);
     void _sendDebugReport(Record&, Record&, int, float);
+    void _sendSerialDebugReport(Record&, Record&, int, float);
     void _changeOutputMode(OutputMode);
     String _buildComString(Record&, Record&, int, float);
     void _sendToStatusBoard(Record&, Record&, int, float);
