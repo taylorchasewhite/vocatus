@@ -28,6 +28,7 @@ enum Type {
  */
 Record::Record(int count, float volume, int fastestTime,int startTime) {
 	this->count(count);
+  _volume=0;
 	this->addVolume(volume);
 	_fastestDrink=*new Drink(fastestTime);
 	//startTime(startTime);
