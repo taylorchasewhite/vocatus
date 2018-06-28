@@ -18,7 +18,7 @@
 Drink::Drink() {
 	this->startTime(0);
 	this->endTime(0);
-	this->volume(0);
+	this->volume(0.0);
 }
 
 /**
@@ -43,7 +43,7 @@ Drink::Drink(int startTime,int endTime, float volume) {
 Drink::Drink(int duration) {
 	this->startTime(0);
 	this->endTime(duration);
-	this->volume(0);
+	this->volume(0.0);
 }
 
 /**

@@ -61,6 +61,8 @@ Record::Record() {
  * @param volume float the amount of recorded liquid in this drink
  */
 void Record::addDrink(int startTime, int endTime, float volume) {
+	Serial.print("PASSED IN VOLUME (RecordFromParams): ");
+  Serial.println(volume);
 	this->addDrink(*new Drink(startTime,endTime,volume));
 }
 
@@ -71,10 +73,12 @@ void Record::addDrink(int startTime, int endTime, float volume) {
  * @param drink Drink The drink that was just drank.
  */
 void Record::addDrink(Drink& drink) {
-	this->addCount();
+	Serial.print("PASSED IN VOLUME BEFORE (RecordFromDrink): ");
+  Serial.println(drink.volume());
+  this->addCount();
 	this->addVolume(drink.volume());
-	Serial.print("PASSED IN VOLUME (Drink): ");
-	Serial.println(drink.volume());
+	Serial.print("PASSED IN VOLUME AFTER (RecordFromDrink): ");
+  Serial.println(drink.volume());
 	this->evalAndUpdateFastestDrink(drink);
 }
 

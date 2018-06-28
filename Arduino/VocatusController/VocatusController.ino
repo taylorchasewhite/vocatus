@@ -126,20 +126,23 @@ void loop() {
   noInterrupts(); //Disable the interrupts on the Arduino
 
   if(isDrinkOver()) {
+    Serial.println("=====Controller Loop:isDrinkOver executed====="); //@NOTE:: displaymanager testing
     recordDrinkEnd();
     printStatusReport();
     resetCurrentDrink();
   }
 
   //if the mode cycle button is pressed
-  if (modeCycleButtonVal == LOW) {
+  if (1 == 2) {
+    Serial.println("=====Controller Loop:lcdCyle executed====="); //@NOTE:: displaymanager testing
     display->DebugPrintln("  ==LCD Cycle Button pressed==");
     display->CycleCurrentValueToDisplay();
     printStatusReport();
   } 
 
   //if the reset button is pressed
-  if (resetButtonVal == LOW) {
+  if (1 == 2) {
+    Serial.println("=====Controller Loop:resetPushed executed====="); //@NOTE:: displaymanager testing
     display->DebugPrintln("  ==Reset button pushed==");
     totalReset();
     readFromStorage();
@@ -215,7 +218,6 @@ void recordDrinkEnd() {
   lifetime->addDrink(startTime,endTime,mostRecentVolume);
   tonight->addDrink(startTime,endTime,mostRecentVolume);
   
-  
   setDrinkCompletionDuration();
   
   setDrinkCompletionDateTime(); // @NOTE:: This function does nothing
@@ -289,6 +291,7 @@ boolean isDrinkOver() {
  * @param storage boolean indicating where to read the data from
  */
 void printStatusReport() {
+  Serial.println("=====Controller printstatusreport executed====="); //@NOTE:: displaymanager testing
   display->OutputData(*lifetime,*tonight,mostRecentDrinkTime,mostRecentVolume);
 }
 
