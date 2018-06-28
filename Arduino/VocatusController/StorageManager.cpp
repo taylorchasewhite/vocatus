@@ -13,15 +13,18 @@
 #include "StorageIO.h"
 #include "Record.h"
 #include "EEPROM.h"
+#include <TimeLib.h>
 
 // Addresses
-const int ADDR_DRINK_COUNT             = 0;
-const int ADDR_LIFETIME_VOLUME        = 1*sizeof(float);
-const int ADDR_FASTEST_DRINK           = 2*sizeof(float);
+const int ADDR_DRINK_COUNT              = 0;
+const int ADDR_LIFETIME_VOLUME          = 1*sizeof(float);
+const int ADDR_FASTEST_DRINK            = 2*sizeof(float);
+const int ADDR_LIFETIME_START_TIME      = 3*sizeof(float);
 
-const int ADDR_TONIGHT_DRINK_COUNT     = 10*sizeof(float);
-const int ADDR_TONIGHT_FASTEST_DRINK   = 11*sizeof(float);
-const int ADDR_TONIGHT_VOLUME         = 12*sizeof(float);
+const int ADDR_TONIGHT_DRINK_COUNT      = 10*sizeof(float);
+const int ADDR_TONIGHT_FASTEST_DRINK    = 11*sizeof(float);
+const int ADDR_TONIGHT_VOLUME           = 12*sizeof(float);
+const int ADDR_TONIGHT_START_TIME       = 13*sizeof(float);
 
 /**
  * Copy constructor, makes an exact copy in newly allocated memory
@@ -118,6 +121,23 @@ void StorageManager::lifetimeVolume(float volume) {
   _io.storeData(ADDR_LIFETIME_VOLUME,volume); 
 }
 
+/**
+ * Get the start time for the tonight record
+ * @return time_t the start instant for when the record started.
+ */
+time_t StorageManager::lifetimeStartTime() {
+  return _io.readFloatData(ADDR_TONIGHT_START_TIME);
+  
+}
+
+/**
+ * Store the start time for the tonight record
+ * @param startTime time_t the start instant for when this record started.
+ */
+void StorageManager::lifetimeStartTime(time_t startTime) {
+  _io.storeData(ADDR_TONIGHT_START_TIME,startTime);
+}
+
 /**************
  * Tonight
  **************/
@@ -165,6 +185,23 @@ float StorageManager::tonightVolume() {
  */
 void StorageManager::tonightVolume(float volume) { 
   _io.storeData(ADDR_TONIGHT_VOLUME,volume); 
+}
+
+/**
+ * Get the start time for the tonight record
+ * @return time_t the start instant for when the record started.
+ */
+time_t StorageManager::tonightStartTime() {
+  return _io.readFloatData(ADDR_TONIGHT_START_TIME);
+  
+}
+
+/**
+ * Store the start time for the tonight record
+ * @param startTime time_t the start instant for when this record started.
+ */
+void StorageManager::tonightStartTime(time_t startTime) {
+  _io.storeData(ADDR_TONIGHT_START_TIME,startTime);
 }
 
 /**

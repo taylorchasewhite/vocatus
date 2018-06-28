@@ -10,6 +10,7 @@
 #include "Arduino.h"
 #include "StorageIO.h"
 #include "Record.h"
+#include <TimeLib.h>
 
 class StorageManager
 {
@@ -31,6 +32,9 @@ class StorageManager
 		float lifetimeVolume();
 		void lifetimeVolume(float volume);
 
+    time_t lifetimeStartTime();
+    void lifetimeStartTime(time_t startTime);
+
 		float tonightCount();
 		void tonightCount(float count);
 
@@ -41,6 +45,9 @@ class StorageManager
 
 		float tonightVolume();
 		void tonightVolume(float volume);
+
+    time_t tonightStartTime();
+    void tonightStartTime(time_t startTime);
 
     void storeLifetimeValues(float drinkCount,float fastestDrinkTime, float drinkVolume);
     void storeTonightValues(float drinkCount,float fastestDrinkTime, float drinkVolume);

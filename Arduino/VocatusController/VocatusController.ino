@@ -35,6 +35,7 @@
 #include "Record.h"
 #include "DisplayManager.h"
 #include "StorageManager.h"
+#include <TimeLib.h>
 
 /****************************************************************/
 /********************        Globals        *********************/
@@ -294,9 +295,25 @@ void printStatusReport() {
   Serial.print(tonight.volume());
   Serial.println(" ml");
 
+  Serial.print(month(tonight.endTime()));
+  Serial.print("/");
+  Serial.print(day(tonight.endTime()));
+  Serial.print("/");
+  Serial.print(year(tonight.endTime()));
+
+  Serial.print(" ");
+
+  Serial.print(hour(tonight.endTime()));
+  Serial.print(":");
+  Serial.println(minute(tonight.endTime()));
+
+
   Serial.print("Most Recent Drink Time: ");
   Serial.print(mostRecentDrinkTime);
   Serial.print(" ms");
+
+
+  Serial.print(hour());
 
   
   //display.OutputData(lifetime,tonight,mostRecentDrinkTime,mostRecentVolume);
@@ -313,6 +330,8 @@ void printStatusReport() {
 void readFromStorage() {
   lifetime = storage.lifetimeRecord();
   tonight = storage.tonightRecord();
+  lifetime.startTime(now());
+  tonight.startTime(now());
 }
 
 /**

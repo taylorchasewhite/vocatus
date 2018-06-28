@@ -9,12 +9,13 @@
 #define Record_h
 #include "Arduino.h"
 #include "Drink.h"
+#include <TimeLib.h>
 
 class Record
 {
   public:
   	//Record(Type type);
-	  Record(int count, float volume, int fastestTime,int startTime);
+	  Record(int count, float volume, int fastestTime,time_t startTime);
 	  Record(Record &copy);
 	  Record();
 
@@ -25,16 +26,16 @@ class Record
 	  int count();
 	  void count(int count);
 	
-  	int endTime();
-  	void endTime(int endTime);
+  	time_t endTime();
+  	void endTime(time_t endTime);
 
 	  bool evalAndUpdateFastestDrink(Drink& drink);
 
 	  float fastestTime(); 			// return the completion duration of the fastest drink
 	  Drink& fastestDrink(); 			// Same as fastest time but returns the Drink record.
 	  
-	  int startTime();
-	  void startTime(int startTime);
+	  time_t startTime();
+	  void startTime(time_t startTime);
 	
 	  int flowRate();
 
@@ -44,8 +45,8 @@ class Record
   private:
 	  int _count;
 	  Drink _fastestDrink;
-    int _endTime;
-	  int _startTime;
+    time_t _endTime;
+	  time_t _startTime;
 	  float _volume;
 };
 #endif
