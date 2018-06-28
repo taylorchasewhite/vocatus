@@ -311,25 +311,6 @@ void printStatusReport() {
   Serial.print("Most Recent Drink Time: ");
   Serial.print(mostRecentDrinkTime);
   Serial.print(" ms");
-//  Serial.println("Lifetime");
-//  Serial.println("---------");
-//  Serial.print(lifetime.count());
-//  Serial.println(" drinks");
-//
-//  Serial.print(lifetime.volume());
-//  Serial.println(" ml");
-//
-//  Serial.println("Tonight");
-//  Serial.println("---------");
-//  Serial.print(tonight.count());
-//  Serial.println(" drinks");
-//
-//  Serial.print(tonight.volume());
-//  Serial.println(" ml");
-//
-//  Serial.print("Most Recent Drink Time: ");
-//  Serial.print(mostRecentDrinkTime);
-//  Serial.print(" ms");
 
 
   Serial.print(hour());
@@ -348,9 +329,7 @@ void printStatusReport() {
  */
 void readFromStorage() {
   lifetime = storage.lifetimeRecord();
-  tonight = storage.tonightRecord();
-  lifetime.startTime(now());
-  tonight.startTime(now());
+  tonight = storage.tonightRecord();ß
 }
 
 /**
