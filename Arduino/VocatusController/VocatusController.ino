@@ -69,8 +69,6 @@ unsigned long currentDrinkCompletionInstant;
 DisplayManager display;
 StorageManager storage;
 
-//states
-bool justReset;
 
 /****************************************************************/
 /********************      Initialize       *********************/
@@ -91,8 +89,6 @@ void initGlobals() {
 
   display = *new DisplayManager(DEBUG|LCD); //set it to whatever mode(s) you want: DEBUG|STATUSBOARD|LCD
   storage = *new StorageManager();
-
-  justReset = false;
 }
 
 /**
@@ -103,6 +99,7 @@ void setup() {
   
   initGlobals();
   readFromStorage();
+
   
   pinMode(PIN_FLOW, INPUT);           
   pinMode(PIN_RESET, INPUT_PULLUP);
@@ -198,7 +195,6 @@ boolean isNewDay() {
  * Record that a drink has been completed, update any current records, storage and display to the LCD
  */
 void recordDrinkEnd() {
-  justReset = false;
   mostRecentVolume=flowCount*multiplier;
 
   lifetime.addDrink(startTime,endTime,mostRecentVolume);
@@ -215,8 +211,8 @@ void recordDrinkEnd() {
 }
 
 void resetListener() {
-    display.DebugPrintln("  ==Reset button pushed==");
-    if(!justReset){reset();} //prevent multiple resets in a row
+    display.DebugPrintln("==Reset button pushed==");
+    reset();
     printStatusReport();
 }
 
@@ -229,7 +225,6 @@ void reset() {
   resetLifetimeRecord();
 
   storeAllValues();
-  justReset = true;
 }
 
 /**
@@ -252,7 +247,7 @@ void resetCurrentDrink() {
  * This function will reset all of the relevant variables scoring drink statistics for a given night.
  */
 void resetTonightRecord() {
-  tonight = *new Record();
+  tonight.Reset();
 }
 
 /**
@@ -260,7 +255,7 @@ void resetTonightRecord() {
  * This function will reset all of the relevant variables scoring drink statistics for the device lifetime.
  */
 void resetLifetimeRecord() {
-  lifetime = *new Record();
+  lifetime.Reset();
 }
 
 
@@ -302,7 +297,6 @@ void printStatusReport() {
 //  Serial.print("Most Recent Drink Time: ");
 //  Serial.print(mostRecentDrinkTime);
 //  Serial.print(" ms");
-
   
   display.OutputData(lifetime,tonight,mostRecentDrinkTime,mostRecentVolume);
 }

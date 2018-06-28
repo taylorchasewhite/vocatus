@@ -56,6 +56,22 @@ Record::Record() {
 	_volume=0;
 }
 
+Record::~Record(){
+  delete &_count;
+  delete &_fastestDrink;
+  delete &_endTime;
+  delete &_startTime;
+  delete &_volume;
+}
+
+void Record::Reset(){
+  _count = 0;
+  _endTime = 0;
+  _startTime = 0;
+  _volume = 0.0;
+  _fastestDrink.Reset();
+}
+
 /**
  * Record the successful completion of another drink. Update the count indicating number of drinks drank,
  * the volume drank in this record's lifetime, and the evaluate if the new drink was the fastest
