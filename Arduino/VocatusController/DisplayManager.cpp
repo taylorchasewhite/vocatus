@@ -117,61 +117,71 @@ void DisplayManager::DebugPrintln(double debugText) { if(_shouldDebug()){ Serial
  * Output a standard debug message to the console with the current state of variables
  */
 void DisplayManager::_sendDebugReport(Record& lifetimeRecord, Record& tonightRecord,int mostRecentDrinkTimeVar, float mostRecentVolumeVar) {
-  DebugPrintln(LIFECOUNT_LABEL + ": " + lifetimeRecord.count() + " " + _handleSingleCase(lifetimeRecord.count(),LIFECOUNT_UNIT_SINGLE,LIFECOUNT_UNIT));
-  DebugPrintln(TONIGHTCOUNT_LABEL + ": " + tonightRecord.count() + " " + _handleSingleCase(tonightRecord.count(),TONIGHTCOUNT_UNIT_SINGLE,TONIGHTCOUNT_UNIT));
+  DebugPrintln(LIFETIME_LABEL);
+  DebugPrintln(SECTION_SEPARATOR);
+
+  DebugPrintln(lifetimeRecord.count() + " " + _handleSingleCase(lifetimeRecord.count(),LIFECOUNT_UNIT_SINGLE,LIFECOUNT_UNIT));
   DebugPrintln(LIFESPEED_LABEL + ": " + lifetimeRecord.fastestTime() + " " + LIFESPEED_UNIT);
-  DebugPrintln(TONIGHTSPEED_LABEL + ": " + tonightRecord.fastestTime() + " " + TONIGHTSPEED_UNIT);
-  DebugPrintln(LASTSPEED_LABEL + ": " + mostRecentDrinkTimeVar + " " + LASTSPEED_UNIT);
   DebugPrintln(LIFEVOLUME_LABEL + ": " + lifetimeRecord.volume() + " " + LIFEVOLUME_UNIT);
+  
+  DebugPrintln(TONIGHT_LABEL);
+  DebugPrintln(SECTION_SEPARATOR);
+    
+  DebugPrintln(TONIGHT_LABEL + ": " + tonightRecord.count() + " " + _handleSingleCase(tonightRecord.count(),TONIGHTCOUNT_UNIT_SINGLE,TONIGHTCOUNT_UNIT));
+  DebugPrintln(TONIGHTSPEED_LABEL + ": " + tonightRecord.fastestTime() + " " + TONIGHTSPEED_UNIT);
   DebugPrintln(TONIGHTVOLUME_LABEL + ": " + tonightRecord.volume() + " " + TONIGHTVOLUME_UNIT);
+
+  DebugPrintln(LASTSPEED_LABEL + ": " + mostRecentDrinkTimeVar + " " + LASTSPEED_UNIT);
   DebugPrintln(LASTVOLUME_LABEL + ": " + mostRecentVolumeVar + " " + LASTVOLUME_UNIT);
+  
 }
 
 void DisplayManager::_sendSerialDebugReport(Record& lifetimeRecord, Record& tonightRecord,const int mostRecentDrinkTimeVar, const float mostRecentVolumeVar) {
-  Serial.print(LIFECOUNT_LABEL);
-  Serial.print(": ");
+  Serial.println("");
+  Serial.println(LIFETIME_LABEL);
+  Serial.println(SECTION_SEPARATOR);
+  
   Serial.print(lifetimeRecord.count());
   Serial.print(" ");
   Serial.println(_handleSingleCase(lifetimeRecord.count(),LIFECOUNT_UNIT_SINGLE,LIFECOUNT_UNIT));
 
-  Serial.print(TONIGHTCOUNT_LABEL);
-  Serial.print(": ");
-  Serial.print(tonightRecord.count());
+  Serial.print(lifetimeRecord.volume());
   Serial.print(" ");
-  Serial.println(_handleSingleCase(tonightRecord.count(),TONIGHTCOUNT_UNIT_SINGLE,TONIGHTCOUNT_UNIT));
-  
-  Serial.print(LIFESPEED_LABEL);
-  Serial.print(": ");
+  Serial.print(GENERIC_TOTAL);
+  Serial.print(" ");
+  Serial.println(LIFEVOLUME_UNIT);
+
   Serial.print(lifetimeRecord.fastestTime());
   Serial.print(" ");
   Serial.println(LIFESPEED_UNIT);
+
+  Serial.println("");
+
+  Serial.println(TONIGHT_LABEL);
+  Serial.println(SECTION_SEPARATOR);
   
-  Serial.print(TONIGHTSPEED_LABEL);
-  Serial.print(": ");
+  Serial.print(tonightRecord.count());
+  Serial.print(" ");
+  Serial.println(_handleSingleCase(tonightRecord.count(),TONIGHTCOUNT_UNIT_SINGLE,TONIGHTCOUNT_UNIT));
+
+  Serial.print(tonightRecord.volume());
+  Serial.print(" ");
+  Serial.print(GENERIC_TOTAL);
+  Serial.print(" ");
+  Serial.println(TONIGHTVOLUME_UNIT);
+  
   Serial.print(tonightRecord.fastestTime());
   Serial.print(" ");
   Serial.println(TONIGHTSPEED_UNIT);
-  
-  Serial.print(LASTSPEED_LABEL);
-  Serial.print(": ");
+  Serial.println("");
+
+  Serial.println("Last Drink");
+  Serial.println(SECTION_SEPARATOR);
+
   Serial.print(mostRecentDrinkTimeVar);
   Serial.print(" ");
   Serial.println(LASTSPEED_UNIT);
-  
-  Serial.print(LIFEVOLUME_LABEL);
-  Serial.print(": ");
-  Serial.print(lifetimeRecord.volume());
-  Serial.print(" ");
-  Serial.println(LIFEVOLUME_UNIT);
-  
-  Serial.print(TONIGHTVOLUME_LABEL);
-  Serial.print(": ");
-  Serial.print(tonightRecord.volume());
-  Serial.print(" ");
-  Serial.println(TONIGHTVOLUME_UNIT);
 
-  Serial.print(LASTVOLUME_LABEL);
-  Serial.print(": ");
   Serial.print(mostRecentVolumeVar);
   Serial.print(" ");
   Serial.println(LASTVOLUME_UNIT);
@@ -254,12 +264,12 @@ void DisplayManager::_sendToLcd(Record& lifetimeRecord, Record& tonightRecord,in
   //use the current mode to determine what to show on the LCD
   switch(_currentValueToDisplay) {
     case LIFECOUNT:
-      toDisplayLabel = LIFECOUNT_LABEL;
+      toDisplayLabel = LIFETIME_LABEL;
       toDisplayValue = lifetimeRecord.count();
       toDisplayUnit  = _handleSingleCase(lifetimeRecord.count(),LIFECOUNT_UNIT_SINGLE,LIFECOUNT_UNIT); 
       break;
     case TONIGHTCOUNT:
-      toDisplayLabel = TONIGHTCOUNT_LABEL;
+      toDisplayLabel = TONIGHT_LABEL;
       toDisplayValue = tonightRecord.count();
       toDisplayUnit  = _handleSingleCase(tonightRecord.count(),TONIGHTCOUNT_UNIT_SINGLE,TONIGHTCOUNT_UNIT);
       break;

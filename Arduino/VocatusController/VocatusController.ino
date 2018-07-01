@@ -88,7 +88,7 @@ void initGlobals() {
   tonight = *new Record();
   lifetime = *new Record();
 
-  display = *new DisplayManager(LCD); //set it to whatever mode(s) you want: DEBUG|STATUSBOARD|LCD
+  display = *new DisplayManager(DEBUG); //set it to whatever mode(s) you want: DEBUG|STATUSBOARD|LCD
   storage = *new StorageManager();
 }
 
