@@ -32,7 +32,7 @@ Record::Record(int count, float volume, int fastestTime,time_t startTime) {
   _volume=0;
 	this->addVolume(volume);
 	_fastestDrink=*new Drink(fastestTime);
-	_startTime=now();
+	_startTime=startTime;//now();
 }
 
 /**
@@ -93,6 +93,7 @@ void Record::addDrink(int startTime, int endTime, float volume) {
  * @param drink Drink The drink that was just drank.
  */
 void Record::addDrink(Drink& drink) {
+  _lastDrink = drink;
 	this->addCount();
 	this->addVolume(drink.volume());
 	this->evalAndUpdateFastestDrink(drink);

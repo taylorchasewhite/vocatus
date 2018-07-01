@@ -37,6 +37,8 @@ class Record
 
 	  float fastestTime(); 			// return the completion duration of the fastest drink
 	  Drink& fastestDrink(); 			// Same as fastest time but returns the Drink record.
+
+    Drink& lastDrink();
 	  
 	  time_t startTime();
 	  void startTime(time_t startTime);
@@ -49,6 +51,7 @@ class Record
   private:
 	  int _count;
 	  Drink _fastestDrink;
+    Drink _lastDrink;
     time_t _endTime;
 	  time_t _startTime;
 	  float _volume;
