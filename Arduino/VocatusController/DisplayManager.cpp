@@ -138,7 +138,9 @@ void DisplayManager::_sendDebugReport(Record& lifetimeRecord, Record& tonightRec
 
 void DisplayManager::_sendSerialDebugReport(Record& lifetimeRecord, Record& tonightRecord,const int mostRecentDrinkTimeVar, const float mostRecentVolumeVar) {
   Serial.println("");
-  Serial.println(LIFETIME_LABEL);
+  Serial.print(LIFETIME_LABEL);
+  Serial.print(" - ");
+  Serial.println(lifetimeRecord.startTimeString());
   Serial.println(SECTION_SEPARATOR);
   
   Serial.print(lifetimeRecord.count());
@@ -157,7 +159,9 @@ void DisplayManager::_sendSerialDebugReport(Record& lifetimeRecord, Record& toni
 
   Serial.println("");
 
-  Serial.println(TONIGHT_LABEL);
+  Serial.print(TONIGHT_LABEL);
+  Serial.print(" - ");
+  Serial.println(tonightRecord.startTimeString());
   Serial.println(SECTION_SEPARATOR);
   
   Serial.print(tonightRecord.count());
@@ -178,13 +182,13 @@ void DisplayManager::_sendSerialDebugReport(Record& lifetimeRecord, Record& toni
   Serial.println("Last Drink");
   Serial.println(SECTION_SEPARATOR);
 
-  Serial.print(mostRecentDrinkTimeVar);
-  Serial.print(" ");
-  Serial.println(LASTSPEED_UNIT);
-
   Serial.print(mostRecentVolumeVar);
   Serial.print(" ");
   Serial.println(LASTVOLUME_UNIT);
+
+  Serial.print(mostRecentDrinkTimeVar);
+  Serial.print(" ");
+  Serial.println(LASTSPEED_UNIT);
 }
 
 /****************************************************************/

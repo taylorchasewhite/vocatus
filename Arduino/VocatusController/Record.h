@@ -41,6 +41,7 @@ class Record
     Drink& lastDrink();
 	  
 	  time_t startTime();
+	  String startTimeString();
 	  void startTime(time_t startTime);
 	
 	  int flowRate();
@@ -56,4 +57,6 @@ class Record
 	  time_t _startTime;
 	  float _volume;
 };
+
+String _dateString(time_t dateString);
 #endif

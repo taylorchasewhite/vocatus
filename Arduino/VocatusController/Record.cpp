@@ -11,6 +11,7 @@
 #include "Record.h"
 #include "Drink.h"
 #include <TimeLib.h>
+#include <CStringBuilder.h>
 
 //@NOTE:: Not sold on variable naming convention; makes it confusing to parse the code
 //examples: count(), startTime(), endTime()
@@ -32,7 +33,12 @@ Record::Record(int count, float volume, int fastestTime,time_t startTime) {
   _volume=0;
 	this->addVolume(volume);
 	_fastestDrink=*new Drink(fastestTime);
-	_startTime=startTime;//now();
+  if (startTime==0) {
+    _startTime=now(); 
+  }
+  else {
+    _startTime=startTime;
+  }
 }
 
 /**
@@ -176,6 +182,16 @@ Drink& Record::fastestDrink() { // Same as fastest time but returns the Drink re
  */
 time_t Record::startTime() {
 	return _startTime;
+}
+
+String Record::startTimeString() {
+  return _dateString(_startTime);
+}
+
+String _dateString(time_t dateTime) {
+  String returnString = String(monthStr(month(dateTime)));
+  returnString+=String(" ") + String(day(dateTime)) + String(", ") + String(year(dateTime));
+  return returnString;
 }
 
 /**
