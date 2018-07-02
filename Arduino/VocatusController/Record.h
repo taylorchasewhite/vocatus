@@ -37,8 +37,11 @@ class Record
 
 	  float fastestTime(); 			// return the completion duration of the fastest drink
 	  Drink& fastestDrink(); 			// Same as fastest time but returns the Drink record.
+
+    Drink& lastDrink();
 	  
 	  time_t startTime();
+	  String startTimeString();
 	  void startTime(time_t startTime);
 	
 	  int flowRate();
@@ -49,8 +52,11 @@ class Record
   private:
 	  int _count;
 	  Drink _fastestDrink;
+    Drink _lastDrink;
     time_t _endTime;
 	  time_t _startTime;
 	  float _volume;
 };
+
+String _dateString(time_t dateString);
 #endif
