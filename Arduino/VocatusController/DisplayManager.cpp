@@ -7,7 +7,7 @@
 #include "Arduino.h"
 #include "DisplayManager.h"
 #include <LiquidCrystal.h>
-#include <Time.h>
+#include <TimeLib.h>
 
 const int rs = 7, en = 8, d4 = 9, d5 = 10, d6 = 11, d7 = 12;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
