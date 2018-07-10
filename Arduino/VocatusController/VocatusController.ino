@@ -35,6 +35,7 @@
 #include "Record.h"
 #include "DisplayManager.h"
 #include "StorageManager.h"
+#include "TimeManager.h"
 #include <TimeLib.h>
 
 /****************************************************************/
@@ -69,6 +70,7 @@ unsigned long currentDrinkCompletionInstant;
 // I/O Controls
 DisplayManager display;
 StorageManager storage;
+TimeManager timeManager;
 
 
 /****************************************************************/
@@ -83,13 +85,14 @@ void initGlobals() {
 
   flowCount = 0;
   prevFlowCount = -1;
-  
-  //initialize all tracking variables to 0 in case they are not read from storage
-  tonight = *new Record();
-  lifetime = *new Record();
 
   display = *new DisplayManager(DEBUG); //set it to whatever mode(s) you want: DEBUG|STATUSBOARD|LCD
   storage = *new StorageManager();
+  timeManager = *new TimeManager(10); // TODO Allow different initialization modes like DisplayManager
+
+  //initialize all tracking variables to 0 in case they are not read from storage
+  tonight = *new Record();
+  lifetime = *new Record();
 }
 
 /**
@@ -122,7 +125,7 @@ void loop() {
   interrupts();   //Enables interrupts on the Arduino
   delay (1000);   //Wait 1 second 
   noInterrupts(); //Disable the interrupts on the Arduino
-
+  timeManager.manageTime();
   if(isDrinkOver()) {
     recordDrinkEnd();
     printStatusReport();
