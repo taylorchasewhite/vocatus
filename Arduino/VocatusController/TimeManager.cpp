@@ -18,22 +18,32 @@
  */
 TimeManager::TimeManager(TimeManager & copy) {
   // TODO: Write
-  _initialize();
+  this->_initialize(10);
 }
 
 /**
- * Default constructor, used to allocate space when defining members. 
- * Sets all values to null, 0, or other non-meaningful data.
+ * Constructor that takes a variable number of seconds to
+ * alternate the frequency of the sync request
+ * @param int seconds the number of seconds between sync requests
+ */
+TimeManager::TimeManager(int seconds) {
+  this->_initialize(seconds);
+}
+
+/**
+ * Default constructor, defaults to ten seconds between sync requests
  */
 TimeManager::TimeManager() {
-  _initialize();
+	this->_initialize(10);
 }
 
 /**
  * Initialize the TimeManager by setting up the sync function
  */
-void TimeManager::_initialize() {
+void TimeManager::_initialize(int seconds) {
 	setSyncProvider(_requestSync);  //set function to call when sync required	
+	setSyncInterval(seconds);
+	pinMode(13, OUTPUT);
 	Serial.println("Waiting for sync message");
 }
 
@@ -76,7 +86,7 @@ void TimeManager::_printDigits(int digits){
 
 void TimeManager::_processSyncMessage() {
   unsigned long pctime;
-  const unsigned long DEFAULT_TIME = 757036800; // Dec 28, 1993
+  const unsigned long DEFAULT_TIME = 757036800; // Dec 28, 1993 - Jessie's birthday
 
   if(Serial.find(TIME_HEADER)) {
      pctime = Serial.parseInt();

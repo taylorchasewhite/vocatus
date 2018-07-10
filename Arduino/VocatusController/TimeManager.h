@@ -17,10 +17,11 @@ class TimeManager
   public:
   	TimeManager(TimeManager & copy);
 	TimeManager();
+	TimeManager(int seconds);
 	void manageTime();
 	void digitalClockDisplay();
   private:
-	void _initialize();
+	void _initialize(int seconds);
 	void _printDigits(int digits);
 	void _processSyncMessage();
 
