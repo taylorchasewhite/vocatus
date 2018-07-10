@@ -99,7 +99,6 @@ void Record::addDrink(int startTime, int endTime, float volume) {
  * @param drink Drink The drink that was just drank.
  */
 void Record::addDrink(Drink& drink) {
-  delete &_lastDrink;
   _lastDrink = drink;
 	this->addCount();
 	this->addVolume(drink.volume());
