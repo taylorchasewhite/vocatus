@@ -34,22 +34,26 @@ TimeManager::TimeManager(int seconds) {
  * Default constructor, defaults to ten seconds between sync requests
  */
 TimeManager::TimeManager() {
-	this->_initialize(10);
+	//this->_initialize(10);
 }
 
 /**
  * Initialize the TimeManager by setting up the sync function
  */
 void TimeManager::_initialize(int seconds) {
+  while (!Serial) ; // Needed for Leonardo only
 	setSyncProvider(_requestSync);  //set function to call when sync required	
-	setSyncInterval(seconds);
+	//setSyncInterval(seconds);
 	pinMode(13, OUTPUT);
-	Serial.println("Waiting for sync message");
+	Serial.print("Waiting for sync message.");
+	Serial.print(" Requesting sync every ");
+	Serial.print(seconds);
+	Serial.print(" second(s).");
 }
 
 void TimeManager::manageTime() {
   if (Serial.available()) {
-    _processSyncMessage();
+    //_processSyncMessage();
   }
   if (timeStatus()!= timeNotSet) {
     digitalClockDisplay();  
@@ -84,14 +88,14 @@ void TimeManager::_printDigits(int digits){
 }
 
 
-void TimeManager::_processSyncMessage() {
+void _processSyncMessage() {
   unsigned long pctime;
   const unsigned long DEFAULT_TIME = 757036800; // Dec 28, 1993 - Jessie's birthday
-
   if(Serial.find(TIME_HEADER)) {
      pctime = Serial.parseInt();
      if( pctime >= DEFAULT_TIME) { // check the integer is a valid time (greater than Jan 1 2013)
        setTime(pctime); // Sync Arduino clock to the time received on the serial port
+	   //Serial.println(_dateString((time_t)pctime));
      }
   }
 }
