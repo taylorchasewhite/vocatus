@@ -9,6 +9,7 @@
 #define Record_h
 #include "Arduino.h"
 #include "Drink.h"
+#include "TimeManager.h" // For Display Strings
 #include <TimeLib.h>
 
 class Record
@@ -23,7 +24,7 @@ class Record
 
     void Reset();
 
-	  void addDrink(int startTime, int endTime, float volume);
+	  void addDrink(int drinkStartTime, int drinkEndTime, float drinkVolume);
 	  void addDrink(Drink& drink);
 	  void addCount();
 
@@ -57,6 +58,4 @@ class Record
 	  time_t _startTime;
 	  float _volume;
 };
-
-String _dateString(time_t dateString);
 #endif

@@ -9,6 +9,7 @@
  */
 #include "Arduino.h"
 #include "TimeManager.h"
+#include <TimeLib.h>
 
 #define TIME_HEADER  "T"   // Header tag for serial time sync message
 #define TIME_REQUEST  7    // ASCII bell character requests a time sync message 
@@ -81,9 +82,7 @@ void TimeManager::manageTime() {
 
 void TimeManager::digitalClockDisplay(){
   // digital clock display of the time
-  Serial.print(hour());
-  _printDigits(minute());
-  _printDigits(second());
+  Serial.print(_timeDisplayString(now()));
   Serial.print(" ");
   Serial.print(month());
   Serial.print("/");
@@ -93,14 +92,12 @@ void TimeManager::digitalClockDisplay(){
   Serial.println(); 
 }
 
+/**
+ * Outputs the human readable time display to the console.
+ */
 void TimeManager::_printDigits(int digits){
-  // utility function for digital clock display: prints preceding colon and leading 0
-  Serial.print(":");
-  if(digits < 10)
-    Serial.print('0');
-  Serial.print(digits);
+  Serial.print(_getDigits(digits));
 }
-
 
 void _processSyncMessage() {
   unsigned long pctime;
@@ -119,3 +116,56 @@ time_t _requestSync()
   Serial.write(TIME_REQUEST);  
   return 0; // the time will be sent later in response to serial mesg
 }
+
+/**
+ * Given a time_t struct, return a long formatted date
+ */
+String _dateString(time_t dateTime) {
+  String returnString = String(monthStr(month(dateTime)));
+  returnString+=String(" ");
+  returnString+=String(day(dateTime));
+  returnString+=String(", ");
+  returnString+=String(year(dateTime));
+  return returnString;
+}
+
+/**
+ * Utility function for time display. Prints a preceding colon and leading 0.
+ * @return String returns a human readable time string
+ */
+String _getDigits(int digits) {
+  String returnString=":";
+  
+  if(digits < 10) {
+    returnString+="0";
+  }
+  returnString+=digits;
+  return returnString;
+}
+
+/**
+ * Get a string in the format of "Month dd, yyyy hh:mm:ss"
+ * @return String the long-formatted string of a time_t object
+ */
+String _dateTimeString(time_t dateTime) {
+  String returnString;
+  returnString += _dateString(dateTime);
+  returnString += " (";
+  returnString += _timeDisplayString(dateTime);
+  returnString += ")";
+
+  return returnString;
+}
+
+/**
+ * Get a human-readable string in the format of "hh:mm:tt"
+ * @return String the display string representing a time
+ */
+String _timeDisplayString(time_t dateTime) {
+  String returnString = String(hour(dateTime));
+  returnString += String(_getDigits(minute(dateTime)));
+  returnString += String(_getDigits(second(dateTime)));
+
+  return returnString;
+}
+

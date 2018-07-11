@@ -34,10 +34,10 @@ Record::Record(int count, float volume, int fastestTime,time_t startTime) {
 	this->addVolume(volume);
 	_fastestDrink=*new Drink(fastestTime);
   if (startTime==0) {
-    _startTime=now(); 
+    this->startTime(now()); 
   }
   else {
-    _startTime=startTime;
+    this->startTime(startTime);
   }
 }
 
@@ -57,11 +57,12 @@ Record::Record(Record &copy) {
  * Sets all values to null, 0, or other non-meaningful data.
  */
 Record::Record() {
-  _count=0;
+  this->count(0);
 	//Drink* _fastestDrink; // TODO, what to do?
-	_endTime=now();
-	_startTime=now();
+	this->endTime(now());
+	this->startTime(now());
 	_volume=0;
+  this->addVolume(0);
 }
 
 /**
@@ -78,7 +79,7 @@ Record::~Record(){
 void Record::Reset(){
   _count = 0;
   _endTime = 0;
-  _startTime = 0;
+  _startTime = now();
   _volume = 0.0;
   _fastestDrink.Reset();
 }
@@ -91,8 +92,8 @@ void Record::Reset(){
  * @param endTime int the last instant of drink consumption recorded
  * @param volume float the amount of recorded liquid in this drink
  */
-void Record::addDrink(int startTime, int endTime, float volume) {
-	this->addDrink(*new Drink(startTime,endTime,volume));
+void Record::addDrink(int drinkStartTime, int drinkEndTime, float drinkVolume) {
+	this->addDrink(*new Drink(drinkStartTime,drinkEndTime,drinkVolume));
 }
 
 /**
@@ -188,13 +189,7 @@ time_t Record::startTime() {
 }
 
 String Record::startTimeString() {
-  return _dateString(_startTime);
-}
-
-String _dateString(time_t dateTime) {
-  String returnString = String(monthStr(month(dateTime)));
-  returnString+=String(" ") + String(day(dateTime)) + String(", ") + String(year(dateTime));
-  return returnString;
+  return _dateTimeString(_startTime);
 }
 
 /**

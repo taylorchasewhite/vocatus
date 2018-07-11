@@ -125,7 +125,7 @@ void loop() {
   interrupts();   //Enables interrupts on the Arduino
   delay (1000);   //Wait 1 second 
   noInterrupts(); //Disable the interrupts on the Arduino
-  timeManager.manageTime();
+  //timeManager.manageTime(); // TODO uncomment when syncing is required
   if(isDrinkOver()) {
     recordDrinkEnd();
     printStatusReport();
