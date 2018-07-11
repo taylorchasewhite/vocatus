@@ -18,6 +18,7 @@ class TimeManager
   public:
   	TimeManager(TimeManager & copy);
 	  TimeManager();
+    ~TimeManager();
 	  TimeManager(int seconds);
 	  void manageTime();
 	  void digitalClockDisplay();

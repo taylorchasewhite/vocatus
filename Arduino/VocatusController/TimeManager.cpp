@@ -15,6 +15,7 @@
 
 /**
  * Copy constructor, makes an exact copy in newly allocated memory
+ * @param copy TimeManager the TimeManager we are copying from
  */
 TimeManager::TimeManager(TimeManager & copy) {
   // TODO: Write
@@ -38,19 +39,32 @@ TimeManager::TimeManager() {
 }
 
 /**
+ * Destructor that deletes each property for the TimeManager object and ends syncing with the time provider
+ */
+TimeManager::~TimeManager() {
+  
+}
+
+/**
  * Initialize the TimeManager by setting up the sync function
  */
 void TimeManager::_initialize(int seconds) {
   while (!Serial) ; // Needed for Leonardo only
 	setSyncProvider(_requestSync);  //set function to call when sync required	
+  setTime(1531274012); // TODO: Remove when using RTC
 	//setSyncInterval(seconds);
 	pinMode(13, OUTPUT);
-	Serial.print("Waiting for sync message.");
+  
+  // TODO: Uncomment when using with RTC
+	/*Serial.print("Waiting for sync message.");
 	Serial.print(" Requesting sync every ");
 	Serial.print(seconds);
-	Serial.print(" second(s).");
+	Serial.print(" second(s).");*/
 }
 
+/**
+ * Process Sync Message
+ */
 void TimeManager::manageTime() {
   if (Serial.available()) {
     //_processSyncMessage();
@@ -71,10 +85,10 @@ void TimeManager::digitalClockDisplay(){
   _printDigits(minute());
   _printDigits(second());
   Serial.print(" ");
-  Serial.print(day());
-  Serial.print(" ");
   Serial.print(month());
-  Serial.print(" ");
+  Serial.print("/");
+  Serial.print(day());
+  Serial.print("/");
   Serial.print(year()); 
   Serial.println(); 
 }

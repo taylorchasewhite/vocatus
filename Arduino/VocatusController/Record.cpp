@@ -64,6 +64,9 @@ Record::Record() {
 	_volume=0;
 }
 
+/**
+ * Destructor that deletes each property in the record object.
+ */
 Record::~Record(){
   delete &_count;
   delete &_fastestDrink;
