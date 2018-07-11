@@ -9,6 +9,7 @@
 #define StorageIO_h
 #include "Arduino.h"
 #include "Record.h"
+#include <TimeLib.h>
 
 class StorageIO
 {
@@ -26,6 +27,7 @@ class StorageIO
 		void storeAllValues(Record& lifetime, Record& tonight);
 		void storeData(int address, float value);
 		void storeData(int address, int value);
+    void storeData(int address, time_t value);
 		void reset();
 
   private:

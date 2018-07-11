@@ -10,6 +10,8 @@
 #include "Arduino.h"
 #include "Record.h"
 #include "Drink.h"
+#include <TimeLib.h>
+#include <CStringBuilder.h>
 
 //@NOTE:: Not sold on variable naming convention; makes it confusing to parse the code
 //examples: count(), startTime(), endTime()
@@ -26,12 +28,17 @@ enum Type {
  * @param fastestTime int the fastest beer time during this record's lifetime
  * @param startTime int the start instant of this record (how long ago since it started)
  */
-Record::Record(int count, float volume, int fastestTime,int startTime) {
+Record::Record(int count, float volume, int fastestTime,time_t startTime) {
 	this->count(count);
   _volume=0;
 	this->addVolume(volume);
 	_fastestDrink=*new Drink(fastestTime);
-	//startTime(startTime);
+  if (startTime==0) {
+    _startTime=now(); 
+  }
+  else {
+    _startTime=startTime;
+  }
 }
 
 /**
@@ -42,6 +49,7 @@ Record::Record(Record &copy) {
 	this->addVolume(copy.volume());
 	_fastestDrink=*new Drink(copy.fastestTime());
 	this->count(copy.count());
+  this->startTime(copy.startTime());
 }
 
 /**
@@ -49,10 +57,10 @@ Record::Record(Record &copy) {
  * Sets all values to null, 0, or other non-meaningful data.
  */
 Record::Record() {
-	_count=0;
+  _count=0;
 	//Drink* _fastestDrink; // TODO, what to do?
-    _endTime=0;
-	_startTime=0;
+	_endTime=now();
+	_startTime=now();
 	_volume=0;
 }
 
@@ -91,10 +99,9 @@ void Record::addDrink(int startTime, int endTime, float volume) {
  * @param drink Drink The drink that was just drank.
  */
 void Record::addDrink(Drink& drink) {
+  _lastDrink = drink;
 	this->addCount();
 	this->addVolume(drink.volume());
-	Serial.print("PASSED IN VOLUME: ");
-	Serial.println(drink.volume());
 	this->evalAndUpdateFastestDrink(drink);
 }
 
@@ -124,17 +131,16 @@ void Record::count(int count) {
 /**
  * Return the time this record became inactive. If this record is a lifetime record, this should never be set.
  * If this record is a nightly record, it will be set whenever the night has been determined to be complete.
- * TODO:Should this return a datetime?
  * @return int the end time
  */
-int Record::endTime() {
+time_t Record::endTime() {
 	return _endTime;
 }
 
 /**
  * Set an end time for this record. This will essentially discontinue this record's life.
  */
-void Record::endTime(int endTime) {
+void Record::endTime(time_t endTime) {
 	_endTime=endTime;
 }
 
@@ -172,11 +178,20 @@ Drink& Record::fastestDrink() { // Same as fastest time but returns the Drink re
 
 /**
  * Get the start time that this record began tracking drink consumption. 
- * @TODO: Should this be a datetime?
  * @return int the integer value representing the start instant
  */
-int Record::startTime() {
+time_t Record::startTime() {
 	return _startTime;
+}
+
+String Record::startTimeString() {
+  return _dateString(_startTime);
+}
+
+String _dateString(time_t dateTime) {
+  String returnString = String(monthStr(month(dateTime)));
+  returnString+=String(" ") + String(day(dateTime)) + String(", ") + String(year(dateTime));
+  return returnString;
 }
 
 /**
@@ -184,7 +199,7 @@ int Record::startTime() {
  * @TODO: Should this be a datetime?
  * @param startTime int the instant this Record was created/started
  */
-void Record::startTime(int startTime) {
+void Record::startTime(time_t startTime) {
 	_startTime=startTime;
 }
 	
