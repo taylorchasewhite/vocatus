@@ -11,13 +11,14 @@
 #define TimeManager_h
 #include <TimeLib.h>
 #include "Arduino.h"
-#include "Record.h"
+#include "TimeUtility.h"
 
 class TimeManager
 {
   public:
   	TimeManager(TimeManager & copy);
 	  TimeManager();
+    ~TimeManager();
 	  TimeManager(int seconds);
 	  void manageTime();
 	  void digitalClockDisplay();

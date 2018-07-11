@@ -34,6 +34,7 @@ Drink::Drink(int startTime,int endTime, float volume) {
 	this->startTime(startTime);
 	this->endTime(endTime);
 	this->volume(volume);
+	_endInstant=now(); // assume that this is created when the drink ends TODO, don't do this; we do this now since millis does not give us the date
 }
 
 /**
@@ -44,11 +45,11 @@ Drink::Drink(int duration) {
 	this->startTime(0);
 	this->endTime(duration);
 	this->volume(0);
+  _endInstant=now(); // assume that this is created when the drink ends TODO, don't do this
 }
 
 Drink::~Drink(){
-  delete &_drinkDay;
-  delete &_drinkHour;
+  delete &_endInstant;
   delete &_endTime;
   delete &_startTime;
   delete &_volume;
@@ -76,6 +77,14 @@ int Drink::endTime() { return _endTime; }
 void Drink::endTime(int endTime) { _endTime = endTime; }
 
 /**
+ * Return back a standard time_t dateTime string
+ * @return String a human readable dateTime string
+ */
+String Drink::endTimeString() {
+  return _dateTimeString(this->_endInstant);
+}
+
+/**
  * Get the first instant drink consumption was recorded.
  * @TODO should this be a datetime?
  * @return int The first instant drink was consumed
@@ -88,6 +97,14 @@ int Drink::startTime() { return _startTime; }
  * @TODO Should this be a datetime?
  */
 void Drink::startTime(int startTime) { _startTime = startTime; }
+
+/**
+ * Return back a standard time_t dateTime string
+ * @return String a human readable dateTime string
+ */
+String Drink::startTimeString() {
+  return _dateTimeString(this->startTime());
+}
 
 /**
  * Get the rate at which this drink was consumed by the drinker.

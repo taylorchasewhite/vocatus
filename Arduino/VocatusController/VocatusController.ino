@@ -125,7 +125,7 @@ void loop() {
   interrupts();   //Enables interrupts on the Arduino
   delay (1000);   //Wait 1 second 
   noInterrupts(); //Disable the interrupts on the Arduino
-  timeManager.manageTime();
+  //timeManager.manageTime(); // TODO uncomment when syncing is required
   if(isDrinkOver()) {
     recordDrinkEnd();
     printStatusReport();
@@ -199,6 +199,7 @@ boolean isNewDay() {
  * Record that a drink has been completed, update any current records, storage and display to the LCD
  */
 void recordDrinkEnd() {
+  
   mostRecentVolume=flowCount*multiplier;
 
   lifetime.addDrink(startTime,endTime,mostRecentVolume);
@@ -282,7 +283,7 @@ boolean isDrinkOver() {
  * @param storage boolean indicating where to read the data from
  */
 void printStatusReport() {
-  display.OutputData(lifetime,tonight,mostRecentDrinkTime,mostRecentVolume);
+  display.OutputData(lifetime,tonight,lifetime.lastDrink()); //mostRecentDrinkTime,mostRecentVolume);
 }
 
 /****************************************************************/
