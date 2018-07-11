@@ -9,9 +9,6 @@
  */
 #include "Arduino.h"
 #include "Record.h"
-#include "Drink.h"
-#include <TimeLib.h>
-#include <CStringBuilder.h>
 
 //@NOTE:: Not sold on variable naming convention; makes it confusing to parse the code
 //examples: count(), startTime(), endTime()
@@ -94,6 +91,14 @@ void Record::Reset(){
  */
 void Record::addDrink(int drinkStartTime, int drinkEndTime, float drinkVolume) {
 	this->addDrink(*new Drink(drinkStartTime,drinkEndTime,drinkVolume));
+}
+
+/**
+ * Get the last drink consumed during this record's lifetime
+ * @return Drink a Drink object representing the last drink consumed
+ */
+Drink& Record::lastDrink() {
+  return this->_lastDrink;
 }
 
 /**

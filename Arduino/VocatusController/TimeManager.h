@@ -11,7 +11,7 @@
 #define TimeManager_h
 #include <TimeLib.h>
 #include "Arduino.h"
-#include "Record.h"
+#include "TimeUtility.h"
 
 class TimeManager
 {
@@ -27,10 +27,6 @@ class TimeManager
 	  void _printDigits(int digits);
 };
 
-String _timeDisplayString(time_t dateTime);
-String _dateTimeString(time_t dateTime);
-String _dateString(time_t dateTime);
-String _getDigits(int digits);
 void _processSyncMessage();
 time_t _requestSync();
 #endif

@@ -9,6 +9,7 @@
 #include "Arduino.h"
 #include "Record.h"
 #include <TimeLib.h>
+#include "TimeUtility.h"
 
 enum OutputMode {
   DEBUG       = 0x0001,  //noisy debug info output to the console
@@ -74,7 +75,7 @@ class DisplayManager
     void DebugPrint(double);
     void DebugPrintln(double);
 
-    void OutputData(Record&, Record&, int, float);
+    void OutputData(Record&, Record&, Drink&);
     void CycleCurrentValueToDisplay();
   private:
     OutputMode _outputMode;
@@ -90,13 +91,13 @@ class DisplayManager
     String _handleSingleCase(int,String,String);
     String _createDebugString(String, int, String);
     String _createDebugString(String, float, String);
-    void _sendDebugReport(Record&, Record&, int, float);
-    void _sendSerialDebugReport(Record&, Record&, int, float);
+    void _sendDebugReport(Record&, Record&, Drink&);
+    void _sendSerialDebugReport(Record&, Record&, Drink&);
     void _changeOutputMode(OutputMode);
-    String _buildComString(Record&, Record&, int, float);
-    void _sendToStatusBoard(Record&, Record&, int, float);
+    String _buildComString(Record&, Record&, Drink&);
+    void _sendToStatusBoard(Record&, Record&, Drink&);
     void _initLcd();
-    void _sendToLcd(Record&, Record&, int);
+    void _sendToLcd(Record&, Record&, Drink&);
 };
 
 #endif

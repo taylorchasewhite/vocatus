@@ -9,8 +9,10 @@
 #define Record_h
 #include "Arduino.h"
 #include "Drink.h"
-#include "TimeManager.h" // For Display Strings
+#include <CStringBuilder.h>
 #include <TimeLib.h>
+#include "TimeUtility.h"
+
 
 class Record
 {
