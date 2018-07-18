@@ -149,7 +149,7 @@ void loop() {
   resetLastState = resetReading;
   displayLastState = displayReading;
 
-  timeManager.manageTime();
+  //timeManager.manageTime();
   if(isDrinkOver()) {
     recordDrinkEnd();
     printStatusReport();
@@ -173,7 +173,6 @@ void Flow() {
  * Called when the display cycle button is pressed.
  */
 void displayChangeListener() {
-  display.DebugPrintln("  ==LCD Cycle Button pressed==");
   display.CycleCurrentValueToDisplay();
   printStatusReport();
 }
@@ -275,7 +274,6 @@ void recordDrinkEnd() {
 }
 
 void resetListener() {
-    display.DebugPrintln("==Reset button pushed==");
     reset();
     printStatusReport();
 }
