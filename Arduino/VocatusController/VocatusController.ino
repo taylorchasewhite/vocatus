@@ -117,7 +117,6 @@ void initGlobals() {
  */
 void setup() {
   Serial.begin(BITS_PER_SECOND);
-  
   initGlobals();
   readFromStorage();
 
@@ -149,7 +148,8 @@ void loop() {
   resetLastState = resetReading;
   displayLastState = displayReading;
 
-  //timeManager.manageTime();
+  timeManager.manageTime();
+  
   if(isDrinkOver()) {
     recordDrinkEnd();
     printStatusReport();

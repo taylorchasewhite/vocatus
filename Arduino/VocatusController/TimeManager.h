@@ -10,6 +10,8 @@
 #ifndef TimeManager_h
 #define TimeManager_h
 #include <TimeLib.h>
+#include <Wire.h>
+#include <DS1307RTC.h>
 #include "Arduino.h"
 #include "TimeUtility.h"
 
@@ -25,8 +27,6 @@ class TimeManager
   private:
 	  void _initialize(int seconds);
 	  void _printDigits(int digits);
-};
 
-void _processSyncMessage();
-time_t _requestSync();
+};
 #endif
