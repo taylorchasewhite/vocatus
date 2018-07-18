@@ -91,8 +91,10 @@ class DisplayManager
     String _handleSingleCase(int,String,String);
     String _createDebugString(String, int, String);
     String _createDebugString(String, float, String);
+
     void _sendDebugReport(Record&, Record&, Drink&);
     void _sendSerialDebugReport(Record&, Record&, Drink&);
+
     void _changeOutputMode(OutputMode);
     String _buildComString(Record&, Record&, Drink&);
     void _sendToStatusBoard(Record&, Record&, Drink&);

@@ -13,11 +13,6 @@
 //@NOTE:: Not sold on variable naming convention; makes it confusing to parse the code
 //examples: count(), startTime(), endTime()
 
-enum Type {
-	LifeTime,
-	Tonight
-} recordType;
-
 /**
  * Initialize a new record with just count,volume and fastestTime.
  * @param count int the number of drinks this record should have
