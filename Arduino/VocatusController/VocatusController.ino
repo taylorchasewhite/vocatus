@@ -100,7 +100,6 @@ void initGlobals() {
  */
 void setup() {
   Serial.begin(BITS_PER_SECOND);
-  
   initGlobals();
   readFromStorage();
 
@@ -125,7 +124,7 @@ void loop() {
   interrupts();   //Enables interrupts on the Arduino
   delay (1000);   //Wait 1 second 
   noInterrupts(); //Disable the interrupts on the Arduino
-  //timeManager.manageTime(); // TODO uncomment when syncing is required
+  timeManager.manageTime(); // TODO uncomment when syncing is required
   if(isDrinkOver()) {
     recordDrinkEnd();
     printStatusReport();

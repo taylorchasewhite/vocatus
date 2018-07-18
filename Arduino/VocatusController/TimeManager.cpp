@@ -9,10 +9,10 @@
  */
 #include "Arduino.h"
 #include "TimeManager.h"
-#include <TimeLib.h>
 
 #define TIME_HEADER  "T"   // Header tag for serial time sync message
 #define TIME_REQUEST  7    // ASCII bell character requests a time sync message 
+
 
 /**
  * Copy constructor, makes an exact copy in newly allocated memory
@@ -36,7 +36,6 @@ TimeManager::TimeManager(int seconds) {
  * Default constructor, defaults to ten seconds between sync requests
  */
 TimeManager::TimeManager() {
-	//this->_initialize(10);
 }
 
 /**
@@ -50,33 +49,31 @@ TimeManager::~TimeManager() {
  * Initialize the TimeManager by setting up the sync function
  */
 void TimeManager::_initialize(int seconds) {
-  while (!Serial) ; // Needed for Leonardo only
-	setSyncProvider(_requestSync);  //set function to call when sync required	
-  setTime(1531274012); // TODO: Remove when using RTC
-	//setSyncInterval(seconds);
-	pinMode(13, OUTPUT);
+  while (!Serial) ; // wait until Arduino Serial Monitor opens
+  setSyncProvider(RTC.get);   // the function to get the time from the RTC
   
-  // TODO: Uncomment when using with RTC
-	/*Serial.print("Waiting for sync message.");
-	Serial.print(" Requesting sync every ");
-	Serial.print(seconds);
-	Serial.print(" second(s).");*/
+  if(timeStatus()!= timeSet) {
+     Serial.println("Unable to sync with the RTC");
+  }
+  else {
+     Serial.println("RTC has set the system time");  
+     this->digitalClockDisplay();
+  }
 }
 
 /**
  * Process Sync Message
  */
 void TimeManager::manageTime() {
-  if (Serial.available()) {
-    //_processSyncMessage();
-  }
-  if (timeStatus()!= timeNotSet) {
-    digitalClockDisplay();  
-  }
   if (timeStatus() == timeSet) {
     digitalWrite(13, HIGH); // LED on if synced
-  } else {
+    digitalClockDisplay();
+  } 
+  else {
     digitalWrite(13, LOW);  // LED off if needs refresh
+    Serial.println("The time has not been set.  Please run the Time");
+    Serial.println("TimeRTCSet example, or DS1307RTC SetTime example.");
+    Serial.println();
   }
 }
 
@@ -99,21 +96,4 @@ void TimeManager::_printDigits(int digits){
   Serial.print(_getDigits(digits));
 }
 
-void _processSyncMessage() {
-  unsigned long pctime;
-  const unsigned long DEFAULT_TIME = 757036800; // Dec 28, 1993 - Jessie's birthday
-  if(Serial.find(TIME_HEADER)) {
-     pctime = Serial.parseInt();
-     if( pctime >= DEFAULT_TIME) { // check the integer is a valid time (greater than Jan 1 2013)
-       setTime(pctime); // Sync Arduino clock to the time received on the serial port
-	   //Serial.println(_dateString((time_t)pctime));
-     }
-  }
-}
-
-time_t _requestSync()
-{
-  Serial.write(TIME_REQUEST);  
-  return 0; // the time will be sent later in response to serial mesg
-}
 
