@@ -67,7 +67,7 @@ const unsigned long SECONDS_IN_DAY = 86400;
 unsigned long lastDrinkCompletionInstant; //@NOTE:: why are all of these globals?
 unsigned long currentDrinkCompletionInstant;
 
-const unsigned long DEBOUNCE_BUFFER = 50;
+const unsigned long DEBOUNCE_BUFFER = 50; //time to wait for a "bounce", e.g. machine error reading a single press as multiple
 unsigned long resetLastDebounce;
 unsigned long displayLastDebounce;
 
@@ -135,6 +135,7 @@ void setup() {
 /********************         Core          *********************/
 /****************************************************************/
 void loop() {
+  //handle button presses
   int resetReading = digitalRead(PIN_RESET);
   int displayReading = digitalRead(PIN_CYCLE_DISPLAY);
 
@@ -172,26 +173,26 @@ void Flow() {
  * Called when the display cycle button is pressed.
  */
 void displayChangeListener() {
-  Serial.println("====Executed LCDListener====");
-    //display.DebugPrintln("  ==LCD Cycle Button pressed==");
-    //display.CycleCurrentValueToDisplay();
-    //printStatusReport();
+  display.DebugPrintln("  ==LCD Cycle Button pressed==");
+  display.CycleCurrentValueToDisplay();
+  printStatusReport();
 }
 
 /**
  * Called when the display cycle button is pressed.
  */
 
-bool checkDebounce(int newReading, int buttonState, int lastState, unsigned long lastDebounce) {
+bool checkDebounce(int newReading, int& buttonState, int lastState, unsigned long& lastDebounce) {
   bool returnValue = false;
   
   if(newReading != lastState) {
     lastDebounce = millis(); //reset debouncing timer
   }
+    
+  unsigned long dif = millis() - lastDebounce;
 
   //wait until the buffer period has passed
-  if((millis() - lastDebounce) > DEBOUNCE_BUFFER) {
-
+  if(dif > DEBOUNCE_BUFFER) {
     //if the state has changed
     if(newReading != buttonState) {
       buttonState = newReading;
