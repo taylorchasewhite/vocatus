@@ -56,8 +56,8 @@ float multiplier;
 float mostRecentVolume;
 
 // Timing
-Record* lifetime;
-Record*  tonight;
+Record lifetime;
+Record tonight;
 
 unsigned long endTime;
 unsigned long startTime;
@@ -90,7 +90,9 @@ TimeManager timeManager;
  * Set starting values for globals
  */
 void initGlobals() {
+
   multiplier = 3.05; //TCW: 2.647  Chode: 3.05
+
   flowCount = 0;
 
   display = *new DisplayManager(DEBUG|LCD); //set it to whatever mode(s) you want: DEBUG|STATUSBOARD|LCD
@@ -98,8 +100,8 @@ void initGlobals() {
   timeManager = *new TimeManager(10); // TODO Allow different initialization modes like DisplayManager
 
   //initialize all tracking variables to 0 in case they are not read from storage
-  tonight = new Record();
-  lifetime = new Record();
+  tonight = *new Record();
+  lifetime = *new Record();
 
   //start the button states at their expected starting values
   resetLastState = HIGH;
@@ -118,11 +120,12 @@ void setup() {
   
   initGlobals();
   readFromStorage();
+
   
   pinMode(PIN_FLOW, INPUT);           
   pinMode(PIN_RESET, INPUT_PULLUP);
   pinMode(PIN_CYCLE_DISPLAY, INPUT_PULLUP);
-
+  
   attachInterrupt(digitalPinToInterrupt(PIN_FLOW), Flow, RISING);
 
   printStatusReport();
@@ -148,7 +151,6 @@ void loop() {
 
   //timeManager.manageTime();
   if(isDrinkOver()) {
-    Serial.println("=====Controller Loop:isDrinkOver executed====="); //@NOTE:: displaymanager testing
     recordDrinkEnd();
     printStatusReport();
     resetCurrentDrink();
@@ -164,7 +166,7 @@ void Flow() {
   }
   flowCount++;
   drinkPulse();
-  display->DebugPrintln(flowCount);
+  display.DebugPrintln(flowCount);
 }
 
 /**
@@ -234,9 +236,9 @@ void drinkPulse() {
 void setDrinkCompletionDuration() {
   mostRecentDrinkTime = endTime-startTime;
   //@NOTE:: we should be using globals unless there's a reason to read from memory (globals can exist in the storage class, that's fine; but it looks like the plan is to have them read from memory every time)
-  //if ((mostRecentDrinkTime < storage.lifetimeFastestTime()) || (storage.lifetimeFastestTime()<=0)) {//@NOTE:: Temp storage testing
-    //storage.lifetimeFastestTime(mostRecentDrinkTime); //@NOTE:: Temp storage testing
-  //} //@NOTE:: Temp storage testing
+  if ((mostRecentDrinkTime < storage.lifetimeFastestTime()) || (storage.lifetimeFastestTime()<=0)) {
+    storage.lifetimeFastestTime(mostRecentDrinkTime);
+  }
 }
 
 /**
@@ -255,10 +257,11 @@ boolean isNewDay() {
  * Record that a drink has been completed, update any current records, storage and display to the LCD
  */
 void recordDrinkEnd() {
+  
   mostRecentVolume=flowCount*multiplier;
 
-  lifetime->addDrink(startTime,endTime,mostRecentVolume);
-  //tonight->addDrink(startTime,endTime,mostRecentVolume);
+  lifetime.addDrink(startTime,endTime,mostRecentVolume);
+  tonight.addDrink(startTime,endTime,mostRecentVolume);
   
   setDrinkCompletionDuration();
   

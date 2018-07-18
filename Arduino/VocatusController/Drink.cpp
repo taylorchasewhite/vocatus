@@ -18,7 +18,7 @@
 Drink::Drink() {
 	this->startTime(0);
 	this->endTime(0);
-	this->setVolume(0.0);
+	this->volume(0);
 }
 
 /**

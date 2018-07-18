@@ -16,13 +16,11 @@ LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 /***********************   Constructors   ***********************/
 /****************************************************************/
 DisplayManager::DisplayManager(OutputMode myOutputMode) {
-  Serial.println("=====DisplayManager parameterized constructor executed====="); //@NOTE:: displaymanager testing
   this->_changeOutputMode(myOutputMode);
   this->_currentValueToDisplay = LIFECOUNT;
 }
 
 DisplayManager::DisplayManager() {
-  Serial.println("=====DisplayManager default constructor executed====="); //@NOTE:: displaymanager testing
   this->_changeOutputMode(DEBUG);
   this->_currentValueToDisplay = LIFECOUNT;
 }
@@ -36,7 +34,6 @@ DisplayManager::DisplayManager() {
  * updates the boolean state values to make sure they are always correct
  */
 void DisplayManager::_changeOutputMode(OutputMode newOutputMode) {
-  //Serial.println("=====DisplayManager changeOutputMode executed====="); //@NOTE:: displaymanager testing
   //set new modes
   _outputMode = newOutputMode;
   _isDebugEnabled = ((newOutputMode&DEBUG) == DEBUG);
@@ -53,11 +50,7 @@ void DisplayManager::_changeOutputMode(OutputMode newOutputMode) {
  * E.g. it says "1 drink" instead of "1 drinks"
  */
 String DisplayManager::_handleSingleCase(float value,String stringIfSingle, String stringIfNotSingle) { 
-  if(value==1.0)
-  {
-    return(stringIfSingle);
-  }
-  return(stringIfNotSingle);
+  return (_handleSingleCase((int)value, stringIfSingle, stringIfNotSingle));
 }
 String DisplayManager::_handleSingleCase(int value,String stringIfSingle,String stringIfNotSingle) {
   if(value==1)
@@ -71,7 +64,6 @@ String DisplayManager::_handleSingleCase(int value,String stringIfSingle,String 
  * Setup code to run when initializing the display manager
  */
 void DisplayManager::_initDebug() {
-  //Serial.println("=====DisplayManager initDebug executed====="); //@NOTE:: displaymanager testing
   DebugPrintln("Welcome to Vocatus!");
   DebugPrintln("----------------------------------");
 }
@@ -81,7 +73,6 @@ void DisplayManager::_initDebug() {
  */
 void DisplayManager::OutputData(Record& lifetimeRecord, Record& tonightRecord,Drink& lastDrink)
 {
-  Serial.println("=====DisplayManager outputData executed====="); //@NOTE:: displaymanager testing
   if(_isDebugEnabled) {
     _sendSerialDebugReport(lifetimeRecord,tonightRecord,lastDrink);
   }
@@ -109,30 +100,18 @@ bool DisplayManager::_shouldDebug() {
  * Methods used to print debug messages
  * First checks whether it is appropriate to send text to the serial monitor
  */
-//void DisplayManager::DebugPrint(const String debugText) { if(_shouldDebug()){ Serial.print(debugText); }}
-//void DisplayManager::DebugPrintln(const String debugText) { if(_shouldDebug()){ Serial.println(debugText); }}
-//void DisplayManager::DebugPrint(const int debugText) { if(_shouldDebug()){ Serial.print(debugText); }}
-//void DisplayManager::DebugPrintln(const int debugText) { if(_shouldDebug()){ Serial.println(debugText); }}
-//void DisplayManager::DebugPrint(const long debugText) { if(_shouldDebug()){ Serial.print(debugText); }}
-//void DisplayManager::DebugPrintln(const long debugText) { if(_shouldDebug()){ Serial.println(debugText); }}
-//void DisplayManager::DebugPrint(const unsigned long debugText) { if(_shouldDebug()){ Serial.print(debugText); }}
-//void DisplayManager::DebugPrintln(const unsigned long debugText) { if(_shouldDebug()){ Serial.println(debugText); }}
-//void DisplayManager::DebugPrint(const float debugText) { if(_shouldDebug()){ Serial.print(debugText); }}
-//void DisplayManager::DebugPrintln(const float debugText) { if(_shouldDebug()){ Serial.println(debugText); }}
-//void DisplayManager::DebugPrint(const double debugText) { if(_shouldDebug()){ Serial.print(debugText); }}
-//void DisplayManager::DebugPrintln(const double debugText) { if(_shouldDebug()){ Serial.println(debugText); }}
-void DisplayManager::DebugPrint(String debugText) { if(_shouldDebug()){ Serial.print("#");Serial.print(debugText);Serial.print("%"); }}
-void DisplayManager::DebugPrintln(String debugText) { if(_shouldDebug()){ Serial.print("#");Serial.println(debugText);Serial.print("%"); }}
-void DisplayManager::DebugPrint(int debugText) { if(_shouldDebug()){ Serial.print("^");Serial.print(debugText);Serial.print("%"); }}
-void DisplayManager::DebugPrintln(int debugText) { if(_shouldDebug()){ Serial.print("^");Serial.println(debugText);Serial.print("%"); }}
-void DisplayManager::DebugPrint(long debugText) { if(_shouldDebug()){ Serial.print("$");Serial.print(debugText);Serial.print("%"); }}
-void DisplayManager::DebugPrintln(long debugText) { if(_shouldDebug()){ Serial.print("$");Serial.println(debugText);Serial.print("%"); }}
-void DisplayManager::DebugPrint(unsigned long debugText) { if(_shouldDebug()){ Serial.print("@");Serial.print(debugText);Serial.print("%"); }}
-void DisplayManager::DebugPrintln(unsigned long debugText) { if(_shouldDebug()){ Serial.print("@");Serial.println(debugText);Serial.print("%"); }}
-void DisplayManager::DebugPrint(float debugText) { if(_shouldDebug()){ Serial.print("!");Serial.print(debugText);Serial.print("%"); }}
-void DisplayManager::DebugPrintln(float debugText) { if(_shouldDebug()){ Serial.print("!");Serial.println(debugText);Serial.print("%"); }}
-void DisplayManager::DebugPrint(double debugText) { if(_shouldDebug()){ Serial.print("+");Serial.print(debugText);Serial.print("%"); }}
-void DisplayManager::DebugPrintln(double debugText) { if(_shouldDebug()){ Serial.print("+");Serial.println(debugText);Serial.print("%"); }}
+void DisplayManager::DebugPrint(String debugText) { if(_shouldDebug()){ Serial.print(debugText); }}
+void DisplayManager::DebugPrintln(String debugText) { if(_shouldDebug()){ Serial.println(debugText); }}
+void DisplayManager::DebugPrint(int debugText) { if(_shouldDebug()){ Serial.print(debugText); }}
+void DisplayManager::DebugPrintln(int debugText) { if(_shouldDebug()){ Serial.println(debugText); }}
+void DisplayManager::DebugPrint(long debugText) { if(_shouldDebug()){ Serial.print(debugText); }}
+void DisplayManager::DebugPrintln(long debugText) { if(_shouldDebug()){ Serial.println(debugText); }}
+void DisplayManager::DebugPrint(unsigned long debugText) { if(_shouldDebug()){ Serial.print(debugText); }}
+void DisplayManager::DebugPrintln(unsigned long debugText) { if(_shouldDebug()){ Serial.println(debugText); }}
+void DisplayManager::DebugPrint(float debugText) { if(_shouldDebug()){ Serial.print(debugText); }}
+void DisplayManager::DebugPrintln(float debugText) { if(_shouldDebug()){ Serial.println(debugText); }}
+void DisplayManager::DebugPrint(double debugText) { if(_shouldDebug()){ Serial.print(debugText); }}
+void DisplayManager::DebugPrintln(double debugText) { if(_shouldDebug()){ Serial.println(debugText); }}
 
 /**
  * Output a standard debug message to the console with the current state of variables
