@@ -8,6 +8,7 @@
 #ifndef Drink_h
 #define Drink_h
 #include "Arduino.h"
+#include "TimeUtility.h"
   
 class Drink
 {
@@ -23,9 +24,11 @@ class Drink
 	
   	int endTime();
   	void endTime(int endTime);
+    String endTimeString();
 	  
 	  int startTime();
 	  void startTime(int startTime);
+    String startTimeString(); //TODO Remove -- cannot use millis for this
 	  
 	  int flowRate();
 	  bool isFinished();
@@ -35,8 +38,7 @@ class Drink
 	  void volume(float volume);
 
   private:
-    int _drinkDay;
-    int _drinkHour;
+    time_t _endInstant;
     int _endTime;
     int _startTime;
     int _volume;

@@ -258,6 +258,7 @@ boolean isNewDay() {
  * Record that a drink has been completed, update any current records, storage and display to the LCD
  */
 void recordDrinkEnd() {
+  
   mostRecentVolume=flowCount*multiplier;
 
   lifetime.addDrink(startTime,endTime,mostRecentVolume);
@@ -340,7 +341,7 @@ boolean isDrinkOver() {
  * @param storage boolean indicating where to read the data from
  */
 void printStatusReport() {
-  display.OutputData(lifetime,tonight,mostRecentDrinkTime,mostRecentVolume);
+  display.OutputData(lifetime,tonight,lifetime.lastDrink()); //mostRecentDrinkTime,mostRecentVolume);
 }
 
 /****************************************************************/

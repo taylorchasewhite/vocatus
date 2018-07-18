@@ -71,18 +71,18 @@ void DisplayManager::_initDebug() {
 /**
  * Send info to the appropriate output
  */
-void DisplayManager::OutputData(Record& lifetimeRecord, Record& tonightRecord,int mostRecentDrinkTimeVar, float mostRecentVolumeVar)
+void DisplayManager::OutputData(Record& lifetimeRecord, Record& tonightRecord,Drink& lastDrink)
 {
   if(_isDebugEnabled) {
-    _sendSerialDebugReport(lifetimeRecord,tonightRecord,mostRecentDrinkTimeVar,mostRecentVolumeVar);
+    _sendSerialDebugReport(lifetimeRecord,tonightRecord,lastDrink);
   }
   
   if(_isStatusBoardEnabled) { 
-    _sendToStatusBoard(lifetimeRecord,tonightRecord,mostRecentDrinkTimeVar,mostRecentVolumeVar);
+    _sendToStatusBoard(lifetimeRecord,tonightRecord,lastDrink);
   }
 
   if(_isLcdEnabled) {
-    _sendToLcd(lifetimeRecord,tonightRecord,mostRecentDrinkTimeVar);
+    _sendToLcd(lifetimeRecord,tonightRecord,lastDrink);
   }
 }
 
@@ -116,7 +116,7 @@ void DisplayManager::DebugPrintln(double debugText) { if(_shouldDebug()){ Serial
 /**
  * Output a standard debug message to the console with the current state of variables
  */
-void DisplayManager::_sendDebugReport(Record& lifetimeRecord, Record& tonightRecord,int mostRecentDrinkTimeVar, float mostRecentVolumeVar) {
+void DisplayManager::_sendDebugReport(Record& lifetimeRecord, Record& tonightRecord,Drink& lastDrink) {
   DebugPrintln(LIFETIME_LABEL);
   DebugPrintln(SECTION_SEPARATOR);
 
@@ -131,12 +131,12 @@ void DisplayManager::_sendDebugReport(Record& lifetimeRecord, Record& tonightRec
   DebugPrintln(TONIGHTSPEED_LABEL + ": " + tonightRecord.fastestTime() + " " + TONIGHTSPEED_UNIT);
   DebugPrintln(TONIGHTVOLUME_LABEL + ": " + tonightRecord.volume() + " " + TONIGHTVOLUME_UNIT);
 
-  DebugPrintln(LASTSPEED_LABEL + ": " + mostRecentDrinkTimeVar + " " + LASTSPEED_UNIT);
-  DebugPrintln(LASTVOLUME_LABEL + ": " + mostRecentVolumeVar + " " + LASTVOLUME_UNIT);
+  DebugPrintln(LASTSPEED_LABEL + ": " + lastDrink.timeToFinish() + " " + LASTSPEED_UNIT);
+  DebugPrintln(LASTVOLUME_LABEL + ": " + lastDrink.volume() + " " + LASTVOLUME_UNIT);
   
 }
 
-void DisplayManager::_sendSerialDebugReport(Record& lifetimeRecord, Record& tonightRecord,const int mostRecentDrinkTimeVar, const float mostRecentVolumeVar) {
+void DisplayManager::_sendSerialDebugReport(Record& lifetimeRecord, Record& tonightRecord,Drink& lastDrink) {
   Serial.println("");
   Serial.print(LIFETIME_LABEL);
   Serial.print(" - ");
@@ -179,14 +179,15 @@ void DisplayManager::_sendSerialDebugReport(Record& lifetimeRecord, Record& toni
   Serial.println(TONIGHTSPEED_UNIT);
   Serial.println("");
 
-  Serial.println("Last Drink");
+  Serial.print("Last Drink - ");
+  Serial.println(lastDrink.endTimeString());
   Serial.println(SECTION_SEPARATOR);
 
-  Serial.print(mostRecentVolumeVar);
+  Serial.print(lastDrink.volume());
   Serial.print(" ");
   Serial.println(LASTVOLUME_UNIT);
 
-  Serial.print(mostRecentDrinkTimeVar);
+  Serial.print(lastDrink.timeToFinish());
   Serial.print(" ");
   Serial.println(LASTSPEED_UNIT);
 }
@@ -200,7 +201,7 @@ void DisplayManager::_sendSerialDebugReport(Record& lifetimeRecord, Record& toni
  * 
  * @return a semicolon delimited string containing the information to send as output
  */
-String DisplayManager::_buildComString(Record& lifetimeRecordVar, Record& tonightRecordVar,int mostRecentDrinkTimeVar, float mostRecentVolumeVar)
+String DisplayManager::_buildComString(Record& lifetimeRecordVar, Record& tonightRecordVar,Drink& lastDrink)
 {
   String toSend = "";
   String delim = ";";
@@ -213,21 +214,21 @@ String DisplayManager::_buildComString(Record& lifetimeRecordVar, Record& tonigh
   toSend += delim;
   toSend += tonightRecordVar.fastestTime();
   toSend += delim;
-  toSend += mostRecentDrinkTimeVar;
+  toSend += lastDrink.timeToFinish();
   toSend += delim;
   toSend += lifetimeRecordVar.volume();
   toSend += delim;
   toSend += tonightRecordVar.volume();
   toSend += delim;
-  toSend += mostRecentVolumeVar;
+  toSend += lastDrink.volume();
   toSend += delim;  
   
   return (toSend);
 }
 
 
-void DisplayManager::_sendToStatusBoard(Record& lifetimeRecordVar, Record& tonightRecordVar,int mostRecentDrinkTimeVar, float mostRecentVolumeVar) {
-  String comString = _buildComString(lifetimeRecordVar,tonightRecordVar,mostRecentDrinkTimeVar,mostRecentVolumeVar); 
+void DisplayManager::_sendToStatusBoard(Record& lifetimeRecordVar, Record& tonightRecordVar, Drink& lastDrink) {
+  String comString = _buildComString(lifetimeRecordVar,tonightRecordVar,lastDrink); 
   Serial.println(comString);  
 }
 
@@ -259,7 +260,7 @@ void DisplayManager::CycleCurrentValueToDisplay() {
 /**
  * Send the relevant info for display on the LCD, based on the current lcdDisplayMode
  */
-void DisplayManager::_sendToLcd(Record& lifetimeRecord, Record& tonightRecord,int mostRecentDrinkTime)
+void DisplayManager::_sendToLcd(Record& lifetimeRecord, Record& tonightRecord, Drink& lastDrink)
 {
   String toDisplayLabel = "";
   String toDisplayValue = "";
@@ -289,7 +290,7 @@ void DisplayManager::_sendToLcd(Record& lifetimeRecord, Record& tonightRecord,in
       break;
     case LASTSPEED:
       toDisplayLabel = LASTSPEED_LABEL;
-      toDisplayValue = mostRecentDrinkTime;
+      toDisplayValue = lastDrink.timeToFinish();
       toDisplayUnit  = LASTSPEED_UNIT;
       break;
     default:  //might as well have a saftey case //TODO:: do we want to remove this in the final product for less noisy errors?
