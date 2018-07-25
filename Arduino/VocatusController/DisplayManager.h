@@ -37,24 +37,26 @@ const String LIFEVOLUME_UNIT          = "mL";
 const String LIFESPEED_LABEL          = "All-Time Record";
 const String LIFESPEED_UNIT           = "ms";
 
-const String TONIGHT_LABEL       = "Tonight";
+const String TONIGHT_LABEL            = "Tonight";
 const String TONIGHTCOUNT_UNIT        = "drinks";
 const String TONIGHTCOUNT_UNIT_SINGLE = "drink";
 
 const String TONIGHTSPEED_LABEL       = "Tonight's Record";
 const String TONIGHTSPEED_UNIT        = "ms";
-const String LASTSPEED_LABEL          = "Last Drink";
-const String LASTSPEED_UNIT           = "ms";
 
 const String TONIGHTVOLUME_LABEL      = "Tonight's Volume";
 const String TONIGHTVOLUME_UNIT       = "mL";
+
+const String LAST_LABEL               = "Last Drink";
+
+const String LASTSPEED_LABEL          = "Last Drink";
+const String LASTSPEED_UNIT           = "ms";
+
 const String LASTVOLUME_LABEL         = "Last Volume";
 const String LASTVOLUME_UNIT          = "mL";
 
 const String SECTION_SEPARATOR        = "----------";
-const String GENERIC_FASTEST          = "Fastest Time ";
 const String GENERIC_TOTAL            = "total";
-const String COLON_SEPARATOR          = ": ";
 
 class DisplayManager
 {

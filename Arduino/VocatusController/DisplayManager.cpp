@@ -117,23 +117,42 @@ void DisplayManager::DebugPrintln(double debugText) { if(_shouldDebug()){ Serial
  * Output a standard debug message to the console with the current state of variables
  */
 void DisplayManager::_sendDebugReport(Record& lifetimeRecord, Record& tonightRecord,Drink& lastDrink) {
-  DebugPrintln(LIFETIME_LABEL);
-  DebugPrintln(SECTION_SEPARATOR);
+  //top separator
+  DebugPrintln(F("================================================="));
 
-  DebugPrintln(lifetimeRecord.count() + " " + _handleSingleCase(lifetimeRecord.count(),LIFECOUNT_UNIT_SINGLE,LIFECOUNT_UNIT));
-  DebugPrintln(LIFESPEED_LABEL + ": " + lifetimeRecord.fastestTime() + " " + LIFESPEED_UNIT);
-  DebugPrintln(LIFEVOLUME_LABEL + ": " + lifetimeRecord.volume() + " " + LIFEVOLUME_UNIT);
+  //Lifetime Header
+  DebugPrint(LIFETIME_LABEL + " - "); DebugPrintln(lifetimeRecord.startTimeString());
+  DebugPrintln(SECTION_SEPARATOR);     DebugPrintln(SECTION_SEPARATOR);
   
-  DebugPrintln(TONIGHT_LABEL);
-  DebugPrintln(SECTION_SEPARATOR);
-    
-  DebugPrintln(TONIGHT_LABEL + ": " + tonightRecord.count() + " " + _handleSingleCase(tonightRecord.count(),TONIGHTCOUNT_UNIT_SINGLE,TONIGHTCOUNT_UNIT));
-  DebugPrintln(TONIGHTSPEED_LABEL + ": " + tonightRecord.fastestTime() + " " + TONIGHTSPEED_UNIT);
+  DebugPrintln(lifetimeRecord.count() + " " + _handleSingleCase(lifetimeRecord.count(),LIFECOUNT_UNIT_SINGLE,LIFECOUNT_UNIT));  //Lifetime Info
+  DebugPrint(lifetimeRecord.count()); DebugPrintln(" " + _handleSingleCase(lifetimeRecord.count(),LIFECOUNT_UNIT_SINGLE,LIFECOUNT_UNIT));
+  DebugPrint(lifetimeRecord.volume()); DebugPrintln(" " + GENERIC_TOTAL + " " + LIFEVOLUME_UNIT);
+  DebugPrintln(LIFESPEED_LABEL + ": " + lifetimeRecord.fastestTime() + " " + LIFESPEED_UNIT);     DebugPrintln(LIFESPEED_LABEL + ": " + lifetimeRecord.fastestTime() + " " + LIFESPEED_UNIT);
+  DebugPrintln(LIFEVOLUME_LABEL + ": " + lifetimeRecord.volume() + " " + LIFEVOLUME_UNIT);  DebugPrintln("");
+   
+  DebugPrintln(TONIGHT_LABEL);  //Tonight Header
+  DebugPrint(TONIGHT_LABEL + " - "); DebugPrintln(tonightRecord.startTimeString());
+  DebugPrintln(SECTION_SEPARATOR);    DebugPrintln(SECTION_SEPARATOR);
+
+  //Tonight Info
+  DebugPrintln(TONIGHT_LABEL + ": " + tonightRecord.count() + " " + _handleSingleCase(tonightRecord.count(),TONIGHTCOUNT_UNIT_SINGLE,TONIGHTCOUNT_UNIT));     DebugPrintln(TONIGHT_LABEL + ": " + tonightRecord.count() + " " + _handleSingleCase(tonightRecord.count(),TONIGHTCOUNT_UNIT_SINGLE,TONIGHTCOUNT_UNIT));
+  DebugPrint(tonightRecord.volume()); DebugPrintln(" " + GENERIC_TOTAL + " " + TONIGHTVOLUME_UNIT);
+  DebugPrintln(TONIGHTSPEED_LABEL + ": " + tonightRecord.fastestTime() + " " + TONIGHTSPEED_UNIT);    DebugPrintln(TONIGHTSPEED_LABEL + ": " + tonightRecord.fastestTime() + " " + TONIGHTSPEED_UNIT);
   DebugPrintln(TONIGHTVOLUME_LABEL + ": " + tonightRecord.volume() + " " + TONIGHTVOLUME_UNIT);
+  DebugPrintln("");
 
-  DebugPrintln(LASTSPEED_LABEL + ": " + lastDrink.timeToFinish() + " " + LASTSPEED_UNIT);
-  DebugPrintln(LASTVOLUME_LABEL + ": " + lastDrink.volume() + " " + LASTVOLUME_UNIT);
+  //Last drink header
+  DebugPrint(LAST_LABEL + " - "); DebugPrintln(lastDrink.endTimeString());
+  DebugPrintln(SECTION_SEPARATOR);
   
+  //Last drink info
+  DebugPrintln(LASTSPEED_LABEL + ": " + lastDrink.timeToFinish() + " " + LASTSPEED_UNIT);     DebugPrintln(LASTSPEED_LABEL + ": " + lastDrink.timeToFinish() + " " + LASTSPEED_UNIT);
+  DebugPrintln(LASTVOLUME_LABEL + ": " + lastDrink.volume() + " " + LASTVOLUME_UNIT);     DebugPrintln(LASTVOLUME_LABEL + ": " + lastDrink.volume() + " " + LASTVOLUME_UNIT);
+
+  //bottom separator 
+  DebugPrintln("");
+  DebugPrintln(F("================================================="));
+  DebugPrintln(F("================================================="));
 }
 
 void DisplayManager::_sendSerialDebugReport(Record& lifetimeRecord, Record& tonightRecord,Drink& lastDrink) {
@@ -310,4 +329,3 @@ void DisplayManager::_sendToLcd(Record& lifetimeRecord, Record& tonightRecord, D
   lcd.setCursor(0,1); 
   lcd.print(toDisplayValue + " " + toDisplayUnit);
 }
-
