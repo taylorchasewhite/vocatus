@@ -74,7 +74,7 @@ void DisplayManager::_initDebug() {
 void DisplayManager::OutputData(Record& lifetimeRecord, Record& tonightRecord,Drink& lastDrink)
 {
   if(_isDebugEnabled) {
-    _sendSerialDebugReport(lifetimeRecord,tonightRecord,lastDrink);
+    _sendDebugReport(lifetimeRecord,tonightRecord,lastDrink);
   }
   
   if(_isStatusBoardEnabled) { 
@@ -119,35 +119,35 @@ void DisplayManager::DebugPrintln(double debugText) { if(_shouldDebug()){ Serial
 void DisplayManager::_sendDebugReport(Record& lifetimeRecord, Record& tonightRecord,Drink& lastDrink) {
   //top separator
   DebugPrintln(F("================================================="));
+  DebugPrintln(F("================================================="));
 
   //Lifetime Header
   DebugPrint(LIFETIME_LABEL + " - "); DebugPrintln(lifetimeRecord.startTimeString());
-  DebugPrintln(SECTION_SEPARATOR);     DebugPrintln(SECTION_SEPARATOR);
-  
-  DebugPrintln(lifetimeRecord.count() + " " + _handleSingleCase(lifetimeRecord.count(),LIFECOUNT_UNIT_SINGLE,LIFECOUNT_UNIT));  //Lifetime Info
+  DebugPrintln(SECTION_SEPARATOR);
+
+  //Lifetime Info
   DebugPrint(lifetimeRecord.count()); DebugPrintln(" " + _handleSingleCase(lifetimeRecord.count(),LIFECOUNT_UNIT_SINGLE,LIFECOUNT_UNIT));
   DebugPrint(lifetimeRecord.volume()); DebugPrintln(" " + GENERIC_TOTAL + " " + LIFEVOLUME_UNIT);
-  DebugPrintln(LIFESPEED_LABEL + ": " + lifetimeRecord.fastestTime() + " " + LIFESPEED_UNIT);     DebugPrintln(LIFESPEED_LABEL + ": " + lifetimeRecord.fastestTime() + " " + LIFESPEED_UNIT);
-  DebugPrintln(LIFEVOLUME_LABEL + ": " + lifetimeRecord.volume() + " " + LIFEVOLUME_UNIT);  DebugPrintln("");
-   
-  DebugPrintln(TONIGHT_LABEL);  //Tonight Header
+  DebugPrintln(LIFESPEED_LABEL + ": " + lifetimeRecord.fastestTime() + " " + LIFESPEED_UNIT);
+  DebugPrintln("");
+
+  //Tonight Header
   DebugPrint(TONIGHT_LABEL + " - "); DebugPrintln(tonightRecord.startTimeString());
-  DebugPrintln(SECTION_SEPARATOR);    DebugPrintln(SECTION_SEPARATOR);
+  DebugPrintln(SECTION_SEPARATOR);
 
   //Tonight Info
-  DebugPrintln(TONIGHT_LABEL + ": " + tonightRecord.count() + " " + _handleSingleCase(tonightRecord.count(),TONIGHTCOUNT_UNIT_SINGLE,TONIGHTCOUNT_UNIT));     DebugPrintln(TONIGHT_LABEL + ": " + tonightRecord.count() + " " + _handleSingleCase(tonightRecord.count(),TONIGHTCOUNT_UNIT_SINGLE,TONIGHTCOUNT_UNIT));
+  DebugPrintln(TONIGHT_LABEL + ": " + tonightRecord.count() + " " + _handleSingleCase(tonightRecord.count(),TONIGHTCOUNT_UNIT_SINGLE,TONIGHTCOUNT_UNIT));
   DebugPrint(tonightRecord.volume()); DebugPrintln(" " + GENERIC_TOTAL + " " + TONIGHTVOLUME_UNIT);
-  DebugPrintln(TONIGHTSPEED_LABEL + ": " + tonightRecord.fastestTime() + " " + TONIGHTSPEED_UNIT);    DebugPrintln(TONIGHTSPEED_LABEL + ": " + tonightRecord.fastestTime() + " " + TONIGHTSPEED_UNIT);
-  DebugPrintln(TONIGHTVOLUME_LABEL + ": " + tonightRecord.volume() + " " + TONIGHTVOLUME_UNIT);
+  DebugPrintln(TONIGHTSPEED_LABEL + ": " + tonightRecord.fastestTime() + " " + TONIGHTSPEED_UNIT);
   DebugPrintln("");
 
   //Last drink header
   DebugPrint(LAST_LABEL + " - "); DebugPrintln(lastDrink.endTimeString());
   DebugPrintln(SECTION_SEPARATOR);
-  
+
   //Last drink info
-  DebugPrintln(LASTSPEED_LABEL + ": " + lastDrink.timeToFinish() + " " + LASTSPEED_UNIT);     DebugPrintln(LASTSPEED_LABEL + ": " + lastDrink.timeToFinish() + " " + LASTSPEED_UNIT);
-  DebugPrintln(LASTVOLUME_LABEL + ": " + lastDrink.volume() + " " + LASTVOLUME_UNIT);     DebugPrintln(LASTVOLUME_LABEL + ": " + lastDrink.volume() + " " + LASTVOLUME_UNIT);
+  DebugPrintln(LASTVOLUME_LABEL + ": " + lastDrink.volume() + " " + LASTVOLUME_UNIT);
+  DebugPrintln(LASTSPEED_LABEL + ": " + lastDrink.timeToFinish() + " " + LASTSPEED_UNIT);
 
   //bottom separator 
   DebugPrintln("");
@@ -155,60 +155,71 @@ void DisplayManager::_sendDebugReport(Record& lifetimeRecord, Record& tonightRec
   DebugPrintln(F("================================================="));
 }
 
+/**
+* Method to output the debug info to the monitor directly (without using DebugPrint)
+* Probably no longer needed, but useful in case there's another memory leak problem
+* If we need to free up memory in the code, this whole method can be deleted
+*/
 void DisplayManager::_sendSerialDebugReport(Record& lifetimeRecord, Record& tonightRecord,Drink& lastDrink) {
   Serial.println("");
+  Serial.println(F("================================================="));
+  Serial.println(F("================================================="));
   Serial.print(LIFETIME_LABEL);
-  Serial.print(" - ");
+  Serial.print(F(" - "));
   Serial.println(lifetimeRecord.startTimeString());
   Serial.println(SECTION_SEPARATOR);
   
   Serial.print(lifetimeRecord.count());
-  Serial.print(" ");
+  Serial.print(F(" "));
   Serial.println(_handleSingleCase(lifetimeRecord.count(),LIFECOUNT_UNIT_SINGLE,LIFECOUNT_UNIT));
 
   Serial.print(lifetimeRecord.volume());
-  Serial.print(" ");
+  Serial.print(F(" "));
   Serial.print(GENERIC_TOTAL);
-  Serial.print(" ");
+  Serial.print(F(" "));
   Serial.println(LIFEVOLUME_UNIT);
 
   Serial.print(lifetimeRecord.fastestTime());
-  Serial.print(" ");
+  Serial.print(F(" "));
   Serial.println(LIFESPEED_UNIT);
 
   Serial.println("");
 
   Serial.print(TONIGHT_LABEL);
-  Serial.print(" - ");
+  Serial.print(F(" - "));
   Serial.println(tonightRecord.startTimeString());
   Serial.println(SECTION_SEPARATOR);
   
   Serial.print(tonightRecord.count());
-  Serial.print(" ");
+  Serial.print(F(" "));
   Serial.println(_handleSingleCase(tonightRecord.count(),TONIGHTCOUNT_UNIT_SINGLE,TONIGHTCOUNT_UNIT));
 
   Serial.print(tonightRecord.volume());
-  Serial.print(" ");
+  Serial.print(F(" "));
   Serial.print(GENERIC_TOTAL);
-  Serial.print(" ");
+  Serial.print(F(" "));
   Serial.println(TONIGHTVOLUME_UNIT);
   
   Serial.print(tonightRecord.fastestTime());
-  Serial.print(" ");
+  Serial.print(F(" "));
   Serial.println(TONIGHTSPEED_UNIT);
   Serial.println("");
 
-  Serial.print("Last Drink - ");
+  Serial.print(F("Last Drink - "));
   Serial.println(lastDrink.endTimeString());
   Serial.println(SECTION_SEPARATOR);
 
   Serial.print(lastDrink.volume());
-  Serial.print(" ");
+  Serial.print(F(" "));
   Serial.println(LASTVOLUME_UNIT);
 
   Serial.print(lastDrink.timeToFinish());
-  Serial.print(" ");
+  Serial.print(F(" "));
   Serial.println(LASTSPEED_UNIT);
+  
+  Serial.println();
+  Serial.println(F("================================================="));
+  Serial.println(F("================================================="));
 }
 
 /****************************************************************/

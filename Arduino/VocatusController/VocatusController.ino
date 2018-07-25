@@ -151,11 +151,9 @@ void loop() {
   //timeManager.manageTime();
   
   if(isDrinkOver()) {
-    outputFreeMemory();
     recordDrinkEnd();
     printStatusReport();
     resetCurrentDrink();
-    outputFreeMemory();
   }
 }
 

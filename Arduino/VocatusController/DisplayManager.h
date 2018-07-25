@@ -49,11 +49,11 @@ const String TONIGHTVOLUME_UNIT       = "mL";
 
 const String LAST_LABEL               = "Last Drink";
 
-const String LASTSPEED_LABEL          = "Last Drink";
-const String LASTSPEED_UNIT           = "ms";
-
 const String LASTVOLUME_LABEL         = "Last Volume";
 const String LASTVOLUME_UNIT          = "mL";
+
+const String LASTSPEED_LABEL          = "Last Drink";
+const String LASTSPEED_UNIT           = "ms";
 
 const String SECTION_SEPARATOR        = "----------";
 const String GENERIC_TOTAL            = "total";
