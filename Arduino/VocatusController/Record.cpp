@@ -47,7 +47,6 @@ Record::Record(Record &copy) {
 	_fastestDrink=*new Drink(copy.fastestTime());
 	this->count(copy.count());
   this->startTime(copy.startTime());
-  copy.~Record();
 }
 
 /**
@@ -91,12 +90,7 @@ void Record::Reset(){
  * @param volume float the amount of recorded liquid in this drink
  */
 void Record::addDrink(int drinkStartTime, int drinkEndTime, float drinkVolume) {
-	_lastDrink.volume(drinkVolume);
-  _lastDrink.startTime(drinkStartTime);
-  _lastDrink.endTime(drinkEndTime);
-  this->addCount();
-  this->addVolume(drinkVolume);
-  this->evalAndUpdateFastestDrink(_lastDrink);
+	this->addDrink(*new Drink(drinkStartTime,drinkEndTime,drinkVolume));
 }
 
 /**
