@@ -52,6 +52,7 @@ const String LASTVOLUME_LABEL         = "Last Volume";
 const String LASTVOLUME_UNIT          = "mL";
 
 const String SECTION_SEPARATOR        = "----------";
+const String OUTPUT_SEPARATOR        = "=================================================";
 const String GENERIC_FASTEST          = "Fastest Time ";
 const String GENERIC_TOTAL            = "total";
 const String COLON_SEPARATOR          = ": ";
