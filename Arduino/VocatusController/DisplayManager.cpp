@@ -73,6 +73,7 @@ void DisplayManager::_initDebug() {
 void DisplayManager::OutputData(Record& lifetimeRecord, Record& tonightRecord,Drink& lastDrink)
 {
   if(_isDebugEnabled) {
+    //_sendSerialDebugReport(lifetimeRecord,tonightRecord,lastDrink);
     _sendDebugReport(lifetimeRecord,tonightRecord,lastDrink);
   }
   
@@ -116,49 +117,25 @@ void DisplayManager::DebugPrintln(double debugText) { if(_shouldDebug()){ Serial
  * Output a standard debug message to the console with the current state of variables
  */
 void DisplayManager::_sendDebugReport(Record& lifetimeRecord, Record& tonightRecord,Drink& lastDrink) {
-  //top separator
-  DebugPrintln(OUTPUT_SEPARATOR);
-
-  //Lifetime Header
-  DebugPrint(LIFETIME_LABEL + " - "); DebugPrintln(lifetimeRecord.startTimeString());
+  DebugPrintln(LIFETIME_LABEL);
   DebugPrintln(SECTION_SEPARATOR);
 
-  //Lifetime Info
-  DebugPrint(lifetimeRecord.count()); DebugPrintln(" " + _handleSingleCase(lifetimeRecord.count(),LIFECOUNT_UNIT_SINGLE,LIFECOUNT_UNIT));
-  DebugPrint(lifetimeRecord.volume()); DebugPrintln(" " + GENERIC_TOTAL + " " + LIFEVOLUME_UNIT);
+  DebugPrintln(lifetimeRecord.count() + " " + _handleSingleCase(lifetimeRecord.count(),LIFECOUNT_UNIT_SINGLE,LIFECOUNT_UNIT));
   DebugPrintln(LIFESPEED_LABEL + ": " + lifetimeRecord.fastestTime() + " " + LIFESPEED_UNIT);
-  DebugPrintln("");
-
-  //Tonight Header
-  DebugPrint(TONIGHT_LABEL + " - "); DebugPrintln(tonightRecord.startTimeString());
+  DebugPrintln(LIFEVOLUME_LABEL + ": " + lifetimeRecord.volume() + " " + LIFEVOLUME_UNIT);
+  
+  DebugPrintln(TONIGHT_LABEL);
   DebugPrintln(SECTION_SEPARATOR);
-
-  //Tonight Info
+    
   DebugPrintln(TONIGHT_LABEL + ": " + tonightRecord.count() + " " + _handleSingleCase(tonightRecord.count(),TONIGHTCOUNT_UNIT_SINGLE,TONIGHTCOUNT_UNIT));
-  DebugPrint(tonightRecord.volume()); DebugPrintln(" " + GENERIC_TOTAL + " " + TONIGHTVOLUME_UNIT);
   DebugPrintln(TONIGHTSPEED_LABEL + ": " + tonightRecord.fastestTime() + " " + TONIGHTSPEED_UNIT);
-  DebugPrintln("");
+  DebugPrintln(TONIGHTVOLUME_LABEL + ": " + tonightRecord.volume() + " " + TONIGHTVOLUME_UNIT);
 
-  //Last drink header
-  DebugPrint(LAST_LABEL + " - "); DebugPrintln(lastDrink.endTimeString());
-  DebugPrintln(SECTION_SEPARATOR);
-
-  //Last drink info
   DebugPrintln(LASTSPEED_LABEL + ": " + lastDrink.timeToFinish() + " " + LASTSPEED_UNIT);
   DebugPrintln(LASTVOLUME_LABEL + ": " + lastDrink.volume() + " " + LASTVOLUME_UNIT);
-
-  //bottom separator 
-  DebugPrintln("");
-  DebugPrintln(OUTPUT_SEPARATOR);
-  DebugPrintln(OUTPUT_SEPARATOR);
-
+  
 }
 
-/**
- * Method to output the debug info to the monitor directly (without using DebugPrint)
- * Probably no longer needed, but useful in case there's another memory leak problem
- * If we need to free up memory in the code, this whole method can be deleted
- */
 void DisplayManager::_sendSerialDebugReport(Record& lifetimeRecord, Record& tonightRecord,Drink& lastDrink) {
   Serial.println("");
   Serial.print(LIFETIME_LABEL);
