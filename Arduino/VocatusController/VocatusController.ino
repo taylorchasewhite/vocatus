@@ -35,7 +35,7 @@
 #include "Record.h"
 #include "DisplayManager.h"
 #include "StorageManager.h"
-#include "TimeManager.h"
+//#include "TimeManager.h"
 #include <TimeLib.h>
 
 /****************************************************************/
@@ -80,7 +80,7 @@ int displayCurState;
 // I/O Controls
 DisplayManager display;
 StorageManager storage;
-TimeManager timeManager;
+//TimeManager timeManager;
 
 
 /****************************************************************/
@@ -97,7 +97,7 @@ void initGlobals() {
 
   display = *new DisplayManager(DEBUG|LCD); //set it to whatever mode(s) you want: DEBUG|STATUSBOARD|LCD
   storage = *new StorageManager();
-  timeManager = *new TimeManager(10); // TODO Allow different initialization modes like DisplayManager
+  //timeManager = *new TimeManager(10); // TODO Allow different initialization modes like DisplayManager
 
   //initialize all tracking variables to 0 in case they are not read from storage
   tonight = *new Record();
@@ -148,7 +148,7 @@ void loop() {
   resetLastState = resetReading;
   displayLastState = displayReading;
 
-  timeManager.manageTime();
+  //timeManager.manageTime();
   
   if(isDrinkOver()) {
     recordDrinkEnd();

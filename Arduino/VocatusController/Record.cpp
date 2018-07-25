@@ -90,7 +90,12 @@ void Record::Reset(){
  * @param volume float the amount of recorded liquid in this drink
  */
 void Record::addDrink(int drinkStartTime, int drinkEndTime, float drinkVolume) {
-	this->addDrink(*new Drink(drinkStartTime,drinkEndTime,drinkVolume));
+  _lastDrink.volume(drinkVolume);
+  _lastDrink.startTime(drinkStartTime);
+  _lastDrink.endTime(drinkEndTime);
+  this->addCount();
+  this->addVolume(drinkVolume);
+  this->evalAndUpdateFastestDrink(_lastDrink);
 }
 
 /**
