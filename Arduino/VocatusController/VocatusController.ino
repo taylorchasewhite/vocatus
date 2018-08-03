@@ -37,6 +37,7 @@
 #include "StorageManager.h"
 //#include "TimeManager.h"
 #include <TimeLib.h>
+#include <TimeAlarms.h>
 
 /****************************************************************/
 /********************        Globals        *********************/
@@ -95,7 +96,7 @@ void initGlobals() {
 
   flowCount = 0;
 
-  display = *new DisplayManager(DEBUG|LCD); //set it to whatever mode(s) you want: DEBUG|STATUSBOARD|LCD
+  display = *new DisplayManager(LCD); //set it to whatever mode(s) you want: DEBUG|STATUSBOARD|LCD
   storage = *new StorageManager();
   //timeManager = *new TimeManager(10); // TODO Allow different initialization modes like DisplayManager
 
