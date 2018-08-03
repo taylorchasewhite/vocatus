@@ -73,7 +73,7 @@ void DisplayManager::_initDebug() {
 void DisplayManager::OutputData(Record& lifetimeRecord, Record& tonightRecord,Drink& lastDrink)
 {
   if(_isDebugEnabled) {
-    _sendDebugReport(lifetimeRecord,tonightRecord,lastDrink);
+    _sendSerialDebugReport(lifetimeRecord,tonightRecord,lastDrink);
   }
   
   if(_isStatusBoardEnabled) { 

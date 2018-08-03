@@ -16,7 +16,6 @@
  * Sets all values to null, 0, or other non-meaningful data.
  */
 VocatusManager::VocatusManager() {
-  
 }
 
 /****************************************************************/
@@ -27,18 +26,19 @@ VocatusManager::VocatusManager() {
  * Set starting values for globals
  */
 void VocatusManager::initGlobals() {
-
+  outputFreeMemory();
+  
   multiplier = 3.05; //TCW: 2.647  Chode: 3.05
 
   flowCount = 0;
 
   display = *new DisplayManager(DEBUG); //set it to whatever mode(s) you want: DEBUG|STATUSBOARD|LCD
   storage = *new StorageManager();
+  
   //timeManager = *new TimeManager(10); // TODO Allow different initialization modes like DisplayManager
-
+  
   //initialize all tracking variables to 0 in case they are not read from storage
-  tonight = *new Record();
-  lifetime = *new Record();
+  readFromStorage();
 
   //start the button states at their expected starting values
   resetLastState = HIGH;
@@ -47,6 +47,7 @@ void VocatusManager::initGlobals() {
   displayCurState = HIGH;
   resetLastDebounce = 0;
   displayLastDebounce = 0;
+  
 }
 
 
@@ -247,6 +248,27 @@ void VocatusManager::printStatusReport() {
  */
 void VocatusManager::readFromStorage() {
   lifetime = storage.lifetimeRecord();
+  Serial.println("read from storage");
+  Serial.println("");
+  Serial.print("Lifetime");
+  Serial.println(SECTION_SEPARATOR);
+  
+  Serial.print(lifetime.count());
+  Serial.print(F(" (loaded)"));
+  Serial.print(storage.lifetimeCount());
+  Serial.print(" (storage)");
+  Serial.println(" drinks");
+
+  Serial.print(lifetime.volume());
+  Serial.print(F(" "));
+  Serial.print("total");
+  Serial.print(F(" "));
+  Serial.println("mL");
+
+  Serial.print(lifetime.fastestTime());
+  Serial.print(F(" "));
+  Serial.println("seconds");
+
   tonight = storage.tonightRecord();
 }
 
@@ -255,5 +277,34 @@ void VocatusManager::readFromStorage() {
  * This should happen ANYTIME data that needs to persist is created and/or updated.
  */
 void VocatusManager::storeAllValues() {
+  Serial.println("storing");
   storage.storeAllValues(lifetime,tonight);
+  readFromStorage();
+}
+
+#ifdef __arm__
+// should use uinstd.h to define sbrk but Due causes a conflict
+extern "C" char* sbrk(int incr);
+#else  // __ARM__
+extern char *__brkval;
+#endif  // __arm__
+ 
+int freeMemory() {
+  char top;
+#ifdef __arm__
+  return &top - reinterpret_cast<char*>(sbrk(0));
+#elif defined(CORE_TEENSY) || (ARDUINO > 103 && ARDUINO != 151)
+  return &top - __brkval;
+#else  // __arm__
+  return __brkval ? &top - __brkval : &top - __malloc_heap_start;
+#endif  // __arm__
+}
+
+/**
+ * outputs a string telling the total free memory at the time the method was called (distance between heap and stack)
+ * Used to track memory leaks
+ */
+void outputFreeMemory() {
+  Serial.print(F("Memory: "));
+  Serial.println(freeMemory());
 }
