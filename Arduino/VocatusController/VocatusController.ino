@@ -42,16 +42,15 @@ VocatusManager manager;
  */
 void setup() {
   Serial.begin(BITS_PER_SECOND);
-  manager.initGlobals();
-  manager.readFromStorage();
-
+  
   
   pinMode(PIN_FLOW, INPUT);           
   pinMode(PIN_RESET, INPUT_PULLUP);
   pinMode(PIN_CYCLE_DISPLAY, INPUT_PULLUP);
   
   attachInterrupt(digitalPinToInterrupt(PIN_FLOW), Flow, RISING);
-
+  
+  manager.initGlobals();
   manager.printStatusReport();
 }
 
@@ -73,7 +72,7 @@ void loop() {
   manager.resetLastState = resetReading;
   manager.displayLastState = displayReading;
 
-  //timeManager.manageTime();
+  //manager.timeManager.manageTime(); //@ TODO uncomment
   
   if(manager.isDrinkOver()) {
     manager.recordDrinkEnd();
@@ -87,32 +86,5 @@ void loop() {
  */
 void Flow() {
   manager.Flow();
-}
-
-#ifdef __arm__
-// should use uinstd.h to define sbrk but Due causes a conflict
-extern "C" char* sbrk(int incr);
-#else  // __ARM__
-extern char *__brkval;
-#endif  // __arm__
- 
-int freeMemory() {
-  char top;
-#ifdef __arm__
-  return &top - reinterpret_cast<char*>(sbrk(0));
-#elif defined(CORE_TEENSY) || (ARDUINO > 103 && ARDUINO != 151)
-  return &top - __brkval;
-#else  // __arm__
-  return __brkval ? &top - __brkval : &top - __malloc_heap_start;
-#endif  // __arm__
-}
-
-/**
- * outputs a string telling the total free memory at the time the method was called (distance between heap and stack)
- * Used to track memory leaks
- */
-void outputFreeMemory() {
-  Serial.print(F("Memory: "));
-  Serial.println(freeMemory());
 }
 
