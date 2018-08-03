@@ -90,4 +90,7 @@ class VocatusManager
 
 };
 
+void outputFreeMemory();
+int freeMemory();
+
 #endif
