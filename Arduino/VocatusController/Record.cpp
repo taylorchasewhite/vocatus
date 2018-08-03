@@ -166,7 +166,11 @@ void Record::endTime(time_t endTime) {
  * @return bool if the new drink is the fastest drink, return true, else, return false.
  */
 bool Record::evalAndUpdateFastestDrink(Drink& newDrink) {
-	if (newDrink.startTime()-newDrink.endTime() < _fastestDrink.timeToFinish()) {
+  if (_fastestDrink.timeToFinish()==0) {
+    _fastestDrink=newDrink;
+    return true;
+  }
+	if (newDrink.endTime()-newDrink.startTime() < _fastestDrink.timeToFinish()) {
 		_fastestDrink=newDrink;
 		return true;	
 	}

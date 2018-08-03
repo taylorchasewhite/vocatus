@@ -48,7 +48,7 @@ const int PIN_FLOW = 2;
 const int PIN_RESET = 3;
 const int PIN_CYCLE_DISPLAY = 4;
 
-unsigned int MS_BETWEEN_DRINKS = 1000;
+unsigned int MS_BETWEEN_DRINKS = 1500;
 
 // Counts
 volatile int flowCount; //@NOTE:: I don't think this needs to be volatile. It's only needed if the variable could be changed from outside of the code (e.g another class)
