@@ -25,6 +25,7 @@ DisplayManager::DisplayManager() {
   this->_currentValueToDisplay = LIFECOUNT;
 }
 
+
 /****************************************************************/
 /********************   General Functions   *********************/
 /****************************************************************/
@@ -117,7 +118,8 @@ void DisplayManager::DebugPrintln(double debugText) { if(_shouldDebug()){ Serial
  */
 void DisplayManager::_sendDebugReport(Record& lifetimeRecord, Record& tonightRecord,Drink& lastDrink) {
   //top separator
-  DebugPrintln(OUTPUT_SEPARATOR);
+  DebugPrintln(F("================================================="));
+  DebugPrintln(F("================================================="));
 
   //Lifetime Header
   DebugPrint(LIFETIME_LABEL + " - "); DebugPrintln(lifetimeRecord.startTimeString());
@@ -144,23 +146,24 @@ void DisplayManager::_sendDebugReport(Record& lifetimeRecord, Record& tonightRec
   DebugPrintln(SECTION_SEPARATOR);
 
   //Last drink info
-  DebugPrintln(LASTSPEED_LABEL + ": " + lastDrink.timeToFinish() + " " + LASTSPEED_UNIT);
   DebugPrintln(LASTVOLUME_LABEL + ": " + lastDrink.volume() + " " + LASTVOLUME_UNIT);
+  DebugPrintln(LASTSPEED_LABEL + ": " + lastDrink.timeToFinish() + " " + LASTSPEED_UNIT);
 
   //bottom separator 
   DebugPrintln("");
-  DebugPrintln(OUTPUT_SEPARATOR);
-  DebugPrintln(OUTPUT_SEPARATOR);
-
+  DebugPrintln(F("================================================="));
+  DebugPrintln(F("================================================="));
 }
 
 /**
- * Method to output the debug info to the monitor directly (without using DebugPrint)
- * Probably no longer needed, but useful in case there's another memory leak problem
- * If we need to free up memory in the code, this whole method can be deleted
- */
+* Method to output the debug info to the monitor directly (without using DebugPrint)
+* Probably no longer needed, but useful in case there's another memory leak problem
+* If we need to free up memory in the code, this whole method can be deleted
+*/
 void DisplayManager::_sendSerialDebugReport(Record& lifetimeRecord, Record& tonightRecord,Drink& lastDrink) {
   Serial.println("");
+  Serial.println(F("================================================="));
+  Serial.println(F("================================================="));
   Serial.print(LIFETIME_LABEL);
   Serial.print(F(" - "));
   Serial.println(lifetimeRecord.startTimeString());
@@ -215,8 +218,8 @@ void DisplayManager::_sendSerialDebugReport(Record& lifetimeRecord, Record& toni
   Serial.println(LASTSPEED_UNIT);
   
   Serial.println();
-  Serial.println(OUTPUT_SEPARATOR);
-  Serial.println(OUTPUT_SEPARATOR);
+  Serial.println(F("================================================="));
+  Serial.println(F("================================================="));
 }
 
 /****************************************************************/

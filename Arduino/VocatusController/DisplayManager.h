@@ -56,7 +56,6 @@ const String LASTSPEED_LABEL          = "Last Drink";
 const String LASTSPEED_UNIT           = "ms";
 
 const String SECTION_SEPARATOR        = "----------";
-const String OUTPUT_SEPARATOR        = "=================================================";
 const String GENERIC_TOTAL            = "total";
 
 class DisplayManager
