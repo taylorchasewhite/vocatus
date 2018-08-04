@@ -98,14 +98,15 @@ StorageManager storage;
  * Set starting values for globals
  */
 void initGlobals() {
-
+  randomSeed(analogRead(0)); // If analog input 0 is unconnected, use it to seed as analog noise will cause undeterministic results.
+  
   multiplier = 3.05; //TCW: 2.647  Chode: 3.05
-
   flowCount = 0;
 
   display = *new DisplayManager(DEBUG|LCD); //set it to whatever mode(s) you want: DEBUG|STATUSBOARD|LCD
   storage = *new StorageManager();
   //timeManager = *new TimeManager(10); // TODO Allow different initialization modes like DisplayManager
+  //timeManager = *new TimeManager();
 
   //initialize all tracking variables to 0 in case they are not read from storage
   tonight = *new Record();

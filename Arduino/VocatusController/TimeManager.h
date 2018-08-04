@@ -21,11 +21,10 @@ class TimeManager
   	TimeManager(TimeManager & copy);
 	  TimeManager();
     ~TimeManager();
-	  TimeManager(int seconds);
 	  void manageTime();
 	  void digitalClockDisplay();
   private:
-	  void _initialize(int seconds);
+	  void _initialize();
 	  void _printDigits(int digits);
 
 };

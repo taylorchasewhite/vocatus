@@ -20,22 +20,14 @@
  */
 TimeManager::TimeManager(TimeManager & copy) {
   // TODO: Write
-  this->_initialize(10);
+  this->_initialize();
 }
 
 /**
- * Constructor that takes a variable number of seconds to
- * alternate the frequency of the sync request
- * @param int seconds the number of seconds between sync requests
- */
-TimeManager::TimeManager(int seconds) {
-  this->_initialize(seconds);
-}
-
-/**
- * Default constructor, defaults to ten seconds between sync requests
+ * Default constructor, does nothing so as not to use memory
  */
 TimeManager::TimeManager() {
+   this->_initialize();
 }
 
 /**
@@ -48,7 +40,7 @@ TimeManager::~TimeManager() {
 /**
  * Initialize the TimeManager by setting up the sync function
  */
-void TimeManager::_initialize(int seconds) {
+void TimeManager::_initialize() {
   while (!Serial) ; // wait until Arduino Serial Monitor opens
   setSyncProvider(RTC.get);   // the function to get the time from the RTC
   
