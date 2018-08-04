@@ -40,7 +40,7 @@ void setup() {
   
   // Background Markup; draw this once for performance benefit
   drawBackgroundMarkup();
-  portIndex=Serial.list().length-2;
+  portIndex=Serial.list().length-1;
   println(Serial.list());
   println(" Connecting to -> " + Serial.list()[portIndex]);
   myPort = new Serial(this,Serial.list()[portIndex], 9600);
