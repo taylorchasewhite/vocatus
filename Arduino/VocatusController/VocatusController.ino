@@ -37,6 +37,7 @@
 #include "StorageManager.h"
 //#include "TimeManager.h"
 #include <TimeLib.h>
+#include <TimeAlarms.h>
 
 /****************************************************************/
 /********************        Globals        *********************/
@@ -48,7 +49,14 @@ const int PIN_FLOW = 2;
 const int PIN_RESET = 3;
 const int PIN_CYCLE_DISPLAY = 4;
 
-unsigned int MS_BETWEEN_DRINKS = 1000;
+const int SECONDS_BETWEEN_DISPLAY_CHANGE = 2; // Seconds to wait between cycling displays
+const int NUMBER_OF_DISPLAY_MODES_TO_CYCLE = 5; // The number of displays to cycle through when completing a drink
+
+bool currentlyInDisplayCycle;
+int currentCycleStep;
+bool userCancelledCycleMode;
+
+unsigned int MS_BETWEEN_DRINKS = 1500;
 
 // Counts
 volatile int flowCount; //@NOTE:: I don't think this needs to be volatile. It's only needed if the variable could be changed from outside of the code (e.g another class)
@@ -137,6 +145,7 @@ void loop() {
   //handle button presses
   int resetReading = digitalRead(PIN_RESET);
   int displayReading = digitalRead(PIN_CYCLE_DISPLAY);
+  Alarm.delay(0);
 
   if(checkDebounce(resetReading,resetCurState,resetLastState,resetLastDebounce)) {
     resetListener();
@@ -173,8 +182,47 @@ void Flow() {
  * Called when the display cycle button is pressed.
  */
 void displayChangeListener() {
+  userCancelledCycleMode=true;
+  changeDisplay();
+}
+
+/**
+ * Change the display of the LCD
+ */
+void changeDisplay() {
   display.CycleCurrentValueToDisplay();
   printStatusReport();
+}
+
+/**
+ * Automatically change the LCD display mode. 
+ * Assumptions:
+ *   The first time this is called, we will set a global variable to indicate we are in auto change mode.
+ *   If the user hits the change button during this time, we will stop auto changing until the next drink
+ *     though we still will change as a result of the button press.
+ *   What that means is that upon completing a drink, you *have* to see different information. I think this is okay
+ *     but if not, userCancelledCycleMode will need to become a 3-value enum/integer to allow for "cancelling" of a change
+ *     during the autochangemode since right now we can't differentiate prior to this autoChangeDisplay call if the user expressly
+ *     pressed the button as we just set it to false during the first call.
+ */
+void autoChangeDisplay() {
+  if(!currentlyInDisplayCycle) {
+    currentlyInDisplayCycle=true;
+    currentCycleStep=0;
+    userCancelledCycleMode=false; 
+
+  } 
+  else {
+    if((currentCycleStep+1)==NUMBER_OF_DISPLAY_MODES_TO_CYCLE) {
+      // We're done here, we want to turn off the currentlyInDisplayCycle for the next time
+      currentlyInDisplayCycle=false;
+    } 
+  }
+  
+  if (!userCancelledCycleMode) {
+      changeDisplay();
+  }
+  currentCycleStep++; // we just finished a step, increment;
 }
 
 /**
@@ -264,6 +312,9 @@ void recordDrinkEnd() {
   tonight.addDrink(startTime,endTime,mostRecentVolume);
   
   setDrinkCompletionDuration();
+  for (int i =0; i<=NUMBER_OF_DISPLAY_MODES_TO_CYCLE; i++) {
+    Alarm.timerOnce((i+1)*SECONDS_BETWEEN_DISPLAY_CHANGE, autoChangeDisplay);
+  }
   
   //@NOTE:: we'll want to tear this out once we properly define a session
   /*if (isNewDay()) {
