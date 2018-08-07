@@ -56,11 +56,12 @@ bool currentlyInDisplayCycle;
 int currentCycleStep;
 bool userCancelledCycleMode;
 
-unsigned int MS_BETWEEN_DRINKS = 1500;
+unsigned int MS_BETWEEN_DRINKS = 2000; //2 seconds after the flow stops is the end of the drink
+const float MIN_ML_FOR_DRINK = 44.0; //minimum drink size is 44mL (one shot)
+const float MULTIPLIER = 3.05; ///TCW: 2.647 Chode: 3.05
 
 // Counts
 volatile int flowCount; //@NOTE:: I don't think this needs to be volatile. It's only needed if the variable could be changed from outside of the code (e.g another class)
-float multiplier;
 float mostRecentVolume;
 
 // Timing
@@ -98,9 +99,6 @@ StorageManager storage;
  * Set starting values for globals
  */
 void initGlobals() {
-
-  multiplier = 3.05; //TCW: 2.647  Chode: 3.05
-
   flowCount = 0;
 
   display = *new DisplayManager(DEBUG|LCD); //set it to whatever mode(s) you want: DEBUG|STATUSBOARD|LCD
@@ -160,7 +158,9 @@ void loop() {
   //timeManager.manageTime();
   
   if(isDrinkOver()) {
-    recordDrinkEnd();
+    if((flowCount*MULTIPLIER)>MIN_ML_FOR_DRINK) {
+      recordDrinkEnd();
+    }
     printStatusReport();
     resetCurrentDrink();
   }
@@ -306,7 +306,7 @@ boolean isNewDay() {
  */
 void recordDrinkEnd() {
   
-  mostRecentVolume=flowCount*multiplier;
+  mostRecentVolume=flowCount*MULTIPLIER;
 
   lifetime.addDrink(startTime,endTime,mostRecentVolume);
   tonight.addDrink(startTime,endTime,mostRecentVolume);
