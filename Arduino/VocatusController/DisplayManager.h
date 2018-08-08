@@ -26,38 +26,6 @@ enum CurrentValueToDisplay {
   ENDVALUE //this value should always be last to support cycling; add new values before this guy
 };
 
-//constant string values for display
-const String LIFETIME_LABEL          = "Lifetime";
-const String LIFECOUNT_UNIT           = "drinks";
-const String LIFECOUNT_UNIT_SINGLE    = "drink";
-
-const String LIFEVOLUME_LABEL         = "All-Time Volume";
-const String LIFEVOLUME_UNIT          = "mL";
-
-const String LIFESPEED_LABEL          = "All-Time Record";
-const String LIFESPEED_UNIT           = "ms";
-
-const String TONIGHT_LABEL            = "Tonight";
-const String TONIGHTCOUNT_UNIT        = "drinks";
-const String TONIGHTCOUNT_UNIT_SINGLE = "drink";
-
-const String TONIGHTSPEED_LABEL       = "Tonight's Record";
-const String TONIGHTSPEED_UNIT        = "ms";
-
-const String TONIGHTVOLUME_LABEL      = "Tonight's Volume";
-const String TONIGHTVOLUME_UNIT       = "mL";
-
-const String LAST_LABEL               = "Last Drink";
-
-const String LASTVOLUME_LABEL         = "Last Volume";
-const String LASTVOLUME_UNIT          = "mL";
-
-const String LASTSPEED_LABEL          = "Last Drink";
-const String LASTSPEED_UNIT           = "ms";
-
-const String SECTION_SEPARATOR        = "----------";
-const String GENERIC_TOTAL            = "total";
-
 class DisplayManager
 {
   public:
