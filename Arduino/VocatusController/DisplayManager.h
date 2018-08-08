@@ -93,6 +93,7 @@ class DisplayManager
     String _handleSingleCase(int,String,String);
     String _createDebugString(String, int, String);
     String _createDebugString(String, float, String);
+    String _seperator();
     void _sendDebugReport(Record&, Record&, Drink&);
     void _sendSerialDebugReport(Record&, Record&, Drink&);
     void _changeOutputMode(OutputMode);
@@ -100,6 +101,8 @@ class DisplayManager
     void _sendToStatusBoard(Record&, Record&, Drink&);
     void _initLcd();
     void _sendToLcd(Record&, Record&, Drink&);
+    String _welcomeText();
+    String _randomGreeting();
 };
 
 #endif

@@ -99,18 +99,18 @@ StorageManager storage;
  */
 void initGlobals() {
   randomSeed(analogRead(0)); // If analog input 0 is unconnected, use it to seed as analog noise will cause undeterministic results.
-  
+  outputFreeMemory(F("InitGlobals"));
   multiplier = 3.05; //TCW: 2.647  Chode: 3.05
   flowCount = 0;
-
-  display = *new DisplayManager(DEBUG|LCD); //set it to whatever mode(s) you want: DEBUG|STATUSBOARD|LCD
+  display = *new DisplayManager(DEBUG); //set it to whatever mode(s) you want: DEBUG|STATUSBOARD|LCD
   storage = *new StorageManager();
-  //timeManager = *new TimeManager(10); // TODO Allow different initialization modes like DisplayManager
+  outputFreeMemory(F("After storage/display"));
   //timeManager = *new TimeManager();
 
   //initialize all tracking variables to 0 in case they are not read from storage
   tonight = *new Record();
   lifetime = *new Record();
+  outputFreeMemory(F("after records"));
 
   //start the button states at their expected starting values
   resetLastState = HIGH;
@@ -128,6 +128,7 @@ void setup() {
   Serial.begin(BITS_PER_SECOND);
   initGlobals();
   readFromStorage();
+  outputFreeMemory(F("after from storage"));
 
   
   pinMode(PIN_FLOW, INPUT);           
@@ -137,6 +138,7 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(PIN_FLOW), Flow, RISING);
 
   printStatusReport();
+  outputFreeMemory(F("after first print"));
 }
 
 /****************************************************************/
@@ -437,7 +439,9 @@ int freeMemory() {
  * outputs a string telling the total free memory at the time the method was called (distance between heap and stack)
  * Used to track memory leaks
  */
-void outputFreeMemory() {
+void outputFreeMemory(String location) {
+  Serial.print("Location: ");
+  Serial.println(location);
   Serial.print(F("Memory: "));
   Serial.println(freeMemory());
 }

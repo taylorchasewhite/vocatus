@@ -9,6 +9,15 @@
 #include <LiquidCrystal.h>
 #include <TimeLib.h>
 
+const String GREETINGS[] = {
+  "Aye, drinking time, is it?",
+  "Shiver me timbers! You again!",
+  "Welcome aboard, mate!",
+  "Avast! It's good to see ye!"
+};
+
+const int GREETINGS_LENGTH=4;
+
 const int rs = 7, en = 8, d4 = 9, d5 = 10, d6 = 11, d7 = 12;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
@@ -64,8 +73,24 @@ String DisplayManager::_handleSingleCase(int value,String stringIfSingle,String 
  * Setup code to run when initializing the display manager
  */
 void DisplayManager::_initDebug() {
-  DebugPrintln("Welcome to Vocatus!");
-  DebugPrintln("----------------------------------");
+  DebugPrintln(_welcomeText());
+}
+
+/**
+ * Display a cute greeting to the user and/or welcome them traditionally.
+ */
+String DisplayManager::_welcomeText() {
+  String returnString = _randomGreeting();
+  returnString +=F("\nWelcome to Vocatus!\n");
+  returnString+=F("----------------------------------");
+  return returnString;
+}
+
+/**
+ * In the pre-programmed greetings, return one of them.
+ */
+String DisplayManager::_randomGreeting() {
+  return GREETINGS[random(GREETINGS_LENGTH-1)]; 
 }
 
 /**
@@ -118,8 +143,8 @@ void DisplayManager::DebugPrintln(double debugText) { if(_shouldDebug()){ Serial
  */
 void DisplayManager::_sendDebugReport(Record& lifetimeRecord, Record& tonightRecord,Drink& lastDrink) {
   //top separator
-  DebugPrintln(F("================================================="));
-  DebugPrintln(F("================================================="));
+  DebugPrintln(_seperator());
+  DebugPrintln("");
 
   //Lifetime Header
   DebugPrint(LIFETIME_LABEL + " - "); DebugPrintln(lifetimeRecord.startTimeString());
@@ -151,8 +176,7 @@ void DisplayManager::_sendDebugReport(Record& lifetimeRecord, Record& tonightRec
 
   //bottom separator 
   DebugPrintln("");
-  DebugPrintln(F("================================================="));
-  DebugPrintln(F("================================================="));
+  DebugPrintln(_seperator());
 }
 
 /**
@@ -162,8 +186,9 @@ void DisplayManager::_sendDebugReport(Record& lifetimeRecord, Record& tonightRec
 */
 void DisplayManager::_sendSerialDebugReport(Record& lifetimeRecord, Record& tonightRecord,Drink& lastDrink) {
   Serial.println("");
-  Serial.println(F("================================================="));
-  Serial.println(F("================================================="));
+  Serial.println(F("-------------------------------------------------"));
+  Serial.println("");
+  
   Serial.print(LIFETIME_LABEL);
   Serial.print(F(" - "));
   Serial.println(lifetimeRecord.startTimeString());
@@ -218,8 +243,10 @@ void DisplayManager::_sendSerialDebugReport(Record& lifetimeRecord, Record& toni
   Serial.println(LASTSPEED_UNIT);
   
   Serial.println();
-  Serial.println(F("================================================="));
-  Serial.println(F("================================================="));
+}
+
+String DisplayManager::_seperator() {
+  return F("-------------------------------------------------");
 }
 
 /****************************************************************/
