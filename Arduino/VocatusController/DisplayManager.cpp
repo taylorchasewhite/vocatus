@@ -64,8 +64,8 @@ String DisplayManager::_handleSingleCase(int value,String stringIfSingle,String 
  * Setup code to run when initializing the display manager
  */
 void DisplayManager::_initDebug() {
-  DebugPrintln("Welcome to Vocatus!");
-  DebugPrintln("----------------------------------");
+  DebugPrintln(F("Welcome to Vocatus!"));
+  DebugPrintln(F("----------------------------------"));
 }
 
 /**
@@ -122,37 +122,37 @@ void DisplayManager::_sendDebugReport(Record& lifetimeRecord, Record& tonightRec
   DebugPrintln(F("================================================="));
 
   //Lifetime Header
-  DebugPrint(LIFETIME_LABEL + " - "); DebugPrintln(lifetimeRecord.startTimeString());
-  DebugPrintln(SECTION_SEPARATOR);
+  DebugPrint("Lifetime - "); DebugPrintln(lifetimeRecord.startTimeString());
+  DebugPrintln("----------");
 
   //Lifetime Info
-  DebugPrint(lifetimeRecord.count()); DebugPrintln(" " + _handleSingleCase(lifetimeRecord.count(),LIFECOUNT_UNIT_SINGLE,LIFECOUNT_UNIT));
-  DebugPrint(lifetimeRecord.volume()); DebugPrintln(" " + GENERIC_TOTAL + " " + LIFEVOLUME_UNIT);
-  DebugPrintln(LIFESPEED_LABEL + ": " + lifetimeRecord.fastestTime() + " " + LIFESPEED_UNIT);
-  DebugPrintln("");
+  DebugPrint(lifetimeRecord.count()); DebugPrintln(" " + _handleSingleCase(lifetimeRecord.count(),"drink","drinks"));
+  DebugPrint(lifetimeRecord.volume()); DebugPrintln(" total mL");
+  DebugPrint("All-Time Record: "); DebugPrint(lifetimeRecord.fastestTime()); DebugPrintln(" ms");
+  DebugPrintln(F(""));
 
   //Tonight Header
-  DebugPrint(TONIGHT_LABEL + " - "); DebugPrintln(tonightRecord.startTimeString());
-  DebugPrintln(SECTION_SEPARATOR);
+  DebugPrint("Tonight - "); DebugPrintln(tonightRecord.startTimeString());
+  DebugPrintln("----------");
 
   //Tonight Info
-  DebugPrintln(TONIGHT_LABEL + ": " + tonightRecord.count() + " " + _handleSingleCase(tonightRecord.count(),TONIGHTCOUNT_UNIT_SINGLE,TONIGHTCOUNT_UNIT));
-  DebugPrint(tonightRecord.volume()); DebugPrintln(" " + GENERIC_TOTAL + " " + TONIGHTVOLUME_UNIT);
-  DebugPrintln(TONIGHTSPEED_LABEL + ": " + tonightRecord.fastestTime() + " " + TONIGHTSPEED_UNIT);
-  DebugPrintln("");
+  DebugPrint("Tonight: "); DebugPrint(tonightRecord.count()); DebugPrintln(" " + _handleSingleCase(tonightRecord.count(),"drink","drinks"));
+  DebugPrint(tonightRecord.volume()); DebugPrintln(F(" total mL"));
+  DebugPrint("Tonight's Record: "); DebugPrint(tonightRecord.fastestTime()); DebugPrintln(" ms");
+  DebugPrintln(F(""));
 
   //Last drink header
-  DebugPrint(LAST_LABEL + " - "); DebugPrintln(lastDrink.endTimeString());
-  DebugPrintln(SECTION_SEPARATOR);
+  DebugPrint("Last Drink - "); DebugPrintln(lastDrink.endTimeString());
+  DebugPrintln("----------");
 
   //Last drink info
-  DebugPrintln(LASTVOLUME_LABEL + ": " + lastDrink.volume() + " " + LASTVOLUME_UNIT);
-  DebugPrintln(LASTSPEED_LABEL + ": " + lastDrink.timeToFinish() + " " + LASTSPEED_UNIT);
+  DebugPrint("Last Volume: "); DebugPrint(lastDrink.volume()); DebugPrintln(" mL");
+  DebugPrint("Last Drink: "); DebugPrint(lastDrink.timeToFinish()); DebugPrintln(" ms");
 
   //bottom separator 
   DebugPrintln("");
-  DebugPrintln(F("================================================="));
-  DebugPrintln(F("================================================="));
+  DebugPrintln("=================================================");
+  DebugPrintln("=================================================");
 }
 
 /**
@@ -161,61 +161,61 @@ void DisplayManager::_sendDebugReport(Record& lifetimeRecord, Record& tonightRec
 * If we need to free up memory in the code, this whole method can be deleted
 */
 void DisplayManager::_sendSerialDebugReport(Record& lifetimeRecord, Record& tonightRecord,Drink& lastDrink) {
-  Serial.println("");
+  Serial.println(F(""));
   Serial.println(F("================================================="));
   Serial.println(F("================================================="));
-  Serial.print(LIFETIME_LABEL);
+  Serial.print(F("Lifetime"));
   Serial.print(F(" - "));
   Serial.println(lifetimeRecord.startTimeString());
-  Serial.println(SECTION_SEPARATOR);
+  Serial.println(F("----------"));
   
   Serial.print(lifetimeRecord.count());
   Serial.print(F(" "));
-  Serial.println(_handleSingleCase(lifetimeRecord.count(),LIFECOUNT_UNIT_SINGLE,LIFECOUNT_UNIT));
+  Serial.println(_handleSingleCase(lifetimeRecord.count(),"drink","drinks"));
 
   Serial.print(lifetimeRecord.volume());
   Serial.print(F(" "));
-  Serial.print(GENERIC_TOTAL);
+  Serial.print(F("total"));
   Serial.print(F(" "));
-  Serial.println(LIFEVOLUME_UNIT);
+  Serial.println(F("mL"));
 
   Serial.print(lifetimeRecord.fastestTime());
   Serial.print(F(" "));
-  Serial.println(LIFESPEED_UNIT);
+  Serial.println(F("ms"));
 
-  Serial.println("");
+  Serial.println(F(""));
 
-  Serial.print(TONIGHT_LABEL);
+  Serial.print(F("Tonight"));
   Serial.print(F(" - "));
   Serial.println(tonightRecord.startTimeString());
-  Serial.println(SECTION_SEPARATOR);
+  Serial.println(F("----------"));
   
   Serial.print(tonightRecord.count());
   Serial.print(F(" "));
-  Serial.println(_handleSingleCase(tonightRecord.count(),TONIGHTCOUNT_UNIT_SINGLE,TONIGHTCOUNT_UNIT));
+  Serial.println(_handleSingleCase(tonightRecord.count(),"drink","drinks"));
 
   Serial.print(tonightRecord.volume());
   Serial.print(F(" "));
-  Serial.print(GENERIC_TOTAL);
+  Serial.print(F("total"));
   Serial.print(F(" "));
-  Serial.println(TONIGHTVOLUME_UNIT);
+  Serial.println(F("mL"));
   
   Serial.print(tonightRecord.fastestTime());
   Serial.print(F(" "));
-  Serial.println(TONIGHTSPEED_UNIT);
-  Serial.println("");
+  Serial.println(F("ms"));
+  Serial.println(F(""));
 
   Serial.print(F("Last Drink - "));
   Serial.println(lastDrink.endTimeString());
-  Serial.println(SECTION_SEPARATOR);
+  Serial.println(F("----------"));
 
   Serial.print(lastDrink.volume());
   Serial.print(F(" "));
-  Serial.println(LASTVOLUME_UNIT);
+  Serial.println(F("mL"));
 
   Serial.print(lastDrink.timeToFinish());
   Serial.print(F(" "));
-  Serial.println(LASTSPEED_UNIT);
+  Serial.println(F("ms"));
   
   Serial.println();
   Serial.println(F("================================================="));
@@ -299,29 +299,29 @@ void DisplayManager::_sendToLcd(Record& lifetimeRecord, Record& tonightRecord, D
   //use the current mode to determine what to show on the LCD
   switch(_currentValueToDisplay) {
     case LIFECOUNT:
-      toDisplayLabel = LIFETIME_LABEL;
+      toDisplayLabel = "Lifetime";
       toDisplayValue = lifetimeRecord.count();
-      toDisplayUnit  = _handleSingleCase(lifetimeRecord.count(),LIFECOUNT_UNIT_SINGLE,LIFECOUNT_UNIT); 
+      toDisplayUnit  = _handleSingleCase(lifetimeRecord.count(),"drink","drinks"); 
       break;
     case TONIGHTCOUNT:
-      toDisplayLabel = TONIGHT_LABEL;
+      toDisplayLabel = "Tonight";
       toDisplayValue = tonightRecord.count();
-      toDisplayUnit  = _handleSingleCase(tonightRecord.count(),TONIGHTCOUNT_UNIT_SINGLE,TONIGHTCOUNT_UNIT);
+      toDisplayUnit  = _handleSingleCase(tonightRecord.count(),"drink","drinks");
       break;
     case LIFESPEED:
-      toDisplayLabel = LIFESPEED_LABEL;
+      toDisplayLabel = "All-Time Record";
       toDisplayValue = lifetimeRecord.fastestTime();
-      toDisplayUnit  = LIFESPEED_UNIT;
+      toDisplayUnit  = "ms";
       break;
     case TONIGHTSPEED:
-      toDisplayLabel = TONIGHTSPEED_LABEL;
+      toDisplayLabel = "Tonight's Record";
       toDisplayValue = tonightRecord.fastestTime();
-      toDisplayUnit  = TONIGHTSPEED_UNIT  ;
+      toDisplayUnit  = "ms"  ;
       break;
     case LASTSPEED:
-      toDisplayLabel = LASTSPEED_LABEL;
+      toDisplayLabel = "Last Drink";
       toDisplayValue = lastDrink.timeToFinish();
-      toDisplayUnit  = LASTSPEED_UNIT;
+      toDisplayUnit  = "ms";
       break;
     default:  //might as well have a saftey case //TODO:: do we want to remove this in the final product for less noisy errors?
       toDisplayLabel = "ERROR:";

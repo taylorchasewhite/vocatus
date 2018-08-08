@@ -390,7 +390,11 @@ boolean isDrinkOver() {
  * @param storage boolean indicating where to read the data from
  */
 void printStatusReport() {
+  //display.DebugPrint(F("Memory Before: "));
+  //outputFreeMemory();
   display.OutputData(lifetime,tonight,lifetime.lastDrink()); //mostRecentDrinkTime,mostRecentVolume);
+  //display.DebugPrint(F("Memory After: "));
+  //outputFreeMemory();
 }
 
 /****************************************************************/
